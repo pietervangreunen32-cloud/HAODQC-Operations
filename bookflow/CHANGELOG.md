@@ -1,5 +1,29 @@
 # BookFlow Changelog
 
+## 1.3.0 — Phase 4: Welcome screen display + wedding countdown
+
+**What's new**
+
+- A new full-screen, TV-facing welcome screen at `/bookflow-welcome-screen/`
+  (or `/?bookflow_welcome_screen=1` on sites without pretty permalinks).
+  It's a standalone page — no theme header/footer — designed to be left
+  open, unattended, on a browser plugged into a TV in the shop.
+- Shows the current or next appointment: first name(s) (lead customer +
+  any companions), and clean full-size photos of every item selected.
+  Auto-refreshes every 30 seconds by polling a dedicated REST endpoint,
+  so it moves on to the next appointment by itself.
+- Wedding countdown: if the customer gave a wedding/event date at
+  booking, the screen shows "X days to go!" (or "Today's the big day!").
+  Hidden automatically once the date has passed.
+- Idle state: shows a simple branded "Welcome to [Shop Name]" screen
+  between appointments.
+- Non-negotiable, enforced in code, not just in the template: the
+  welcome screen and its REST endpoint never receive or expose email or
+  phone number — only first names and item selections are ever fetched
+  for display.
+- Admin → Welcome Screen: the link to open on your TV browser, plus a
+  live preview of exactly what it's currently showing.
+
 ## 1.2.0 — Phase 3: Deposits + WooCommerce catalog sync
 
 **What's new**

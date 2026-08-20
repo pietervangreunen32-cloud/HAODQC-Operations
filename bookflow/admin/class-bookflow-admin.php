@@ -38,6 +38,7 @@ class BookFlow_Admin {
 		add_submenu_page( 'bookflow', __( 'Appointments', 'bookflow' ), __( 'Appointments', 'bookflow' ), 'manage_options', 'bookflow-appointments', array( $this, 'render_appointments_page' ) );
 		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
 		add_submenu_page( 'bookflow', __( 'Waitlist', 'bookflow' ), __( 'Waitlist', 'bookflow' ), 'manage_options', 'bookflow-waitlist', array( $this, 'render_waitlist_page' ) );
+		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
 	}
 
@@ -85,6 +86,19 @@ class BookFlow_Admin {
 		$this->guard_capability();
 		$entries = BookFlow_DB_Waitlist::get_upcoming();
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/waitlist.php';
+	}
+
+	public function render_welcome_screen_page() {
+		$this->guard_capability();
+		// Pretty permalinks give a clean /bookflow-welcome-screen/ URL;
+		// sites still on the default "plain" structure need the query-var
+		// form instead, since our rewrite rule only applies when pretty
+		// permalinks are on.
+		$welcome_screen_url = get_option( 'permalink_structure' )
+			? home_url( '/bookflow-welcome-screen/' )
+			: home_url( '/?' . BookFlow_Welcome_Screen::QUERY_VAR . '=1' );
+		$preview_data = BookFlow_Welcome_Screen::get_display_data();
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/welcome-screen.php';
 	}
 
 	public function render_settings_page() {

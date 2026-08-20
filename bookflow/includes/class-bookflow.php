@@ -46,6 +46,9 @@ class BookFlow {
 
 		// Public.
 		require_once $dir . 'public/class-bookflow-public.php';
+
+		// Welcome screen.
+		require_once $dir . 'welcome-screen/class-bookflow-welcome-screen.php';
 	}
 
 	private function init_components() {
@@ -55,6 +58,7 @@ class BookFlow {
 		( new BookFlow_Waitlist() )->init_hooks();
 		( new BookFlow_WooCommerce_Sync() )->init_hooks();
 		( new BookFlow_REST() )->init_hooks();
+		( new BookFlow_Welcome_Screen() )->init_hooks();
 
 		if ( is_admin() ) {
 			( new BookFlow_Admin() )->init_hooks();

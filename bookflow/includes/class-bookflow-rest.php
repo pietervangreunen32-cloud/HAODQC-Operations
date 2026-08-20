@@ -95,6 +95,26 @@ class BookFlow_REST {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/welcome-screen',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_welcome_screen_data' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Backs the welcome screen's auto-refresh poll. Deliberately routes
+	 * through BookFlow_Welcome_Screen::get_display_data() rather than
+	 * exposing appointment data directly, since that's the one place the
+	 * "never show email/phone on the welcome screen" rule is enforced.
+	 */
+	public function get_welcome_screen_data( WP_REST_Request $request ) {
+		return rest_ensure_response( BookFlow_Welcome_Screen::get_display_data() );
 	}
 
 	public function get_items( WP_REST_Request $request ) {

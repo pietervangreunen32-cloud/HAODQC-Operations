@@ -18,8 +18,15 @@ class BookFlow_Activator {
 		self::seed_default_settings();
 		update_option( 'bookflow_db_version', BOOKFLOW_DB_VERSION );
 
-		// So the welcome-screen rewrite endpoint (registered in Phase 4)
-		// resolves correctly the first time it's visited.
+		// Register the welcome-screen rewrite rule directly, rather than
+		// relying on its own 'init' hook — 'init' has already fired for
+		// this request by the time an activation hook runs, so without
+		// this the rule wouldn't exist yet for flush_rewrite_rules() to
+		// pick up, and the welcome screen URL would 404 until some other
+		// event triggered a second flush.
+		if ( class_exists( 'BookFlow_Welcome_Screen' ) ) {
+			BookFlow_Welcome_Screen::add_rewrite_rule();
+		}
 		flush_rewrite_rules();
 	}
 
