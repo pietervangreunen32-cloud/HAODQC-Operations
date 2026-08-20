@@ -89,8 +89,12 @@ class BookFlow_Admin {
 
 	public function render_settings_page() {
 		$this->guard_capability();
-		$settings   = BookFlow_Availability::get_settings();
-		$blackouts  = BookFlow_DB_Blackouts::get_range( gmdate( 'Y-m-d 00:00:00' ), gmdate( 'Y-m-d 00:00:00', strtotime( '+1 year' ) ) );
+		$settings           = BookFlow_Availability::get_settings();
+		$blackouts          = BookFlow_DB_Blackouts::get_range( gmdate( 'Y-m-d 00:00:00' ), gmdate( 'Y-m-d 00:00:00', strtotime( '+1 year' ) ) );
+		$woocommerce_active = BookFlow_Deposits::is_woocommerce_active();
+		$last_synced        = get_option( 'bookflow_wc_catalog_last_synced' );
+		$sync_result        = get_transient( 'bookflow_sync_result_' . get_current_user_id() );
+		delete_transient( 'bookflow_sync_result_' . get_current_user_id() );
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/settings.php';
 	}
 
@@ -108,6 +112,10 @@ class BookFlow_Admin {
 		$settings['concurrent_fittings']     = max( 1, (int) ( $_POST['concurrent_fittings'] ?? 1 ) );
 		$settings['booking_lead_time_hours'] = max( 0, (int) ( $_POST['booking_lead_time_hours'] ?? 2 ) );
 		$settings['booking_horizon_days']    = max( 1, (int) ( $_POST['booking_horizon_days'] ?? 90 ) );
+
+		$settings['catalog_source']  = ( isset( $_POST['catalog_source'] ) && 'woocommerce' === $_POST['catalog_source'] ) ? 'woocommerce' : 'manual';
+		$settings['deposit_enabled'] = ! empty( $_POST['deposit_enabled'] );
+		$settings['deposit_amount']  = max( 0, (float) ( $_POST['deposit_amount'] ?? 0 ) );
 
 		$days = array( 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun' );
 		foreach ( $days as $day ) {

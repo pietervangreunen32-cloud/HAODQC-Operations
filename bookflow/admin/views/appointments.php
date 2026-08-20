@@ -39,13 +39,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<th><?php esc_html_e( 'Companions', 'bookflow' ); ?></th>
 				<th><?php esc_html_e( 'Items', 'bookflow' ); ?></th>
 				<th><?php esc_html_e( 'Status', 'bookflow' ); ?></th>
+				<th><?php esc_html_e( 'Deposit', 'bookflow' ); ?></th>
 				<th><?php esc_html_e( 'Source', 'bookflow' ); ?></th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php if ( empty( $appointments ) ) : ?>
-				<tr><td colspan="7"><?php esc_html_e( 'No appointments in this range.', 'bookflow' ); ?></td></tr>
+				<tr><td colspan="8"><?php esc_html_e( 'No appointments in this range.', 'bookflow' ); ?></td></tr>
 			<?php else : ?>
 				<?php foreach ( $appointments as $appointment ) : ?>
 					<tr>
@@ -79,6 +80,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							?>
 						</td>
 						<td><?php echo esc_html( ucfirst( $appointment->status ) ); ?></td>
+						<td>
+							<?php if ( ! empty( $appointment->deposit_required ) ) : ?>
+								<?php echo esc_html( ucfirst( $appointment->deposit_status ) ); ?>
+							<?php else : ?>
+								&mdash;
+							<?php endif; ?>
+						</td>
 						<td><?php echo esc_html( ucfirst( $appointment->source ) ); ?></td>
 						<td>
 							<?php if ( 'cancelled' !== $appointment->status ) : ?>

@@ -24,10 +24,70 @@ $day_labels = array(
 	<?php if ( isset( $_GET['updated'] ) ) : ?>
 		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'bookflow' ); ?></p></div>
 	<?php endif; ?>
+	<?php if ( $sync_result ) : ?>
+		<div class="notice notice-success is-dismissible"><p><?php echo esc_html( $sync_result ); ?></p></div>
+	<?php endif; ?>
 
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bookflow-form">
 		<?php wp_nonce_field( 'bookflow_save_settings' ); ?>
 		<input type="hidden" name="action" value="bookflow_save_settings" />
+
+		<h2><?php esc_html_e( 'Catalog source', 'bookflow' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th><?php esc_html_e( 'Where do items come from?', 'bookflow' ); ?></th>
+				<td>
+					<label style="display:block;margin-bottom:6px;">
+						<input type="radio" name="catalog_source" value="manual" <?php checked( $settings['catalog_source'] ?? 'manual', 'manual' ); ?> />
+						<?php esc_html_e( 'Manage a separate booking catalog', 'bookflow' ); ?>
+					</label>
+					<label style="display:block;">
+						<input type="radio" name="catalog_source" value="woocommerce" <?php checked( $settings['catalog_source'] ?? 'manual', 'woocommerce' ); ?> <?php disabled( ! $woocommerce_active ); ?> />
+						<?php esc_html_e( 'Use my WooCommerce catalog (read-only auto-sync)', 'bookflow' ); ?>
+					</label>
+					<?php if ( ! $woocommerce_active ) : ?>
+						<p class="description"><?php esc_html_e( 'Install and activate WooCommerce to enable this option.', 'bookflow' ); ?></p>
+					<?php else : ?>
+						<p class="description">
+							<?php
+							if ( $last_synced ) {
+								printf(
+									/* translators: %s: last synced date/time. */
+									esc_html__( 'Last synced: %s. Products sync automatically every hour.', 'bookflow' ),
+									esc_html( date_i18n( get_option( 'date_format' ) . ' H:i', strtotime( $last_synced ) ) )
+								);
+							} else {
+								esc_html_e( 'Not synced yet.', 'bookflow' );
+							}
+							?>
+						</p>
+					<?php endif; ?>
+				</td>
+			</tr>
+		</table>
+
+		<h2><?php esc_html_e( 'Deposits', 'bookflow' ); ?></h2>
+		<table class="form-table">
+			<tr>
+				<th><?php esc_html_e( 'Require a deposit', 'bookflow' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="deposit_enabled" value="1" <?php checked( ! empty( $settings['deposit_enabled'] ) ); ?> <?php disabled( ! $woocommerce_active ); ?> />
+						<?php esc_html_e( 'Require a deposit for every booking, collected through WooCommerce', 'bookflow' ); ?>
+					</label>
+					<?php if ( ! $woocommerce_active ) : ?>
+						<p class="description"><?php esc_html_e( 'Install and activate WooCommerce (with a payment gateway connected) to collect deposits.', 'bookflow' ); ?></p>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
+				<th><label for="deposit_amount"><?php esc_html_e( 'Deposit amount', 'bookflow' ); ?></label></th>
+				<td>
+					<input type="number" step="0.01" min="0" id="deposit_amount" name="deposit_amount" value="<?php echo esc_attr( $settings['deposit_amount'] ?? 0 ); ?>" />
+					<p class="description"><?php esc_html_e( 'Charged in your WooCommerce store\'s own currency.', 'bookflow' ); ?></p>
+				</td>
+			</tr>
+		</table>
 
 		<h2><?php esc_html_e( 'Booking rules', 'bookflow' ); ?></h2>
 		<table class="form-table">
@@ -76,6 +136,14 @@ $day_labels = array(
 
 		<?php submit_button( __( 'Save settings', 'bookflow' ) ); ?>
 	</form>
+
+	<?php if ( $woocommerce_active && 'woocommerce' === ( $settings['catalog_source'] ?? 'manual' ) ) : ?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<?php wp_nonce_field( 'bookflow_sync_woocommerce_catalog' ); ?>
+			<input type="hidden" name="action" value="bookflow_sync_woocommerce_catalog" />
+			<button type="submit" class="button"><?php esc_html_e( 'Sync WooCommerce catalog now', 'bookflow' ); ?></button>
+		</form>
+	<?php endif; ?>
 
 	<h2><?php esc_html_e( 'Blocked-out days', 'bookflow' ); ?></h2>
 	<p class="description"><?php esc_html_e( 'Use this for staff days off, public holidays, or stock-takes. Nothing can be booked during a blocked window.', 'bookflow' ); ?></p>

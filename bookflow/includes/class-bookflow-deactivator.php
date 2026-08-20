@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class BookFlow_Deactivator {
 
 	public static function deactivate() {
-		$timestamp = wp_next_scheduled( 'bookflow_hourly_event' );
+		$timestamp = wp_next_scheduled( 'bookflow_wc_catalog_sync' );
 		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, 'bookflow_hourly_event' );
+			wp_unschedule_event( $timestamp, 'bookflow_wc_catalog_sync' );
 		}
 
 		flush_rewrite_rules();

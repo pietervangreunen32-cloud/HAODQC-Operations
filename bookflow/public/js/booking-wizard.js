@@ -1,9 +1,10 @@
 /**
- * BookFlow booking wizard — Phase 2 adds group/party companions (each with
- * their own name and item picks, all under the lead customer's time slot)
- * and a waitlist offer when a chosen date has no open slots. Deposits
- * (Phase 3) and the shortlist "hand your picks to a friend" flow live in
- * shortlist.js, not here.
+ * BookFlow booking wizard. Group/party companions (each with their own
+ * name and item picks, all under the lead customer's time slot) and a
+ * waitlist offer when a chosen date has no open slots. When the shop
+ * requires a deposit, the confirmation step links to WooCommerce's own
+ * payment page for it. The shortlist "hand your picks to a friend" flow
+ * lives in shortlist.js, not here.
  *
  * Plain vanilla JS by design: BookFlow ships with no build step, so any
  * shop can drop the plugin in without a Node/npm toolchain.
@@ -27,6 +28,7 @@
 		slots: [],
 		waitlistOpen: false,
 		waitlistJoined: false,
+		depositUrl: '',
 	};
 
 	function apiGet( path ) {
@@ -410,7 +412,8 @@
 					} ),
 				website: honeypot.value,
 			} )
-				.then( function () {
+				.then( function ( data ) {
+					state.depositUrl = data.deposit_url || '';
 					state.step = 4;
 					render();
 				} )
@@ -438,6 +441,13 @@
 		var wrap = el( 'div', { class: 'bookflow-step-panel bookflow-confirmed' } );
 		wrap.appendChild( el( 'h3', { text: cfg.i18n.confirmed } ) );
 		wrap.appendChild( el( 'p', { text: 'A confirmation with a calendar invite has been sent to your email.' } ) );
+
+		if ( state.depositUrl ) {
+			wrap.appendChild( el( 'p', { text: 'A deposit is required to hold this booking.' } ) );
+			var payLink = el( 'a', { href: state.depositUrl, class: 'bookflow-btn bookflow-btn-primary', text: 'Pay your deposit now' } );
+			wrap.appendChild( payLink );
+		}
+
 		return wrap;
 	}
 

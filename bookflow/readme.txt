@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,12 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.2.0 =
+* Phase 3: deposit collection through WooCommerce (shop-wide toggle +
+  amount, automatic order creation, payment link in the confirmation
+  email and wizard, live status sync), and read-only WooCommerce catalog
+  sync (hourly + manual "Sync now").
 
 = 1.1.0 =
 * Phase 2: group/party companions in the booking wizard, the waitlist

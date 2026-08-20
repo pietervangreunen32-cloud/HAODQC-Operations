@@ -168,10 +168,16 @@ class BookFlow_REST {
 			return new WP_Error( $result->get_error_code(), $result->get_error_message(), array( 'status' => 400 ) );
 		}
 
+		$deposit_url = '';
+		if ( class_exists( 'BookFlow_Deposits' ) && BookFlow_Deposits::is_deposit_enabled() ) {
+			$deposit_url = BookFlow_Deposits::get_payment_url_for_appointment( $result );
+		}
+
 		return rest_ensure_response(
 			array(
 				'success'        => true,
 				'appointment_id' => $result,
+				'deposit_url'    => $deposit_url,
 			)
 		);
 	}

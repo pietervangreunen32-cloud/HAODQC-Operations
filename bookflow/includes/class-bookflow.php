@@ -27,14 +27,17 @@ class BookFlow {
 		require_once $dir . 'includes/db/class-bookflow-db-blackouts.php';
 		require_once $dir . 'includes/db/class-bookflow-db-waitlist.php';
 		require_once $dir . 'includes/db/class-bookflow-db-shortlists.php';
+		require_once $dir . 'includes/db/class-bookflow-db-deposits.php';
 
 		// Core logic.
 		require_once $dir . 'includes/class-bookflow-catalog.php';
 		require_once $dir . 'includes/class-bookflow-availability.php';
 		require_once $dir . 'includes/class-bookflow-booking-service.php';
+		require_once $dir . 'includes/class-bookflow-deposits.php';
 		require_once $dir . 'includes/class-bookflow-notifications.php';
 		require_once $dir . 'includes/class-bookflow-waitlist.php';
 		require_once $dir . 'includes/class-bookflow-shortlists.php';
+		require_once $dir . 'includes/class-bookflow-woocommerce-sync.php';
 		require_once $dir . 'includes/class-bookflow-license.php';
 		require_once $dir . 'includes/class-bookflow-rest.php';
 
@@ -47,8 +50,10 @@ class BookFlow {
 
 	private function init_components() {
 		( new BookFlow_Catalog() )->init_hooks();
+		( new BookFlow_Deposits() )->init_hooks();
 		( new BookFlow_Notifications() )->init_hooks();
 		( new BookFlow_Waitlist() )->init_hooks();
+		( new BookFlow_WooCommerce_Sync() )->init_hooks();
 		( new BookFlow_REST() )->init_hooks();
 
 		if ( is_admin() ) {

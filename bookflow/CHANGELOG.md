@@ -1,5 +1,43 @@
 # BookFlow Changelog
 
+## 1.2.0 — Phase 3: Deposits + WooCommerce catalog sync
+
+**What's new**
+
+- Deposits: a shop-wide "require a deposit" toggle and amount in Settings.
+  When on, every booking automatically gets a pending WooCommerce order
+  for a hidden "Fitting Deposit" product; the customer's confirmation
+  email and the wizard's confirmation screen both link straight to
+  WooCommerce's own payment page for it, so whatever gateway is already
+  connected (Stripe, PayPal, PayFast, etc.) is used automatically.
+  Deposit status (pending/paid/failed/refunded) stays in sync with the
+  WooCommerce order automatically and shows on the Appointments list.
+- WooCommerce catalog sync: a "Use my WooCommerce catalog" toggle in
+  Settings. When on, BookFlow mirrors published simple WooCommerce
+  products (name, photo, description, price, stock status) into its own
+  catalog every hour, plus a "Sync now" button for an immediate pull.
+  Sync is strictly read-only — nothing is ever written back to
+  WooCommerce or its inventory. Catalog items previously synced from a
+  product that's no longer published are hidden (not deleted), so past
+  appointment records stay intact.
+- Catalog items gained an optional price field (manual entry, or set
+  automatically by the WooCommerce sync).
+
+**Assumption flagged for review:** deposits are currently an all-or-
+nothing, shop-wide setting (on/off + one fixed amount for every booking)
+rather than configurable per item or per booking. This was the simplest
+reading of "optional deposit requirement at booking time" in the brief.
+
+**Known gaps, coming in later phases**
+
+- Variable WooCommerce products aren't synced yet (simple products only).
+- The welcome screen display and wedding countdown (Phase 4).
+- Real license-key validation, tier gating, and multi-currency billing
+  (Phase 5) — every feature currently behaves as if on the Pro tier, and
+  deposit amounts aren't yet currency-converted for buyers outside the
+  shop's own WooCommerce store currency.
+- ReviewLoop integration hook (Phase 6).
+
 ## 1.1.0 — Phase 2: Group bookings + shortlist links + waitlist
 
 **What's new**

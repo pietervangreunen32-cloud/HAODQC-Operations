@@ -57,6 +57,17 @@ class BookFlow_Notifications {
 			$body .= "\n";
 		}
 
+		if ( class_exists( 'BookFlow_Deposits' ) && '1' === (string) $appointment->deposit_required ) {
+			$payment_url = BookFlow_Deposits::get_payment_url_for_appointment( $appointment->id );
+			if ( $payment_url ) {
+				$body .= sprintf(
+					/* translators: %s: payment link. */
+					__( "A deposit is required to hold this booking. Please pay it here:\n%s\n\n", 'bookflow' ),
+					$payment_url
+				);
+			}
+		}
+
 		$body .= __( "We've attached a calendar invite so you don't forget.\n\nSee you soon!\n", 'bookflow' );
 
 		wp_mail( $appointment->customer_email, $subject, $body, array(), $attachments );
