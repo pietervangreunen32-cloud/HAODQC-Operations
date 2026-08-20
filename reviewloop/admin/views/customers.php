@@ -15,6 +15,11 @@ $search = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) 
 $customers = ReviewLoop_Customer::get_list( array( 'per_page' => 20, 'page' => $page, 'search' => $search ) );
 $total     = ReviewLoop_Customer::count_all();
 
+$viewing_id = isset( $_GET['customer_id'] ) ? absint( $_GET['customer_id'] ) : 0;
+$viewing    = $viewing_id ? ReviewLoop_Customer::get( $viewing_id ) : null;
+$history    = $viewing ? ReviewLoop_Consent::history_for_customer( $viewing_id ) : array();
+$messages   = $viewing ? ReviewLoop_Message_Engine::messages_for_customer( $viewing_id ) : array();
+
 $status_labels = array(
 	'pending'          => __( 'Pending', 'reviewloop' ),
 	'active'           => __( 'Check-in sent', 'reviewloop' ),
@@ -33,6 +38,57 @@ $status_labels = array(
 		</div>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-add-customer' ) ); ?>" class="button button-primary"><?php esc_html_e( '+ Add Customer', 'reviewloop' ); ?></a>
 	</div>
+
+	<?php if ( $viewing ) : ?>
+	<div class="reviewloop-panel" style="max-width:640px;">
+		<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-customers' ) ); ?>">&larr; <?php esc_html_e( 'Back to all customers', 'reviewloop' ); ?></a></p>
+		<h2><?php echo esc_html( $viewing->name ); ?></h2>
+		<p>
+			<?php echo esc_html( $viewing->email ? $viewing->email : $viewing->phone ); ?> ·
+			<?php echo esc_html( sprintf( __( 'Service date: %s', 'reviewloop' ), $viewing->service_date ) ); ?> ·
+			<?php echo esc_html( sprintf( __( 'Source: %s', 'reviewloop' ), ucfirst( $viewing->source ) ) ); ?>
+		</p>
+
+		<h3><?php esc_html_e( 'Message history', 'reviewloop' ); ?></h3>
+		<?php if ( empty( $messages ) ) : ?>
+			<p class="description"><?php esc_html_e( 'No messages sent yet.', 'reviewloop' ); ?></p>
+		<?php else : ?>
+			<table class="widefat striped">
+				<thead><tr><th><?php esc_html_e( 'Step', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Status', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Scheduled', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Sent', 'reviewloop' ); ?></th></tr></thead>
+				<tbody>
+				<?php foreach ( $messages as $msg ) : ?>
+					<tr>
+						<td><?php echo esc_html( $msg->sequence_step ); ?></td>
+						<td><span class="rl-status rl-status-<?php echo esc_attr( $msg->status ); ?>"><?php echo esc_html( ucfirst( $msg->status ) ); ?></span></td>
+						<td><?php echo esc_html( $msg->scheduled_at ); ?></td>
+						<td><?php echo esc_html( $msg->sent_at ? $msg->sent_at : '—' ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+
+		<h3><?php esc_html_e( 'Consent history (POPIA audit trail)', 'reviewloop' ); ?></h3>
+		<?php if ( empty( $history ) ) : ?>
+			<p class="description"><?php esc_html_e( 'No consent events recorded yet.', 'reviewloop' ); ?></p>
+		<?php else : ?>
+			<ul>
+				<?php foreach ( $history as $entry ) : ?>
+					<li><?php echo esc_html( $entry->created_at ); ?> — <?php echo esc_html( ucwords( str_replace( '_', ' ', $entry->action ) ) ); ?><?php echo $entry->note ? ' (' . esc_html( $entry->note ) . ')' : ''; ?></li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+
+		<h3><?php esc_html_e( 'Delete this customer', 'reviewloop' ); ?></h3>
+		<p class="description"><?php esc_html_e( 'Permanently removes this customer, their message history, and their consent log — for POPIA data-deletion requests. This cannot be undone.', 'reviewloop' ); ?></p>
+		<form method="post">
+			<?php wp_nonce_field( 'reviewloop_customer_action' ); ?>
+			<input type="hidden" name="reviewloop_action" value="delete_customer">
+			<input type="hidden" name="customer_id" value="<?php echo esc_attr( $viewing->id ); ?>">
+			<button type="submit" class="button rl-confirm" data-confirm="<?php esc_attr_e( 'Permanently delete this customer and all their data? This cannot be undone.', 'reviewloop' ); ?>"><?php esc_html_e( 'Delete permanently', 'reviewloop' ); ?></button>
+		</form>
+	</div>
+	<?php endif; ?>
 
 	<div class="reviewloop-panel">
 		<form method="get" style="margin-bottom:16px;">
@@ -66,6 +122,7 @@ $status_labels = array(
 						<td><span class="rl-status rl-status-<?php echo esc_attr( $customer->consent_status ); ?>"><?php echo esc_html( ucfirst( $customer->consent_status ) ); ?></span></td>
 						<td><span class="rl-status rl-status-<?php echo esc_attr( $customer->sequence_status ); ?>"><?php echo esc_html( isset( $status_labels[ $customer->sequence_status ] ) ? $status_labels[ $customer->sequence_status ] : $customer->sequence_status ); ?></span></td>
 						<td>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-customers&customer_id=' . $customer->id ) ); ?>" class="button button-small"><?php esc_html_e( 'View', 'reviewloop' ); ?></a>
 							<?php if ( 'given' !== $customer->consent_status && ! $customer->opt_out ) : ?>
 								<form method="post" style="display:inline;">
 									<?php wp_nonce_field( 'reviewloop_customer_action' ); ?>

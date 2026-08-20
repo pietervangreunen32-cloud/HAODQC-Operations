@@ -140,6 +140,18 @@ class ReviewLoop_Customer {
 		ReviewLoop_Message_Engine::cancel_pending_messages( $customer_id );
 	}
 
+	/**
+	 * Permanent deletion (POPIA right to erasure), distinct from opt-out —
+	 * opt-out stops messaging but keeps the record; this removes it entirely.
+	 */
+	public static function delete( $customer_id ) {
+		global $wpdb;
+
+		$wpdb->delete( ReviewLoop_DB::messages_table(), array( 'customer_id' => $customer_id ), array( '%d' ) );
+		$wpdb->delete( ReviewLoop_DB::consent_log_table(), array( 'customer_id' => $customer_id ), array( '%d' ) );
+		$wpdb->delete( ReviewLoop_DB::customers_table(), array( 'id' => $customer_id ), array( '%d' ) );
+	}
+
 	public static function get( $customer_id ) {
 		global $wpdb;
 		$table = ReviewLoop_DB::customers_table();

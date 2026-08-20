@@ -102,6 +102,9 @@ class ReviewLoop_Admin_Menu {
 			case 'opt_out':
 				$this->handle_customer_action( 'opt_out' );
 				break;
+			case 'delete_customer':
+				$this->handle_delete_customer();
+				break;
 			case 'approve_reply':
 				$this->handle_approve_reply();
 				break;
@@ -161,6 +164,18 @@ class ReviewLoop_Admin_Menu {
 		}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=reviewloop-customers' ) );
+		exit;
+	}
+
+	private function handle_delete_customer() {
+		check_admin_referer( 'reviewloop_customer_action' );
+
+		$customer_id = isset( $_POST['customer_id'] ) ? absint( $_POST['customer_id'] ) : 0;
+		if ( $customer_id ) {
+			ReviewLoop_Customer::delete( $customer_id );
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'reviewloop-customers', 'rl_msg' => 'deleted' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 
@@ -234,6 +249,10 @@ class ReviewLoop_Admin_Menu {
 
 		if ( isset( $_GET['rl_msg'] ) && 'saved' === $_GET['rl_msg'] ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'reviewloop' ) . '</p></div>';
+		}
+
+		if ( isset( $_GET['rl_msg'] ) && 'deleted' === $_GET['rl_msg'] ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Customer record permanently deleted.', 'reviewloop' ) . '</p></div>';
 		}
 
 		if ( isset( $_GET['rl_msg'] ) && 'reply_posted' === $_GET['rl_msg'] ) {
