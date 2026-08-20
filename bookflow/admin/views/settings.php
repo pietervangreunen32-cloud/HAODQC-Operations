@@ -42,10 +42,12 @@ $day_labels = array(
 						<?php esc_html_e( 'Manage a separate booking catalog', 'bookflow' ); ?>
 					</label>
 					<label style="display:block;">
-						<input type="radio" name="catalog_source" value="woocommerce" <?php checked( $settings['catalog_source'] ?? 'manual', 'woocommerce' ); ?> <?php disabled( ! $woocommerce_active ); ?> />
+						<input type="radio" name="catalog_source" value="woocommerce" <?php checked( $settings['catalog_source'] ?? 'manual', 'woocommerce' ); ?> <?php disabled( ! $woocommerce_active || ! $can_use_wc_sync ); ?> />
 						<?php esc_html_e( 'Use my WooCommerce catalog (read-only auto-sync)', 'bookflow' ); ?>
 					</label>
-					<?php if ( ! $woocommerce_active ) : ?>
+					<?php if ( ! $can_use_wc_sync ) : ?>
+						<p class="description"><?php esc_html_e( 'WooCommerce catalog sync is a Pro plan feature.', 'bookflow' ); ?> <a href="<?php echo esc_url( admin_url( 'admin.php?page=bookflow-license' ) ); ?>"><?php esc_html_e( 'Upgrade', 'bookflow' ); ?></a></p>
+					<?php elseif ( ! $woocommerce_active ) : ?>
 						<p class="description"><?php esc_html_e( 'Install and activate WooCommerce to enable this option.', 'bookflow' ); ?></p>
 					<?php else : ?>
 						<p class="description">
@@ -72,10 +74,12 @@ $day_labels = array(
 				<th><?php esc_html_e( 'Require a deposit', 'bookflow' ); ?></th>
 				<td>
 					<label>
-						<input type="checkbox" name="deposit_enabled" value="1" <?php checked( ! empty( $settings['deposit_enabled'] ) ); ?> <?php disabled( ! $woocommerce_active ); ?> />
+						<input type="checkbox" name="deposit_enabled" value="1" <?php checked( ! empty( $settings['deposit_enabled'] ) ); ?> <?php disabled( ! $woocommerce_active || ! $can_use_deposits ); ?> />
 						<?php esc_html_e( 'Require a deposit for every booking, collected through WooCommerce', 'bookflow' ); ?>
 					</label>
-					<?php if ( ! $woocommerce_active ) : ?>
+					<?php if ( ! $can_use_deposits ) : ?>
+						<p class="description"><?php esc_html_e( 'Deposits are a Growth plan and up feature.', 'bookflow' ); ?> <a href="<?php echo esc_url( admin_url( 'admin.php?page=bookflow-license' ) ); ?>"><?php esc_html_e( 'Upgrade', 'bookflow' ); ?></a></p>
+					<?php elseif ( ! $woocommerce_active ) : ?>
 						<p class="description"><?php esc_html_e( 'Install and activate WooCommerce (with a payment gateway connected) to collect deposits.', 'bookflow' ); ?></p>
 					<?php endif; ?>
 				</td>
@@ -137,7 +141,7 @@ $day_labels = array(
 		<?php submit_button( __( 'Save settings', 'bookflow' ) ); ?>
 	</form>
 
-	<?php if ( $woocommerce_active && 'woocommerce' === ( $settings['catalog_source'] ?? 'manual' ) ) : ?>
+	<?php if ( $woocommerce_active && $can_use_wc_sync && 'woocommerce' === ( $settings['catalog_source'] ?? 'manual' ) ) : ?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'bookflow_sync_woocommerce_catalog' ); ?>
 			<input type="hidden" name="action" value="bookflow_sync_woocommerce_catalog" />

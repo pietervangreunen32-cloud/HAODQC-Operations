@@ -20,6 +20,10 @@ class BookFlow_Waitlist {
 	 * @return int|WP_Error
 	 */
 	public static function join( array $request ) {
+		if ( ! BookFlow_License::tier_includes( 'waitlist' ) ) {
+			return new WP_Error( 'bookflow_feature_not_available', __( 'The waitlist isn\'t available on this shop\'s current plan.', 'bookflow' ) );
+		}
+
 		$name  = isset( $request['customer_name'] ) ? sanitize_text_field( $request['customer_name'] ) : '';
 		$email = isset( $request['customer_email'] ) ? sanitize_email( $request['customer_email'] ) : '';
 		$phone = isset( $request['customer_phone'] ) ? sanitize_text_field( $request['customer_phone'] ) : '';

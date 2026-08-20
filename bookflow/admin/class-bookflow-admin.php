@@ -21,6 +21,8 @@ class BookFlow_Admin {
 		add_action( 'admin_post_bookflow_delete_blackout', array( $this, 'handle_delete_blackout' ) );
 		add_action( 'admin_post_bookflow_cancel_appointment', array( $this, 'handle_cancel_appointment' ) );
 		add_action( 'admin_post_bookflow_delete_waitlist_entry', array( $this, 'handle_delete_waitlist_entry' ) );
+		add_action( 'admin_post_bookflow_activate_license', array( $this, 'handle_activate_license' ) );
+		add_action( 'admin_post_bookflow_deactivate_license', array( $this, 'handle_deactivate_license' ) );
 	}
 
 	public function register_menu() {
@@ -39,6 +41,7 @@ class BookFlow_Admin {
 		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
 		add_submenu_page( 'bookflow', __( 'Waitlist', 'bookflow' ), __( 'Waitlist', 'bookflow' ), 'manage_options', 'bookflow-waitlist', array( $this, 'render_waitlist_page' ) );
 		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
+		add_submenu_page( 'bookflow', __( 'License', 'bookflow' ), __( 'License', 'bookflow' ), 'manage_options', 'bookflow-license', array( $this, 'render_license_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
 	}
 
@@ -101,11 +104,29 @@ class BookFlow_Admin {
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/welcome-screen.php';
 	}
 
+	public function render_license_page() {
+		$this->guard_capability();
+
+		$license_data  = BookFlow_License::get_license_data();
+		$current_tier  = BookFlow_License::get_current_tier();
+		$tier_config   = BookFlow_Pricing::get_tier( $current_tier );
+		$purchasable   = BookFlow_Pricing::get_purchasable_tiers();
+		$is_trial      = BookFlow_License::is_trial_active();
+		$trial_days    = BookFlow_License::trial_days_remaining();
+		$bookings_used = BookFlow_DB_Appointments::count_for_month( (int) current_time( 'Y' ), (int) current_time( 'n' ) );
+		$license_error = get_transient( 'bookflow_license_error_' . get_current_user_id() );
+		delete_transient( 'bookflow_license_error_' . get_current_user_id() );
+
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/license.php';
+	}
+
 	public function render_settings_page() {
 		$this->guard_capability();
 		$settings           = BookFlow_Availability::get_settings();
 		$blackouts          = BookFlow_DB_Blackouts::get_range( gmdate( 'Y-m-d 00:00:00' ), gmdate( 'Y-m-d 00:00:00', strtotime( '+1 year' ) ) );
 		$woocommerce_active = BookFlow_Deposits::is_woocommerce_active();
+		$can_use_deposits   = BookFlow_License::tier_includes( 'deposits' );
+		$can_use_wc_sync    = BookFlow_License::tier_includes( 'woocommerce_sync' );
 		$last_synced        = get_option( 'bookflow_wc_catalog_last_synced' );
 		$sync_result        = get_transient( 'bookflow_sync_result_' . get_current_user_id() );
 		delete_transient( 'bookflow_sync_result_' . get_current_user_id() );
@@ -218,6 +239,31 @@ class BookFlow_Admin {
 		BookFlow_DB_Waitlist::delete( (int) ( $_POST['waitlist_id'] ?? 0 ) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-waitlist' ) );
+		exit;
+	}
+
+	public function handle_activate_license() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_activate_license' );
+
+		$key    = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
+		$result = BookFlow_License::activate_license( $key );
+
+		if ( is_wp_error( $result ) ) {
+			set_transient( 'bookflow_license_error_' . get_current_user_id(), $result->get_error_message(), 60 );
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-license' ) );
+		exit;
+	}
+
+	public function handle_deactivate_license() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_deactivate_license' );
+
+		BookFlow_License::deactivate_license();
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-license' ) );
 		exit;
 	}
 

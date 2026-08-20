@@ -41,6 +41,14 @@ class BookFlow_Booking_Service {
 			return new WP_Error( 'bookflow_missing_fields', __( 'Please provide a name, valid email, and a date/time.', 'bookflow' ) );
 		}
 
+		// Enforced for every booking regardless of source (online or
+		// staff-entered manual), since a plan's monthly booking cap is
+		// meant to describe total bookings, not just self-serve ones.
+		$license_check = BookFlow_License::check_can_book();
+		if ( is_wp_error( $license_check ) ) {
+			return $license_check;
+		}
+
 		$settings     = BookFlow_Availability::get_settings();
 		$slot_minutes = max( 5, (int) $settings['slot_length_minutes'] );
 
@@ -54,6 +62,14 @@ class BookFlow_Booking_Service {
 
 		$lead_item_ids  = isset( $request['item_ids'] ) ? array_map( 'intval', (array) $request['item_ids'] ) : array();
 		$companions_in  = isset( $request['companions'] ) && is_array( $request['companions'] ) ? $request['companions'] : array();
+
+		// Group/party bookings are a Growth-and-up feature — a Starter or
+		// Free-tier request that somehow includes companions (a modified
+		// client, a stale cached page) still books the lead customer, it
+		// just doesn't get their party.
+		if ( ! BookFlow_License::tier_includes( 'group_bookings' ) ) {
+			$companions_in = array();
+		}
 
 		$all_item_ids = $lead_item_ids;
 		foreach ( $companions_in as $companion ) {

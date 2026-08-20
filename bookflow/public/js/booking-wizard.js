@@ -166,52 +166,56 @@
 			} )
 		);
 
-		var companionsWrap = el( 'div', { class: 'bookflow-companions' } );
-		state.companions.forEach( function ( companion, index ) {
-			var block = el( 'div', { class: 'bookflow-companion-block' } );
+		var groupBookingsEnabled = !! ( cfg.features && cfg.features.groupBookings );
 
-			var header = el( 'div', { class: 'bookflow-companion-header' } );
-			var nameInput = el( 'input', {
-				type: 'text',
-				class: 'bookflow-companion-name',
-				placeholder: cfg.i18n.companionName,
-				value: companion.name,
-			} );
-			nameInput.addEventListener( 'input', function ( e ) {
-				companion.name = e.target.value;
-			} );
-			header.appendChild( nameInput );
+		if ( groupBookingsEnabled ) {
+			var companionsWrap = el( 'div', { class: 'bookflow-companions' } );
+			state.companions.forEach( function ( companion, index ) {
+				var block = el( 'div', { class: 'bookflow-companion-block' } );
 
-			var removeBtn = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-small', text: cfg.i18n.removeCompanion } );
-			removeBtn.addEventListener( 'click', function () {
-				state.companions.splice( index, 1 );
+				var header = el( 'div', { class: 'bookflow-companion-header' } );
+				var nameInput = el( 'input', {
+					type: 'text',
+					class: 'bookflow-companion-name',
+					placeholder: cfg.i18n.companionName,
+					value: companion.name,
+				} );
+				nameInput.addEventListener( 'input', function ( e ) {
+					companion.name = e.target.value;
+				} );
+				header.appendChild( nameInput );
+
+				var removeBtn = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-small', text: cfg.i18n.removeCompanion } );
+				removeBtn.addEventListener( 'click', function () {
+					state.companions.splice( index, 1 );
+					render();
+				} );
+				header.appendChild( removeBtn );
+
+				block.appendChild( header );
+				block.appendChild(
+					renderCatalogGrid( companion.itemIds, function ( itemId ) {
+						var idx = companion.itemIds.indexOf( itemId );
+						if ( idx === -1 ) {
+							companion.itemIds.push( itemId );
+						} else {
+							companion.itemIds.splice( idx, 1 );
+						}
+						render();
+					} )
+				);
+
+				companionsWrap.appendChild( block );
+			} );
+			wrap.appendChild( companionsWrap );
+
+			var addCompanionBtn = el( 'button', { type: 'button', class: 'bookflow-btn', text: cfg.i18n.addCompanion } );
+			addCompanionBtn.addEventListener( 'click', function () {
+				state.companions.push( { name: '', itemIds: [] } );
 				render();
 			} );
-			header.appendChild( removeBtn );
-
-			block.appendChild( header );
-			block.appendChild(
-				renderCatalogGrid( companion.itemIds, function ( itemId ) {
-					var idx = companion.itemIds.indexOf( itemId );
-					if ( idx === -1 ) {
-						companion.itemIds.push( itemId );
-					} else {
-						companion.itemIds.splice( idx, 1 );
-					}
-					render();
-				} )
-			);
-
-			companionsWrap.appendChild( block );
-		} );
-		wrap.appendChild( companionsWrap );
-
-		var addCompanionBtn = el( 'button', { type: 'button', class: 'bookflow-btn', text: cfg.i18n.addCompanion } );
-		addCompanionBtn.addEventListener( 'click', function () {
-			state.companions.push( { name: '', itemIds: [] } );
-			render();
-		} );
-		wrap.appendChild( addCompanionBtn );
+			wrap.appendChild( addCompanionBtn );
+		}
 
 		var next = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-primary bookflow-btn-block', text: 'Continue' } );
 		next.disabled = state.selectedItemIds.length === 0;
@@ -270,7 +274,9 @@
 
 				if ( ! anyAvailable ) {
 					wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: cfg.i18n.noSlots } ) );
-					wrap.appendChild( renderWaitlistOffer() );
+					if ( cfg.features && cfg.features.waitlist ) {
+						wrap.appendChild( renderWaitlistOffer() );
+					}
 				}
 			}
 		}

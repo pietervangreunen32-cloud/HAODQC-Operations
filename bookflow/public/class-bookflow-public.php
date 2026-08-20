@@ -33,8 +33,12 @@ class BookFlow_Public {
 		}
 
 		$config = array(
-			'restUrl' => esc_url_raw( rest_url( 'bookflow/v1' ) ),
-			'nonce'   => wp_create_nonce( 'wp_rest' ),
+			'restUrl'  => esc_url_raw( rest_url( 'bookflow/v1' ) ),
+			'nonce'    => wp_create_nonce( 'wp_rest' ),
+			'features' => array(
+				'groupBookings' => BookFlow_License::tier_includes( 'group_bookings' ),
+				'waitlist'      => BookFlow_License::tier_includes( 'waitlist' ),
+			),
 		);
 
 		if ( has_shortcode( $post->post_content, 'bookflow_booking' ) ) {
@@ -66,7 +70,7 @@ class BookFlow_Public {
 			);
 		}
 
-		if ( has_shortcode( $post->post_content, 'bookflow_shortlist' ) ) {
+		if ( has_shortcode( $post->post_content, 'bookflow_shortlist' ) && BookFlow_License::tier_includes( 'shortlist' ) ) {
 			wp_enqueue_style( 'bookflow-shortlist', BOOKFLOW_PLUGIN_URL . 'public/css/shortlist.css', array(), BOOKFLOW_VERSION );
 			wp_enqueue_script( 'bookflow-shortlist', BOOKFLOW_PLUGIN_URL . 'public/js/shortlist.js', array(), BOOKFLOW_VERSION, true );
 
@@ -99,6 +103,10 @@ class BookFlow_Public {
 	}
 
 	public function render_shortlist_shortcode( $atts ) {
+		if ( ! BookFlow_License::tier_includes( 'shortlist' ) ) {
+			return '<p class="bookflow-notice">' . esc_html__( 'Shareable shortlists aren\'t available on this shop\'s current plan.', 'bookflow' ) . '</p>';
+		}
+
 		ob_start();
 		include BOOKFLOW_PLUGIN_DIR . 'public/templates/shortlist.php';
 		return ob_get_clean();

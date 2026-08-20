@@ -101,7 +101,7 @@ class BookFlow_Welcome_Screen {
 		}
 
 		$countdown_days = null;
-		if ( ! empty( $appointment->event_date ) ) {
+		if ( ! empty( $appointment->event_date ) && BookFlow_License::tier_includes( 'wedding_countdown' ) ) {
 			$today_start = strtotime( gmdate( 'Y-m-d', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions
 			$event_start = strtotime( $appointment->event_date );
 			$diff_days   = (int) round( ( $event_start - $today_start ) / DAY_IN_SECONDS );

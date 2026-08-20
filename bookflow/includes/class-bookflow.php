@@ -38,6 +38,7 @@ class BookFlow {
 		require_once $dir . 'includes/class-bookflow-waitlist.php';
 		require_once $dir . 'includes/class-bookflow-shortlists.php';
 		require_once $dir . 'includes/class-bookflow-woocommerce-sync.php';
+		require_once $dir . 'includes/class-bookflow-pricing.php';
 		require_once $dir . 'includes/class-bookflow-license.php';
 		require_once $dir . 'includes/class-bookflow-rest.php';
 
@@ -52,6 +53,7 @@ class BookFlow {
 	}
 
 	private function init_components() {
+		( new BookFlow_License() )->init_hooks();
 		( new BookFlow_Catalog() )->init_hooks();
 		( new BookFlow_Deposits() )->init_hooks();
 		( new BookFlow_Notifications() )->init_hooks();

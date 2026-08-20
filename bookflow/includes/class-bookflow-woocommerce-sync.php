@@ -32,7 +32,9 @@ class BookFlow_WooCommerce_Sync {
 
 	public static function is_sync_enabled() {
 		$settings = BookFlow_Availability::get_settings();
-		return class_exists( 'WooCommerce' ) && 'woocommerce' === ( $settings['catalog_source'] ?? 'manual' );
+		return class_exists( 'WooCommerce' )
+			&& 'woocommerce' === ( $settings['catalog_source'] ?? 'manual' )
+			&& BookFlow_License::tier_includes( 'woocommerce_sync' );
 	}
 
 	public function maybe_reschedule_cron( $old_value, $new_value ) {
@@ -58,6 +60,16 @@ class BookFlow_WooCommerce_Sync {
 		}
 		check_admin_referer( 'bookflow_sync_woocommerce_catalog' );
 
+		if ( ! BookFlow_License::tier_includes( 'woocommerce_sync' ) ) {
+			set_transient(
+				'bookflow_sync_result_' . get_current_user_id(),
+				__( 'WooCommerce catalog sync is a Pro plan feature. Upgrade under BookFlow -> License to use it.', 'bookflow' ),
+				60
+			);
+			wp_safe_redirect( admin_url( 'admin.php?page=bookflow-settings&synced=1' ) );
+			exit;
+		}
+
 		$result = self::sync_catalog();
 
 		set_transient(
@@ -77,7 +89,11 @@ class BookFlow_WooCommerce_Sync {
 	public static function sync_catalog() {
 		$result = array( 'synced' => 0, 'skipped' => 0 );
 
-		if ( ! class_exists( 'WooCommerce' ) ) {
+		// Re-checked here (not just at schedule time) so a license
+		// downgrade takes effect on the very next scheduled run, even if
+		// nobody touches the catalog-source setting that triggered the
+		// original wp_schedule_event() call.
+		if ( ! self::is_sync_enabled() ) {
 			return $result;
 		}
 

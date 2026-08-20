@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,12 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.4.0 =
+* Phase 5: real license-key activation and tier gating (Free/Starter/
+  Growth/Pro), the 14-day trial then 10-bookings/month free fallback,
+  monthly booking caps, and an Admin -> License screen with a plan
+  comparison table.
 
 = 1.3.0 =
 * Phase 4: the full-screen welcome screen display at

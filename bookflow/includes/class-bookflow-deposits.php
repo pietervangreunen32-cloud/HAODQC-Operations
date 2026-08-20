@@ -35,7 +35,9 @@ class BookFlow_Deposits {
 
 	public static function is_deposit_enabled() {
 		$settings = BookFlow_Availability::get_settings();
-		return self::is_woocommerce_active() && ! empty( $settings['deposit_enabled'] );
+		return self::is_woocommerce_active()
+			&& ! empty( $settings['deposit_enabled'] )
+			&& BookFlow_License::tier_includes( 'deposits' );
 	}
 
 	/**

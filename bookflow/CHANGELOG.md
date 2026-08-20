@@ -1,5 +1,58 @@
 # BookFlow Changelog
 
+## 1.4.0 — Phase 5: Licensing/tier gating + multi-currency billing
+
+**What's new**
+
+- Real tier gating replaces the Phase 1 permissive stub. Plans, USD
+  prices, monthly booking caps, and feature lists now live in one config
+  class (`BookFlow_Pricing`) rather than being hardcoded — easy to
+  retune without touching gating logic.
+- Free trial: 14 days fully-featured, then an ongoing 'free' tier capped
+  at 10 bookings/month (core booking calendar only) rather than a hard
+  cutoff — the hybrid model discussed and confirmed for this build.
+- Monthly booking caps (Free 10, Starter 25, Growth 60, Pro unlimited)
+  are now enforced for every booking, online or staff-entered manual.
+- Group bookings, the waitlist, and shareable shortlists are now
+  Growth-plan-and-up features; WooCommerce catalog sync and the wedding
+  countdown are now Pro-plan features. Below the required plan, the
+  booking wizard hides the relevant UI, the shortlist shortcode shows an
+  upsell message instead of the picker, and the corresponding Settings
+  toggles are disabled with an "Upgrade" link.
+- Admin → License: license key activation/deactivation, current plan +
+  trial countdown + this month's booking usage, and a pricing table
+  (USD reference prices — Stripe shows/charges the buyer's local
+  currency at actual checkout, which happens on BookFlow's own site).
+  A daily background check keeps an active license's tier current, with
+  a 3-day grace period if the license server is briefly unreachable
+  rather than an immediate cutoff.
+
+**Assumptions/decisions flagged for review:**
+
+- **Inventory-awareness is not gated by tier.** The brief's pricing
+  table lists "inventory-aware booking" as a Growth-tier add-on, but the
+  brief's Non-negotiables section separately requires it without a tier
+  qualifier. This build keeps double-booking/item-conflict prevention
+  always on, every tier — see the comment at the top of
+  `class-bookflow-pricing.php` for the reasoning and how to flip it if
+  that reading is wrong.
+- **The booking cap applies to every source equally** (online wizard and
+  staff-entered manual bookings), not just self-serve online ones.
+- **This plugin contains no payment-processing code.** BookFlow's own
+  subscription billing (the shop paying for BookFlow, in their local
+  currency via Stripe) happens on a separate BookFlow website/checkout —
+  the same architecture Gravity Forms, ACF Pro, and WP Rocket use. This
+  plugin only activates/validates a license key against that site's API
+  (contract documented in `class-bookflow-license.php`, pointed at via
+  the `bookflow_license_api_url` filter) and links out to
+  `bookflow_checkout_url` for upgrades. That licensing/billing website
+  is separate infrastructure still to be built — see `docs/DISCOVERY.md`.
+- **Multi-location and SMS reminders** are listed as Pro-tier features
+  in the pricing table but aren't built out in this pass — appointments
+  and blackouts already have an optional `location_id` column ready for
+  it, but there's no multi-location management UI yet, and SMS sending
+  needs a provider decision (e.g. Twilio) before it can be built.
+
 ## 1.3.0 — Phase 4: Welcome screen display + wedding countdown
 
 **What's new**

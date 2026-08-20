@@ -16,6 +16,10 @@ class BookFlow_Shortlists {
 	 *         items were provided.
 	 */
 	public static function create( array $item_ids, $label = '' ) {
+		if ( ! BookFlow_License::tier_includes( 'shortlist' ) ) {
+			return new WP_Error( 'bookflow_feature_not_available', __( 'Shareable shortlists aren\'t available on this shop\'s current plan.', 'bookflow' ) );
+		}
+
 		$valid_ids = array();
 		foreach ( array_map( 'intval', $item_ids ) as $item_id ) {
 			if ( BookFlow_Catalog::item_exists_and_available( $item_id ) ) {
