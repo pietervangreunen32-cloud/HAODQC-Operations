@@ -1,0 +1,181 @@
+/* BookFlow booking wizard styles. Scoped under .bookflow-app so it never
+   leaks into the shop's theme. Brand color: #3D4EDB (indigo/blue). */
+
+.bookflow-app {
+	--bookflow-primary: #3D4EDB;
+	--bookflow-primary-dark: #2E3BB0;
+	--bookflow-text: #1F2430;
+	--bookflow-muted: #6B7280;
+	--bookflow-border: #E2E4EC;
+	max-width: 720px;
+	margin: 0 auto;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	color: var(--bookflow-text);
+}
+
+.bookflow-loading {
+	padding: 2rem;
+	text-align: center;
+	color: var(--bookflow-muted);
+}
+
+.bookflow-stepper {
+	display: flex;
+	list-style: none;
+	margin: 0 0 1.5rem;
+	padding: 0;
+	gap: 0.5rem;
+}
+
+.bookflow-step {
+	flex: 1;
+	text-align: center;
+	font-size: 0.8rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 3px solid var(--bookflow-border);
+	color: var(--bookflow-muted);
+}
+
+.bookflow-step.is-active {
+	border-bottom-color: var(--bookflow-primary);
+	color: var(--bookflow-text);
+	font-weight: 600;
+}
+
+.bookflow-step.is-done {
+	border-bottom-color: var(--bookflow-primary);
+}
+
+.bookflow-step-panel h3 {
+	margin-top: 0;
+}
+
+.bookflow-catalog-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+
+.bookflow-catalog-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0.5rem;
+	background: #fff;
+	border: 2px solid var(--bookflow-border);
+	border-radius: 8px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.bookflow-catalog-card img {
+	width: 100%;
+	aspect-ratio: 3 / 4;
+	object-fit: cover;
+	border-radius: 4px;
+	margin-bottom: 0.5rem;
+}
+
+.bookflow-catalog-card.is-selected {
+	border-color: var(--bookflow-primary);
+	box-shadow: 0 0 0 3px rgba(61, 78, 219, 0.15);
+}
+
+.bookflow-catalog-name {
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.bookflow-catalog-size {
+	font-size: 0.75rem;
+	color: var(--bookflow-muted);
+}
+
+.bookflow-slots {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 1rem 0;
+}
+
+.bookflow-slot {
+	padding: 0.5rem 0.9rem;
+	border: 1px solid var(--bookflow-border);
+	border-radius: 6px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.bookflow-slot:disabled {
+	color: var(--bookflow-muted);
+	background: #F5F5F7;
+	cursor: not-allowed;
+	text-decoration: line-through;
+}
+
+.bookflow-slot.is-selected {
+	border-color: var(--bookflow-primary);
+	background: var(--bookflow-primary);
+	color: #fff;
+}
+
+.bookflow-notice {
+	color: var(--bookflow-muted);
+	font-style: italic;
+}
+
+.bookflow-error {
+	color: #B3261E;
+	font-size: 0.9rem;
+}
+
+.bookflow-step-panel form label {
+	display: block;
+	margin-top: 0.75rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+.bookflow-step-panel form input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.6rem;
+	margin-top: 0.25rem;
+	border: 1px solid var(--bookflow-border);
+	border-radius: 6px;
+	font-size: 1rem;
+}
+
+.bookflow-btn {
+	display: inline-block;
+	margin-top: 1.25rem;
+	margin-right: 0.5rem;
+	padding: 0.65rem 1.4rem;
+	border-radius: 6px;
+	border: 1px solid var(--bookflow-border);
+	background: #fff;
+	color: var(--bookflow-text);
+	font-size: 0.95rem;
+	cursor: pointer;
+}
+
+.bookflow-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.bookflow-btn-primary {
+	background: var(--bookflow-primary);
+	border-color: var(--bookflow-primary);
+	color: #fff;
+}
+
+.bookflow-btn-primary:hover:not(:disabled) {
+	background: var(--bookflow-primary-dark);
+}
+
+.bookflow-confirmed {
+	text-align: center;
+	padding: 2rem 0;
+}

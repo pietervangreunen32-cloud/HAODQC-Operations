@@ -1,0 +1,60 @@
+/* BookFlow admin styles. Brand color: #3D4EDB. */
+
+.bookflow-wrap h1 {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.bookflow-admin-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 1rem;
+	margin: 1.5rem 0 2rem;
+	max-width: 900px;
+}
+
+.bookflow-admin-card {
+	display: block;
+	padding: 1rem 1.25rem;
+	background: #fff;
+	border: 1px solid #E2E4EC;
+	border-left: 4px solid #3D4EDB;
+	border-radius: 4px;
+	text-decoration: none;
+	color: #1F2430;
+}
+
+.bookflow-admin-card:hover {
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.bookflow-admin-card h2 {
+	margin: 0 0 0.25rem;
+	font-size: 1rem;
+	color: #2E3BB0;
+}
+
+.bookflow-admin-card p {
+	margin: 0;
+	color: #6B7280;
+	font-size: 0.85rem;
+}
+
+.bookflow-filter-form {
+	margin: 1rem 0;
+	display: flex;
+	gap: 1rem;
+	align-items: flex-end;
+}
+
+.bookflow-filter-form label {
+	display: flex;
+	flex-direction: column;
+	font-size: 0.85rem;
+	gap: 0.25rem;
+}
+
+.bookflow-form .form-table th {
+	width: 240px;
+}
