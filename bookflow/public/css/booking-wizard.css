@@ -179,3 +179,58 @@
 	text-align: center;
 	padding: 2rem 0;
 }
+
+.bookflow-btn-small {
+	padding: 0.35rem 0.75rem;
+	font-size: 0.8rem;
+	margin-top: 0;
+}
+
+.bookflow-btn-block {
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
+.bookflow-companions {
+	margin: 1rem 0;
+}
+
+.bookflow-companion-block {
+	border: 1px solid var(--bookflow-border);
+	border-radius: 8px;
+	padding: 0.75rem;
+	margin-bottom: 1rem;
+	background: #FAFAFC;
+}
+
+.bookflow-companion-header {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	margin-bottom: 0.75rem;
+}
+
+.bookflow-companion-name {
+	flex: 1;
+	padding: 0.5rem;
+	border: 1px solid var(--bookflow-border);
+	border-radius: 6px;
+}
+
+.bookflow-waitlist {
+	margin: 0.75rem 0 1.25rem;
+}
+
+.bookflow-waitlist-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	max-width: 320px;
+}
+
+.bookflow-waitlist-form input {
+	padding: 0.5rem;
+	border: 1px solid var(--bookflow-border);
+	border-radius: 6px;
+}

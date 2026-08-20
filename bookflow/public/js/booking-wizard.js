@@ -1,7 +1,9 @@
 /**
- * BookFlow booking wizard — Phase 1: solo booking only (catalog select,
- * date/time, contact details, confirmation). Group/party companions and
- * the waitlist offer are added to this file in Phase 2.
+ * BookFlow booking wizard — Phase 2 adds group/party companions (each with
+ * their own name and item picks, all under the lead customer's time slot)
+ * and a waitlist offer when a chosen date has no open slots. Deposits
+ * (Phase 3) and the shortlist "hand your picks to a friend" flow live in
+ * shortlist.js, not here.
  *
  * Plain vanilla JS by design: BookFlow ships with no build step, so any
  * shop can drop the plugin in without a Node/npm toolchain.
@@ -19,9 +21,12 @@
 		step: 1,
 		items: [],
 		selectedItemIds: [],
+		companions: [], // [{ name: '', itemIds: [] }]
 		date: '',
 		time: '',
 		slots: [],
+		waitlistOpen: false,
+		waitlistJoined: false,
 	};
 
 	function apiGet( path ) {
@@ -46,8 +51,7 @@
 		} ).then( function ( r ) {
 			return r.json().then( function ( data ) {
 				if ( ! r.ok ) {
-					var err = new Error( data.message || cfg.i18n.genericError );
-					throw err;
+					throw new Error( data.message || cfg.i18n.genericError );
 				}
 				return data;
 			} );
@@ -107,22 +111,14 @@
 		return wrap;
 	}
 
-	function renderCatalogStep() {
-		var wrap = el( 'div', { class: 'bookflow-step-panel' } );
-		wrap.appendChild( el( 'h3', { text: cfg.i18n.chooseItems } ) );
-
-		if ( ! state.items.length ) {
-			wrap.appendChild( el( 'p', { text: '…' } ) );
-			apiGet( '/items' ).then( function ( items ) {
-				state.items = items;
-				render();
-			} );
-			return wrap;
-		}
-
+	/**
+	 * Renders one photo grid of catalog items with toggleable selection —
+	 * used both for the lead customer's picks and for each companion's.
+	 */
+	function renderCatalogGrid( selectedIds, onToggle ) {
 		var grid = el( 'div', { class: 'bookflow-catalog-grid' } );
 		state.items.forEach( function ( item ) {
-			var selected = state.selectedItemIds.indexOf( item.id ) !== -1;
+			var selected = selectedIds.indexOf( item.id ) !== -1;
 			var card = el( 'button', {
 				type: 'button',
 				class: 'bookflow-catalog-card' + ( selected ? ' is-selected' : '' ),
@@ -136,21 +132,87 @@
 				card.appendChild( el( 'span', { class: 'bookflow-catalog-size', text: item.size } ) );
 			}
 			card.addEventListener( 'click', function () {
-				var idx = state.selectedItemIds.indexOf( item.id );
+				onToggle( item.id );
+			} );
+			grid.appendChild( card );
+		} );
+		return grid;
+	}
+
+	function renderCatalogStep() {
+		var wrap = el( 'div', { class: 'bookflow-step-panel' } );
+		wrap.appendChild( el( 'h3', { text: cfg.i18n.chooseItems } ) );
+
+		if ( ! state.items.length ) {
+			wrap.appendChild( el( 'p', { text: '…' } ) );
+			apiGet( '/items' ).then( function ( items ) {
+				state.items = items;
+				render();
+			} );
+			return wrap;
+		}
+
+		wrap.appendChild(
+			renderCatalogGrid( state.selectedItemIds, function ( itemId ) {
+				var idx = state.selectedItemIds.indexOf( itemId );
 				if ( idx === -1 ) {
-					state.selectedItemIds.push( item.id );
+					state.selectedItemIds.push( itemId );
 				} else {
 					state.selectedItemIds.splice( idx, 1 );
 				}
 				render();
-			} );
-			grid.appendChild( card );
-		} );
-		wrap.appendChild( grid );
+			} )
+		);
 
-		var next = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-primary', text: '→' } );
+		var companionsWrap = el( 'div', { class: 'bookflow-companions' } );
+		state.companions.forEach( function ( companion, index ) {
+			var block = el( 'div', { class: 'bookflow-companion-block' } );
+
+			var header = el( 'div', { class: 'bookflow-companion-header' } );
+			var nameInput = el( 'input', {
+				type: 'text',
+				class: 'bookflow-companion-name',
+				placeholder: cfg.i18n.companionName,
+				value: companion.name,
+			} );
+			nameInput.addEventListener( 'input', function ( e ) {
+				companion.name = e.target.value;
+			} );
+			header.appendChild( nameInput );
+
+			var removeBtn = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-small', text: cfg.i18n.removeCompanion } );
+			removeBtn.addEventListener( 'click', function () {
+				state.companions.splice( index, 1 );
+				render();
+			} );
+			header.appendChild( removeBtn );
+
+			block.appendChild( header );
+			block.appendChild(
+				renderCatalogGrid( companion.itemIds, function ( itemId ) {
+					var idx = companion.itemIds.indexOf( itemId );
+					if ( idx === -1 ) {
+						companion.itemIds.push( itemId );
+					} else {
+						companion.itemIds.splice( idx, 1 );
+					}
+					render();
+				} )
+			);
+
+			companionsWrap.appendChild( block );
+		} );
+		wrap.appendChild( companionsWrap );
+
+		var addCompanionBtn = el( 'button', { type: 'button', class: 'bookflow-btn', text: cfg.i18n.addCompanion } );
+		addCompanionBtn.addEventListener( 'click', function () {
+			state.companions.push( { name: '', itemIds: [] } );
+			render();
+		} );
+		wrap.appendChild( addCompanionBtn );
+
+		var next = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-primary bookflow-btn-block', text: 'Continue' } );
 		next.disabled = state.selectedItemIds.length === 0;
-		next.textContent = state.selectedItemIds.length === 0 ? 'Select at least one item to continue' : 'Continue';
 		next.addEventListener( 'click', function () {
 			state.step = 2;
 			render();
@@ -169,6 +231,8 @@
 			state.date = e.target.value;
 			state.time = '';
 			state.slots = [];
+			state.waitlistOpen = false;
+			state.waitlistJoined = false;
 			render();
 		} );
 		wrap.appendChild( el( 'label', { text: 'Date' } ) );
@@ -176,8 +240,7 @@
 
 		if ( state.date ) {
 			if ( ! state.slots.length ) {
-				var loading = el( 'p', { text: '…' } );
-				wrap.appendChild( loading );
+				wrap.appendChild( el( 'p', { text: '…' } ) );
 				apiGet( '/availability?date=' + encodeURIComponent( state.date ) ).then( function ( slots ) {
 					state.slots = slots;
 					render();
@@ -205,6 +268,7 @@
 
 				if ( ! anyAvailable ) {
 					wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: cfg.i18n.noSlots } ) );
+					wrap.appendChild( renderWaitlistOffer() );
 				}
 			}
 		}
@@ -224,6 +288,65 @@
 		} );
 		wrap.appendChild( next );
 
+		return wrap;
+	}
+
+	function renderWaitlistOffer() {
+		var wrap = el( 'div', { class: 'bookflow-waitlist' } );
+
+		if ( state.waitlistJoined ) {
+			wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: cfg.i18n.waitlistJoined } ) );
+			return wrap;
+		}
+
+		if ( ! state.waitlistOpen ) {
+			var openBtn = el( 'button', { type: 'button', class: 'bookflow-btn', text: cfg.i18n.joinWaitlist } );
+			openBtn.addEventListener( 'click', function () {
+				state.waitlistOpen = true;
+				render();
+			} );
+			wrap.appendChild( openBtn );
+			return wrap;
+		}
+
+		var form = el( 'form', { class: 'bookflow-waitlist-form' } );
+		var nameInput = el( 'input', { type: 'text', placeholder: 'Full name', required: 'required' } );
+		var emailInput = el( 'input', { type: 'email', placeholder: 'Email', required: 'required' } );
+		var phoneInput = el( 'input', { type: 'tel', placeholder: 'Phone' } );
+		var errorBox = el( 'p', { class: 'bookflow-error', style: 'display:none;' } );
+
+		form.appendChild( el( 'h4', { text: cfg.i18n.waitlistTitle } ) );
+		form.appendChild( nameInput );
+		form.appendChild( emailInput );
+		form.appendChild( phoneInput );
+		form.appendChild( errorBox );
+
+		var submit = el( 'button', { type: 'submit', class: 'bookflow-btn bookflow-btn-primary', text: cfg.i18n.joinWaitlist } );
+		form.appendChild( submit );
+
+		form.addEventListener( 'submit', function ( e ) {
+			e.preventDefault();
+			errorBox.style.display = 'none';
+			submit.disabled = true;
+
+			apiPost( '/waitlist', {
+				customer_name: nameInput.value,
+				customer_email: emailInput.value,
+				customer_phone: phoneInput.value,
+				date: state.date,
+			} )
+				.then( function () {
+					state.waitlistJoined = true;
+					render();
+				} )
+				.catch( function ( err ) {
+					errorBox.textContent = err.message || cfg.i18n.genericError;
+					errorBox.style.display = 'block';
+					submit.disabled = false;
+				} );
+		} );
+
+		wrap.appendChild( form );
 		return wrap;
 	}
 
@@ -250,6 +373,14 @@
 		} );
 		form.appendChild( honeypot );
 
+		if ( state.companions.length ) {
+			var summary = el( 'p', { class: 'bookflow-notice' } );
+			summary.textContent = 'Joining you: ' + state.companions.map( function ( c ) {
+				return c.name || '(unnamed)';
+			} ).join( ', ' );
+			form.appendChild( summary );
+		}
+
 		var errorBox = el( 'p', { class: 'bookflow-error', style: 'display:none;' } );
 		form.appendChild( errorBox );
 
@@ -270,6 +401,13 @@
 				date: state.date,
 				time: state.time,
 				item_ids: state.selectedItemIds,
+				companions: state.companions
+					.filter( function ( c ) {
+						return c.name;
+					} )
+					.map( function ( c ) {
+						return { name: c.name, item_ids: c.itemIds };
+					} ),
 				website: honeypot.value,
 			} )
 				.then( function () {

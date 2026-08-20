@@ -1,5 +1,22 @@
 # BookFlow Changelog
 
+## 1.1.0 — Phase 2: Group bookings + shortlist links + waitlist
+
+**What's new**
+
+- Booking wizard: customers can now add companions (bridesmaids/groomsmen)
+  to their appointment, each with their own name and their own item picks,
+  all under the same time slot. Item conflict-checking covers every
+  companion's picks, not just the lead customer's.
+- Waitlist: when a chosen date has no open slots, customers are offered a
+  one-field-set signup. The moment a matching appointment is cancelled,
+  BookFlow automatically emails the earliest match a link back to book.
+- Admin → Waitlist: see everyone currently waiting, and remove an entry.
+- New `[bookflow_shortlist]` shortcode: a shareable, anonymous "favorites"
+  browser. Visitors heart items (stored locally, no account needed), then
+  generate a shareable link a partner/parent/friend can open to see the
+  same picks read-only — before anyone has booked anything.
+
 ## 1.0.0 — Phase 1: Core booking calendar + catalog + inventory-awareness
 
 **What's new**
@@ -26,9 +43,6 @@
 
 **Known gaps, coming in later phases**
 
-- Group/party companions aren't exposed in the public wizard UI yet (the
-  data model and conflict-checking already support them — Phase 2 adds the
-  UI, plus shortlist links and the waitlist).
 - Deposits and WooCommerce catalog sync (Phase 3).
 - The welcome screen display and wedding countdown (Phase 4).
 - Real license-key validation, tier gating, and multi-currency billing

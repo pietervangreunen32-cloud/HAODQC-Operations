@@ -65,6 +65,36 @@ class BookFlow_REST {
 				'permission_callback' => array( $this, 'create_appointment_permissions' ),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/waitlist',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'join_waitlist' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/shortlists',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_shortlist' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/shortlists/(?P<key>[A-Za-z0-9]+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_shortlist' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	public function get_items( WP_REST_Request $request ) {
@@ -144,5 +174,78 @@ class BookFlow_REST {
 				'appointment_id' => $result,
 			)
 		);
+	}
+
+	public function join_waitlist( WP_REST_Request $request ) {
+		$body = $request->get_json_params();
+		if ( ! is_array( $body ) ) {
+			$body = array();
+		}
+
+		$result = BookFlow_Waitlist::join( $body );
+
+		if ( is_wp_error( $result ) ) {
+			return new WP_Error( $result->get_error_code(), $result->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		return rest_ensure_response( array( 'success' => true ) );
+	}
+
+	public function create_shortlist( WP_REST_Request $request ) {
+		$body = $request->get_json_params();
+		if ( ! is_array( $body ) ) {
+			$body = array();
+		}
+
+		$item_ids = isset( $body['item_ids'] ) ? (array) $body['item_ids'] : array();
+		$label    = isset( $body['label'] ) ? (string) $body['label'] : '';
+
+		$share_key = BookFlow_Shortlists::create( $item_ids, $label );
+
+		if ( is_wp_error( $share_key ) ) {
+			return new WP_Error( $share_key->get_error_code(), $share_key->get_error_message(), array( 'status' => 400 ) );
+		}
+
+		return rest_ensure_response(
+			array(
+				'share_key' => $share_key,
+				'share_url' => add_query_arg( 'bookflow_shortlist', $share_key, self::get_shortlist_page_url() ),
+			)
+		);
+	}
+
+	public function get_shortlist( WP_REST_Request $request ) {
+		$result = BookFlow_Shortlists::get_items_for_key( $request->get_param( 'key' ) );
+
+		if ( is_wp_error( $result ) ) {
+			return new WP_Error( $result->get_error_code(), $result->get_error_message(), array( 'status' => 404 ) );
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Best-effort link back to wherever the shop placed [bookflow_shortlist].
+	 * Falls back to the homepage.
+	 */
+	private static function get_shortlist_page_url() {
+		$cached = get_transient( 'bookflow_shortlist_page_url' );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$pages = get_posts(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'numberposts' => 1,
+				's'           => '[bookflow_shortlist]',
+			)
+		);
+
+		$url = ! empty( $pages ) ? get_permalink( $pages[0] ) : home_url( '/' );
+		set_transient( 'bookflow_shortlist_page_url', $url, DAY_IN_SECONDS );
+
+		return $url;
 	}
 }

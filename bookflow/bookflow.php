@@ -3,7 +3,7 @@
  * Plugin Name:       BookFlow
  * Plugin URI:        https://bookflow.app
  * Description:       Booking calendar, catalog, and in-store welcome screen display built for bridal & formalwear rental shops. Prevents double-booking, tracks inventory, and greets customers by name when they walk in.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            BookFlow
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'BOOKFLOW_VERSION', '1.0.0' );
+define( 'BOOKFLOW_VERSION', '1.1.0' );
 define( 'BOOKFLOW_PLUGIN_FILE', __FILE__ );
 define( 'BOOKFLOW_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BOOKFLOW_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,11 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.1.0 =
+* Phase 2: group/party companions in the booking wizard, the waitlist
+  (signup + automatic notify-on-cancellation), and the shareable
+  `[bookflow_shortlist]` favorites link. Admin → Waitlist screen added.
 
 = 1.0.0 =
 * Phase 1: core booking calendar, catalog, and inventory-aware conflict

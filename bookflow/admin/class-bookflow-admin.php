@@ -20,6 +20,7 @@ class BookFlow_Admin {
 		add_action( 'admin_post_bookflow_add_blackout', array( $this, 'handle_add_blackout' ) );
 		add_action( 'admin_post_bookflow_delete_blackout', array( $this, 'handle_delete_blackout' ) );
 		add_action( 'admin_post_bookflow_cancel_appointment', array( $this, 'handle_cancel_appointment' ) );
+		add_action( 'admin_post_bookflow_delete_waitlist_entry', array( $this, 'handle_delete_waitlist_entry' ) );
 	}
 
 	public function register_menu() {
@@ -36,6 +37,7 @@ class BookFlow_Admin {
 		add_submenu_page( 'bookflow', __( 'Dashboard', 'bookflow' ), __( 'Dashboard', 'bookflow' ), 'manage_options', 'bookflow', array( $this, 'render_dashboard_page' ) );
 		add_submenu_page( 'bookflow', __( 'Appointments', 'bookflow' ), __( 'Appointments', 'bookflow' ), 'manage_options', 'bookflow-appointments', array( $this, 'render_appointments_page' ) );
 		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
+		add_submenu_page( 'bookflow', __( 'Waitlist', 'bookflow' ), __( 'Waitlist', 'bookflow' ), 'manage_options', 'bookflow-waitlist', array( $this, 'render_waitlist_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
 	}
 
@@ -77,6 +79,12 @@ class BookFlow_Admin {
 		$error = get_transient( 'bookflow_manual_booking_error_' . get_current_user_id() );
 		delete_transient( 'bookflow_manual_booking_error_' . get_current_user_id() );
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/add-booking.php';
+	}
+
+	public function render_waitlist_page() {
+		$this->guard_capability();
+		$entries = BookFlow_DB_Waitlist::get_upcoming();
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/waitlist.php';
 	}
 
 	public function render_settings_page() {
@@ -178,6 +186,16 @@ class BookFlow_Admin {
 		BookFlow_Booking_Service::cancel_booking( (int) ( $_POST['appointment_id'] ?? 0 ) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-appointments&cancelled=1' ) );
+		exit;
+	}
+
+	public function handle_delete_waitlist_entry() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_delete_waitlist_entry' );
+
+		BookFlow_DB_Waitlist::delete( (int) ( $_POST['waitlist_id'] ?? 0 ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-waitlist' ) );
 		exit;
 	}
 
