@@ -17,7 +17,13 @@ class ReviewLoop_Core {
 		if ( is_admin() ) {
 			$admin_menu = new ReviewLoop_Admin_Menu();
 			$admin_menu->init();
+
+			$google_settings = new ReviewLoop_Google_Settings();
+			$google_settings->init();
 		}
+
+		$google_api = new ReviewLoop_Google_Api();
+		$google_api->init();
 
 		$cron = new ReviewLoop_Cron();
 		$cron->init();

@@ -35,8 +35,14 @@ class ReviewLoop_Settings {
 			'license_status'            => 'inactive',
 			'onboarding_complete'       => false,
 			'delete_data_on_uninstall'  => false,
-			'google_connected'          => false,
 			'anthropic_api_key'         => '',
+			'google_client_id'          => '',
+			'google_client_secret'      => '',
+			'google_access_token'       => '',
+			'google_refresh_token'      => '',
+			'google_token_expires'      => 0,
+			'google_location_name'      => '',
+			'google_connected'          => false,
 		);
 	}
 
@@ -59,6 +65,24 @@ class ReviewLoop_Settings {
 
 		update_option( 'reviewloop_settings', $current );
 
+		return $current;
+	}
+
+	public static function save_google_config( $post ) {
+		$current = self::get_all();
+
+		$current['google_client_id']     = isset( $post['google_client_id'] ) ? sanitize_text_field( wp_unslash( $post['google_client_id'] ) ) : $current['google_client_id'];
+		$current['google_client_secret'] = isset( $post['google_client_secret'] ) ? sanitize_text_field( wp_unslash( $post['google_client_secret'] ) ) : $current['google_client_secret'];
+		$current['google_location_name'] = isset( $post['google_location_name'] ) ? sanitize_text_field( wp_unslash( $post['google_location_name'] ) ) : $current['google_location_name'];
+
+		update_option( 'reviewloop_settings', $current );
+
+		return $current;
+	}
+
+	public static function update( $partial ) {
+		$current = wp_parse_args( $partial, self::get_all() );
+		update_option( 'reviewloop_settings', $current );
 		return $current;
 	}
 }
