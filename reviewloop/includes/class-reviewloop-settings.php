@@ -33,6 +33,8 @@ class ReviewLoop_Settings {
 			'woocommerce_auto_hook'     => false,
 			'license_key'               => '',
 			'license_status'            => 'inactive',
+			'license_expires'           => '',
+			'woocommerce_consent_attested' => false,
 			'onboarding_complete'       => false,
 			'delete_data_on_uninstall'  => false,
 			'anthropic_api_key'         => '',
@@ -62,7 +64,8 @@ class ReviewLoop_Settings {
 		$current['reply_voice_notes']         = isset( $post['reply_voice_notes'] ) ? sanitize_textarea_field( wp_unslash( $post['reply_voice_notes'] ) ) : $current['reply_voice_notes'];
 
 		if ( ReviewLoop_License::is_pro_active() ) {
-			$current['woocommerce_auto_hook'] = ! empty( $post['woocommerce_auto_hook'] );
+			$current['woocommerce_auto_hook']         = ! empty( $post['woocommerce_auto_hook'] );
+			$current['woocommerce_consent_attested']  = ! empty( $post['woocommerce_consent_attested'] );
 		}
 
 		update_option( 'reviewloop_settings', $current );

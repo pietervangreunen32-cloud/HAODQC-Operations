@@ -39,8 +39,9 @@ class ReviewLoop_Admin_Menu {
 		add_submenu_page( 'reviewloop', __( 'Reviews', 'reviewloop' ), __( 'Reviews', 'reviewloop' ), self::CAPABILITY, 'reviewloop-reviews', array( $this, 'render_reviews' ) );
 		add_submenu_page( 'reviewloop', __( 'Settings', 'reviewloop' ), __( 'Settings', 'reviewloop' ), self::CAPABILITY, 'reviewloop-settings', array( $this, 'render_settings' ) );
 
-		// Hidden page (no submenu link) used for the first-run wizard.
+		// Hidden pages (no submenu link) reached via in-context links.
 		add_submenu_page( null, __( 'Welcome to ReviewLoop', 'reviewloop' ), __( 'Welcome', 'reviewloop' ), self::CAPABILITY, 'reviewloop-welcome', array( $this, 'render_welcome' ) );
+		add_submenu_page( null, __( 'Import Customers', 'reviewloop' ), __( 'Import', 'reviewloop' ), self::CAPABILITY, 'reviewloop-import', array( $this, 'render_import' ) );
 	}
 
 	private function menu_icon() {
@@ -293,5 +294,9 @@ class ReviewLoop_Admin_Menu {
 
 	public function render_welcome() {
 		require REVIEWLOOP_PLUGIN_DIR . 'admin/views/onboarding.php';
+	}
+
+	public function render_import() {
+		require REVIEWLOOP_PLUGIN_DIR . 'admin/views/csv-import.php';
 	}
 }

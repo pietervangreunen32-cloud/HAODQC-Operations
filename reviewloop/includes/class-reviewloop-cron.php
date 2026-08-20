@@ -11,6 +11,7 @@ class ReviewLoop_Cron {
 
 	public function init() {
 		add_action( 'reviewloop_daily_sequence_check', array( 'ReviewLoop_Message_Engine', 'process_due_messages' ) );
+		add_action( 'reviewloop_daily_sequence_check', array( 'ReviewLoop_License', 'revalidate' ) );
 		add_action( 'reviewloop_hourly_review_poll', array( $this, 'poll_reviews' ) );
 	}
 

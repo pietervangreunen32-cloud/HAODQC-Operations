@@ -20,6 +20,12 @@ class ReviewLoop_Core {
 
 			$google_settings = new ReviewLoop_Google_Settings();
 			$google_settings->init();
+
+			$license_settings = new ReviewLoop_License_Settings();
+			$license_settings->init();
+
+			$csv_importer = new ReviewLoop_Csv_Importer();
+			$csv_importer->init();
 		}
 
 		$google_api = new ReviewLoop_Google_Api();

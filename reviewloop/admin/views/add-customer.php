@@ -70,7 +70,7 @@ $is_pro = ReviewLoop_License::is_pro_active();
 		<h2><?php esc_html_e( 'Bulk import from CSV', 'reviewloop' ); ?></h2>
 		<?php if ( $is_pro ) : ?>
 			<p><?php esc_html_e( 'Upload a spreadsheet exported from QuickBooks, Sage, or any system with a CSV export.', 'reviewloop' ); ?></p>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-customers&rl_tab=import' ) ); ?>" class="button"><?php esc_html_e( 'Go to CSV Import', 'reviewloop' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-import' ) ); ?>" class="button"><?php esc_html_e( 'Go to CSV Import', 'reviewloop' ); ?></a>
 		<?php else : ?>
 			<div class="rl-upgrade-box">
 				<p><?php esc_html_e( 'Import customers in bulk from a QuickBooks/Sage CSV export — this is a Pro feature.', 'reviewloop' ); ?></p>

@@ -26,6 +26,15 @@ define( 'REVIEWLOOP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'REVIEWLOOP_DB_VERSION', '1.0.0' );
 
 /**
+ * Starting price shown in upgrade prompts — a config value, not logic, so
+ * it can change without touching code. Actual billing/enforcement happens
+ * on the license server, not in this plugin.
+ */
+if ( ! defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ) {
+	define( 'REVIEWLOOP_PRO_PRICE_DISPLAY', '$20/month' );
+}
+
+/**
  * Autoload plugin classes on demand (class-reviewloop-xxx.php naming convention).
  */
 spl_autoload_register( function ( $class_name ) {
