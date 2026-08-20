@@ -1,0 +1,234 @@
+/* ReviewLoop admin styles — teal brand (#0F9D8C) on a soft grey/white background. */
+
+:root {
+	--rl-primary: #0f9d8c;
+	--rl-primary-dark: #0b7d70;
+	--rl-primary-light: #e6f6f4;
+	--rl-ink: #1d2327;
+	--rl-muted: #646970;
+	--rl-border: #dcdcde;
+	--rl-bg: #f6f7f7;
+	--rl-danger: #d63638;
+	--rl-warning: #dba617;
+	--rl-white: #ffffff;
+}
+
+.reviewloop-wrap {
+	margin: 20px 20px 20px 0;
+	max-width: 1200px;
+}
+
+.reviewloop-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--rl-white);
+	border: 1px solid var(--rl-border);
+	border-radius: 8px;
+	padding: 20px 24px;
+	margin-bottom: 20px;
+}
+
+.reviewloop-header h1 {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 22px;
+	margin: 0;
+	color: var(--rl-ink);
+}
+
+.reviewloop-header h1 .rl-logo {
+	width: 28px;
+	height: 28px;
+}
+
+.reviewloop-header p.rl-tagline {
+	margin: 4px 0 0;
+	color: var(--rl-muted);
+	font-size: 13px;
+}
+
+.rl-badge {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: var(--rl-primary-light);
+	color: var(--rl-primary-dark);
+}
+
+.rl-badge.rl-badge-pro {
+	background: #fff4e0;
+	color: #9a6700;
+}
+
+.reviewloop-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.reviewloop-card {
+	background: var(--rl-white);
+	border: 1px solid var(--rl-border);
+	border-radius: 8px;
+	padding: 18px 20px;
+}
+
+.reviewloop-card .rl-stat-number {
+	font-size: 28px;
+	font-weight: 600;
+	color: var(--rl-ink);
+	line-height: 1.2;
+}
+
+.reviewloop-card .rl-stat-label {
+	color: var(--rl-muted);
+	font-size: 13px;
+	margin-top: 4px;
+}
+
+.reviewloop-panel {
+	background: var(--rl-white);
+	border: 1px solid var(--rl-border);
+	border-radius: 8px;
+	padding: 24px;
+	margin-bottom: 20px;
+}
+
+.reviewloop-panel h2 {
+	margin-top: 0;
+	font-size: 16px;
+	color: var(--rl-ink);
+}
+
+.reviewloop-panel h2 .dashicons {
+	color: var(--rl-primary);
+}
+
+.reviewloop-wrap table.widefat th {
+	font-weight: 600;
+}
+
+.reviewloop-wrap .form-table th {
+	width: 220px;
+}
+
+.rl-btn-primary,
+.reviewloop-wrap .button-primary {
+	background: var(--rl-primary) !important;
+	border-color: var(--rl-primary-dark) !important;
+	color: #fff !important;
+	box-shadow: none !important;
+}
+
+.rl-btn-primary:hover,
+.reviewloop-wrap .button-primary:hover {
+	background: var(--rl-primary-dark) !important;
+}
+
+.rl-status {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.rl-status-pending { background: #f0f0f1; color: var(--rl-muted); }
+.rl-status-active,
+.rl-status-sent,
+.rl-status-consented { background: var(--rl-primary-light); color: var(--rl-primary-dark); }
+.rl-status-opted-out,
+.rl-status-failed { background: #fcebea; color: var(--rl-danger); }
+.rl-status-awaiting { background: #fff4e0; color: #9a6700; }
+
+.rl-upgrade-box {
+	border: 1px dashed #f0c36d;
+	background: #fffaf0;
+	border-radius: 8px;
+	padding: 14px 16px;
+	margin: 12px 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.rl-upgrade-box p {
+	margin: 0;
+	color: #6b4e00;
+}
+
+.rl-upgrade-box .button {
+	background: #9a6700;
+	border-color: #9a6700;
+	color: #fff;
+	white-space: nowrap;
+}
+
+.rl-empty-state {
+	text-align: center;
+	padding: 40px 20px;
+	color: var(--rl-muted);
+}
+
+.rl-onboarding {
+	max-width: 720px;
+	margin: 40px auto;
+	background: var(--rl-white);
+	border: 1px solid var(--rl-border);
+	border-radius: 12px;
+	padding: 40px;
+	text-align: center;
+}
+
+.rl-onboarding .rl-logo-large {
+	width: 56px;
+	height: 56px;
+	margin-bottom: 16px;
+}
+
+.rl-onboarding-steps {
+	text-align: left;
+	margin: 24px 0;
+	display: grid;
+	gap: 16px;
+}
+
+.rl-onboarding-step {
+	display: flex;
+	gap: 14px;
+	padding: 16px;
+	background: var(--rl-bg);
+	border-radius: 8px;
+}
+
+.rl-onboarding-step .rl-step-number {
+	flex: 0 0 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: var(--rl-primary);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 13px;
+}
+
+.rl-onboarding-step h3 {
+	margin: 0 0 4px;
+	font-size: 14px;
+}
+
+.rl-onboarding-step p {
+	margin: 0;
+	color: var(--rl-muted);
+	font-size: 13px;
+}
