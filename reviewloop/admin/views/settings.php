@@ -73,6 +73,12 @@ $settings = ReviewLoop_Settings::get_all();
 					</td>
 				</tr>
 				<tr>
+					<th><label for="reply_voice_notes"><?php esc_html_e( 'Your voice/style (optional)', 'reviewloop' ); ?></label></th>
+					<td>
+						<textarea id="reply_voice_notes" name="reply_voice_notes" rows="3" class="large-text" placeholder="<?php esc_attr_e( 'e.g. Friendly and a bit informal, we sign off as \"The Team at...\", we never use exclamation marks twice in a row', 'reviewloop' ); ?>"><?php echo esc_textarea( $settings['reply_voice_notes'] ); ?></textarea>
+					</td>
+				</tr>
+				<tr>
 					<th><?php esc_html_e( 'Auto-approve replies', 'reviewloop' ); ?></th>
 					<td>
 						<label>

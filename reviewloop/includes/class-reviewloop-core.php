@@ -25,6 +25,9 @@ class ReviewLoop_Core {
 		$google_api = new ReviewLoop_Google_Api();
 		$google_api->init();
 
+		$ai_reply = new ReviewLoop_Ai_Reply();
+		$ai_reply->init();
+
 		$cron = new ReviewLoop_Cron();
 		$cron->init();
 

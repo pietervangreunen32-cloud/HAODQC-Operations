@@ -8,8 +8,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$connected = class_exists( 'ReviewLoop_Google_Api' ) && ( new ReviewLoop_Google_Api() )->is_connected();
-$reviews   = $connected && class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::get_list() : array();
+$connected     = class_exists( 'ReviewLoop_Google_Api' ) && ( new ReviewLoop_Google_Api() )->is_connected();
+$reviews       = $connected && class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::get_list() : array();
+$viewing_id    = isset( $_GET['review_id'] ) ? absint( $_GET['review_id'] ) : 0;
+$viewing       = $viewing_id ? ReviewLoop_Review::get( $viewing_id ) : null;
 ?>
 <div class="wrap reviewloop-wrap">
 	<div class="reviewloop-header">
@@ -19,7 +21,31 @@ $reviews   = $connected && class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Revi
 		</div>
 	</div>
 
-	<?php if ( ! $connected ) : ?>
+	<?php if ( $viewing ) : ?>
+		<div class="reviewloop-panel" style="max-width:640px;">
+			<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-reviews' ) ); ?>">&larr; <?php esc_html_e( 'Back to all reviews', 'reviewloop' ); ?></a></p>
+			<h2><?php echo esc_html( $viewing->author_name ); ?> — <?php echo esc_html( str_repeat( '★', (int) $viewing->rating ) ); ?></h2>
+			<p style="background:#f6f7f7;padding:14px;border-radius:6px;"><?php echo esc_html( $viewing->review_text ); ?></p>
+
+			<?php if ( 'posted' === $viewing->reply_status ) : ?>
+				<h3><?php esc_html_e( 'Posted reply', 'reviewloop' ); ?></h3>
+				<p><?php echo esc_html( $viewing->final_reply_text ); ?></p>
+			<?php else : ?>
+				<h3><?php esc_html_e( 'AI-drafted reply', 'reviewloop' ); ?></h3>
+				<form method="post">
+					<?php wp_nonce_field( 'reviewloop_review_action' ); ?>
+					<input type="hidden" name="review_id" value="<?php echo esc_attr( $viewing->id ); ?>">
+					<textarea name="reply_text" rows="5" class="large-text"><?php echo esc_textarea( $viewing->ai_draft_text ); ?></textarea>
+					<p class="description"><?php esc_html_e( 'Edit the draft above if you\'d like, then approve to post it publicly on Google.', 'reviewloop' ); ?></p>
+					<p>
+						<button type="submit" name="reviewloop_action" value="approve_reply" class="button button-primary"><?php esc_html_e( 'Approve & Post', 'reviewloop' ); ?></button>
+						<button type="submit" name="reviewloop_action" value="regenerate_draft" class="button"><?php esc_html_e( 'Regenerate draft', 'reviewloop' ); ?></button>
+						<button type="submit" name="reviewloop_action" value="reject_reply" class="button rl-confirm" data-confirm="<?php esc_attr_e( 'Discard this draft without posting?', 'reviewloop' ); ?>"><?php esc_html_e( 'Reject', 'reviewloop' ); ?></button>
+					</p>
+				</form>
+			<?php endif; ?>
+		</div>
+	<?php elseif ( ! $connected ) : ?>
 		<div class="reviewloop-panel">
 			<div class="rl-empty-state">
 				<p><?php esc_html_e( 'Connect your Google Business Profile to start pulling in reviews.', 'reviewloop' ); ?></p>

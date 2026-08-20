@@ -43,6 +43,7 @@ class ReviewLoop_Settings {
 			'google_token_expires'      => 0,
 			'google_location_name'      => '',
 			'google_connected'          => false,
+			'reply_voice_notes'         => '',
 		);
 	}
 
@@ -58,6 +59,7 @@ class ReviewLoop_Settings {
 		$current['positive_rating_threshold'] = isset( $post['positive_rating_threshold'] ) ? min( 5, max( 1, absint( $post['positive_rating_threshold'] ) ) ) : $current['positive_rating_threshold'];
 		$current['delete_data_on_uninstall']  = ! empty( $post['delete_data_on_uninstall'] );
 		$current['anthropic_api_key']         = isset( $post['anthropic_api_key'] ) ? sanitize_text_field( wp_unslash( $post['anthropic_api_key'] ) ) : $current['anthropic_api_key'];
+		$current['reply_voice_notes']         = isset( $post['reply_voice_notes'] ) ? sanitize_textarea_field( wp_unslash( $post['reply_voice_notes'] ) ) : $current['reply_voice_notes'];
 
 		if ( ReviewLoop_License::is_pro_active() ) {
 			$current['woocommerce_auto_hook'] = ! empty( $post['woocommerce_auto_hook'] );

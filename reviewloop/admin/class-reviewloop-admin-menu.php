@@ -102,6 +102,15 @@ class ReviewLoop_Admin_Menu {
 			case 'opt_out':
 				$this->handle_customer_action( 'opt_out' );
 				break;
+			case 'approve_reply':
+				$this->handle_approve_reply();
+				break;
+			case 'reject_reply':
+				$this->handle_reject_reply();
+				break;
+			case 'regenerate_draft':
+				$this->handle_regenerate_draft();
+				break;
 			case 'complete_onboarding':
 				check_admin_referer( 'reviewloop_onboarding' );
 				$settings = get_option( 'reviewloop_settings', array() );
@@ -155,6 +164,56 @@ class ReviewLoop_Admin_Menu {
 		exit;
 	}
 
+	private function handle_approve_reply() {
+		check_admin_referer( 'reviewloop_review_action' );
+
+		$review_id = isset( $_POST['review_id'] ) ? absint( $_POST['review_id'] ) : 0;
+		$text      = isset( $_POST['reply_text'] ) ? sanitize_textarea_field( wp_unslash( $_POST['reply_text'] ) ) : '';
+
+		$redirect_args = array( 'page' => 'reviewloop-reviews', 'review_id' => $review_id );
+
+		if ( $review_id && $text ) {
+			$ai     = new ReviewLoop_Ai_Reply();
+			$result = $ai->approve_and_post( $review_id, $text );
+			$redirect_args['rl_msg'] = is_wp_error( $result ) ? 'reply_failed' : 'reply_posted';
+		}
+
+		wp_safe_redirect( add_query_arg( $redirect_args, admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	private function handle_reject_reply() {
+		check_admin_referer( 'reviewloop_review_action' );
+
+		$review_id = isset( $_POST['review_id'] ) ? absint( $_POST['review_id'] ) : 0;
+		if ( $review_id ) {
+			ReviewLoop_Review::mark_rejected( $review_id );
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'reviewloop-reviews' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	private function handle_regenerate_draft() {
+		check_admin_referer( 'reviewloop_review_action' );
+
+		$review_id = isset( $_POST['review_id'] ) ? absint( $_POST['review_id'] ) : 0;
+
+		if ( $review_id ) {
+			$review = ReviewLoop_Review::get( $review_id );
+			if ( $review ) {
+				$ai    = new ReviewLoop_Ai_Reply();
+				$draft = $ai->draft_reply( $review );
+				if ( ! is_wp_error( $draft ) ) {
+					ReviewLoop_Review::save_ai_draft( $review_id, $draft );
+				}
+			}
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'reviewloop-reviews', 'review_id' => $review_id ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	private function handle_save_settings() {
 		check_admin_referer( 'reviewloop_save_settings' );
 		ReviewLoop_Settings::save_from_admin_form( $_POST );
@@ -175,6 +234,14 @@ class ReviewLoop_Admin_Menu {
 
 		if ( isset( $_GET['rl_msg'] ) && 'saved' === $_GET['rl_msg'] ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'reviewloop' ) . '</p></div>';
+		}
+
+		if ( isset( $_GET['rl_msg'] ) && 'reply_posted' === $_GET['rl_msg'] ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Reply posted to Google.', 'reviewloop' ) . '</p></div>';
+		}
+
+		if ( isset( $_GET['rl_msg'] ) && 'reply_failed' === $_GET['rl_msg'] ) {
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Could not post the reply to Google. Please check your connection in Settings and try again.', 'reviewloop' ) . '</p></div>';
 		}
 
 		$error_key = 'reviewloop_admin_error_' . get_current_user_id();
