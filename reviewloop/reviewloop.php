@@ -3,7 +3,7 @@
  * Plugin Name:       ReviewLoop
  * Plugin URI:        https://reviewloop.app
  * Description:       Automatically request Google reviews from customers without spamming them, and get AI-drafted replies to post once reviews come in. Built for small businesses.
- * Version:           1.0.0
+ * Version:           1.4.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            ReviewLoop
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'REVIEWLOOP_VERSION', '1.0.0' );
+define( 'REVIEWLOOP_VERSION', '1.4.0' );
 define( 'REVIEWLOOP_PLUGIN_FILE', __FILE__ );
 define( 'REVIEWLOOP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'REVIEWLOOP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

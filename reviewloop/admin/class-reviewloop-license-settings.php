@@ -34,6 +34,13 @@ class ReviewLoop_License_Settings {
 			exit;
 		}
 
+		if ( 'save_woocommerce_toggle' === $action ) {
+			check_admin_referer( 'reviewloop_woocommerce_toggle' );
+			ReviewLoop_Settings::save_woocommerce_toggle( $_POST );
+			wp_safe_redirect( add_query_arg( array( 'page' => 'reviewloop-settings', 'rl_msg' => 'saved' ), admin_url( 'admin.php' ) ) );
+			exit;
+		}
+
 		if ( 'deactivate_license' === $action ) {
 			check_admin_referer( 'reviewloop_license_action' );
 			ReviewLoop_License::deactivate();
@@ -79,8 +86,8 @@ class ReviewLoop_License_Settings {
 						<th><?php esc_html_e( 'WooCommerce auto-hook', 'reviewloop' ); ?></th>
 						<td>
 							<form method="post">
-								<?php wp_nonce_field( 'reviewloop_save_settings' ); ?>
-								<input type="hidden" name="reviewloop_action" value="save_settings">
+								<?php wp_nonce_field( 'reviewloop_woocommerce_toggle' ); ?>
+								<input type="hidden" name="reviewloop_action" value="save_woocommerce_toggle">
 								<label>
 									<input type="checkbox" name="woocommerce_auto_hook" value="1" <?php checked( ! empty( $settings['woocommerce_auto_hook'] ) ); ?> <?php echo class_exists( 'WooCommerce' ) ? '' : 'disabled'; ?>>
 									<?php esc_html_e( 'Automatically add customers to the pipeline when a WooCommerce order is completed', 'reviewloop' ); ?>

@@ -63,14 +63,28 @@ class ReviewLoop_Settings {
 		$current['anthropic_api_key']         = isset( $post['anthropic_api_key'] ) ? sanitize_text_field( wp_unslash( $post['anthropic_api_key'] ) ) : $current['anthropic_api_key'];
 		$current['reply_voice_notes']         = isset( $post['reply_voice_notes'] ) ? sanitize_textarea_field( wp_unslash( $post['reply_voice_notes'] ) ) : $current['reply_voice_notes'];
 
-		if ( ReviewLoop_License::is_pro_active() ) {
-			$current['woocommerce_auto_hook']         = ! empty( $post['woocommerce_auto_hook'] );
-			$current['woocommerce_consent_attested']  = ! empty( $post['woocommerce_consent_attested'] );
-		}
-
 		update_option( 'reviewloop_settings', $current );
 
 		return $current;
+	}
+
+	/**
+	 * Separate from save_from_admin_form() on purpose: this handles a
+	 * standalone mini-form (the WooCommerce toggle in the License panel)
+	 * that doesn't include every checkbox field, so it must only ever
+	 * touch its own two keys rather than reset absent checkboxes to false.
+	 */
+	public static function save_woocommerce_toggle( $post ) {
+		if ( ! ReviewLoop_License::is_pro_active() ) {
+			return self::get_all();
+		}
+
+		return self::update(
+			array(
+				'woocommerce_auto_hook'        => ! empty( $post['woocommerce_auto_hook'] ),
+				'woocommerce_consent_attested' => ! empty( $post['woocommerce_consent_attested'] ),
+			)
+		);
 	}
 
 	public static function save_google_config( $post ) {
