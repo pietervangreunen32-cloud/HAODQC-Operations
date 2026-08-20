@@ -147,3 +147,19 @@
 	content: "✓ ";
 	color: #3D4EDB;
 }
+
+.bookflow-status-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: 4px;
+}
+
+.bookflow-status-on {
+	background: #1E9E62;
+}
+
+.bookflow-status-off {
+	background: #B0B4C1;
+}

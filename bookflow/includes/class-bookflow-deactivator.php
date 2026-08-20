@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class BookFlow_Deactivator {
 
 	public static function deactivate() {
-		foreach ( array( 'bookflow_wc_catalog_sync', 'bookflow_license_recheck' ) as $hook ) {
+		foreach ( array( 'bookflow_wc_catalog_sync', 'bookflow_license_recheck', 'bookflow_mark_completed_appointments' ) as $hook ) {
 			$timestamp = wp_next_scheduled( $hook );
 			if ( $timestamp ) {
 				wp_unschedule_event( $timestamp, $hook );

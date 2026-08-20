@@ -40,6 +40,7 @@ class BookFlow {
 		require_once $dir . 'includes/class-bookflow-woocommerce-sync.php';
 		require_once $dir . 'includes/class-bookflow-pricing.php';
 		require_once $dir . 'includes/class-bookflow-license.php';
+		require_once $dir . 'includes/class-bookflow-reviewloop-bridge.php';
 		require_once $dir . 'includes/class-bookflow-rest.php';
 
 		// Admin.
@@ -59,6 +60,7 @@ class BookFlow {
 		( new BookFlow_Notifications() )->init_hooks();
 		( new BookFlow_Waitlist() )->init_hooks();
 		( new BookFlow_WooCommerce_Sync() )->init_hooks();
+		( new BookFlow_ReviewLoop_Bridge() )->init_hooks();
 		( new BookFlow_REST() )->init_hooks();
 		( new BookFlow_Welcome_Screen() )->init_hooks();
 

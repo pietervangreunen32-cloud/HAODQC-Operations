@@ -1,5 +1,33 @@
 # BookFlow Changelog
 
+## 1.5.0 — Phase 6: ReviewLoop integration hook
+
+**What's new**
+
+- An hourly housekeeping pass now marks any confirmed appointment
+  'completed' once its fitting slot has ended (shown on the
+  Appointments list; cancel is no longer offered on a completed
+  appointment).
+- On the Pro plan, completing an appointment fires a plain WordPress
+  action, `bookflow_appointment_completed( $appointment_id,
+  $customer_name, $customer_email, $meta )`, so ReviewLoop (or any other
+  plugin) can hook in and add the customer to its own sequence — no
+  hard dependency, no error if ReviewLoop isn't installed.
+- Admin → Dashboard now has an "Integrations" panel showing whether
+  ReviewLoop and WooCommerce are detected, and whether the current plan
+  includes the ReviewLoop hand-off.
+
+**Assumption flagged for review:** this build was written without
+access to ReviewLoop's actual source (it's referenced in the brief as a
+separate plugin), so the *reliable* integration point is the
+`bookflow_appointment_completed` action above — that's the real
+contract. Alongside it, BookFlow also makes one best-effort call to a
+guessed convenience function, `reviewloop_add_customer( $email, $name,
+$context )`, if it happens to exist. That function name is a guess and
+should be corrected to match ReviewLoop's real "add customer" entry
+point once that plugin's code is available (see the docblock in
+`includes/class-bookflow-reviewloop-bridge.php`).
+
 ## 1.4.0 — Phase 5: Licensing/tier gating + multi-currency billing
 
 **What's new**

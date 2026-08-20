@@ -32,6 +32,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</a>
 	</div>
 
+	<h2><?php esc_html_e( 'Integrations', 'bookflow' ); ?></h2>
+	<table class="widefat" style="max-width:600px;margin-bottom:2rem;">
+		<tbody>
+			<tr>
+				<td><?php esc_html_e( 'ReviewLoop', 'bookflow' ); ?></td>
+				<td>
+					<?php if ( ! $reviewloop_active ) : ?>
+						<span class="bookflow-status-dot bookflow-status-off"></span> <?php esc_html_e( 'Not installed', 'bookflow' ); ?>
+					<?php elseif ( ! $reviewloop_licensed ) : ?>
+						<span class="bookflow-status-dot bookflow-status-off"></span>
+						<?php esc_html_e( 'Detected, but this plan doesn\'t include the integration.', 'bookflow' ); ?>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookflow-license' ) ); ?>"><?php esc_html_e( 'Upgrade to Pro', 'bookflow' ); ?></a>
+					<?php else : ?>
+						<span class="bookflow-status-dot bookflow-status-on"></span> <?php esc_html_e( 'Connected — completed appointments are automatically handed off.', 'bookflow' ); ?>
+					<?php endif; ?>
+				</td>
+			</tr>
+			<tr>
+				<td><?php esc_html_e( 'WooCommerce', 'bookflow' ); ?></td>
+				<td>
+					<?php if ( class_exists( 'WooCommerce' ) ) : ?>
+						<span class="bookflow-status-dot bookflow-status-on"></span> <?php esc_html_e( 'Active', 'bookflow' ); ?>
+					<?php else : ?>
+						<span class="bookflow-status-dot bookflow-status-off"></span> <?php esc_html_e( 'Not installed (needed for deposits or catalog sync)', 'bookflow' ); ?>
+					<?php endif; ?>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
 	<h2><?php esc_html_e( 'Next 7 days', 'bookflow' ); ?></h2>
 
 	<?php if ( empty( $upcoming ) ) : ?>

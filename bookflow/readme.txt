@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,12 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.5.0 =
+* Phase 6: appointments auto-complete once their fitting slot has
+  passed, and (Pro plan) hand off to ReviewLoop via a plain WordPress
+  action hook — optional, no hard dependency. Admin -> Dashboard shows
+  integration status.
 
 = 1.4.0 =
 * Phase 5: real license-key activation and tier gating (Free/Starter/

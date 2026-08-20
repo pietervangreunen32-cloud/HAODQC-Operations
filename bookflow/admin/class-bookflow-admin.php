@@ -58,7 +58,9 @@ class BookFlow_Admin {
 
 	public function render_dashboard_page() {
 		$this->guard_capability();
-		$upcoming = BookFlow_DB_Appointments::get_range( current_time( 'mysql' ), gmdate( 'Y-m-d H:i:s', strtotime( '+7 days' ) ), 'confirmed' );
+		$upcoming            = BookFlow_DB_Appointments::get_range( current_time( 'mysql' ), gmdate( 'Y-m-d H:i:s', strtotime( '+7 days' ) ), 'confirmed' );
+		$reviewloop_active   = BookFlow_ReviewLoop_Bridge::is_reviewloop_active();
+		$reviewloop_licensed = BookFlow_License::tier_includes( 'reviewloop' );
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/dashboard.php';
 	}
 

@@ -89,7 +89,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</td>
 						<td><?php echo esc_html( ucfirst( $appointment->source ) ); ?></td>
 						<td>
-							<?php if ( 'cancelled' !== $appointment->status ) : ?>
+							<?php if ( ! in_array( $appointment->status, array( 'cancelled', 'completed' ), true ) ) : ?>
 								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Cancel this appointment?', 'bookflow' ) ); ?>');">
 									<?php wp_nonce_field( 'bookflow_cancel_appointment' ); ?>
 									<input type="hidden" name="action" value="bookflow_cancel_appointment" />
