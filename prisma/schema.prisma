@@ -1,0 +1,89 @@
+// TruckScreen data model.
+//
+// Local development uses SQLite (zero setup, file-based). For production,
+// point DATABASE_URL at a Postgres database (e.g. Supabase) and change
+// `provider = "sqlite"` below to `provider = "postgresql"` — the schema
+// itself is written to work on both.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Theme {
+  NEON
+  CHALKBOARD
+  MINIMALIST
+  COLORFUL
+}
+
+enum Orientation {
+  LANDSCAPE
+  PORTRAIT
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  passwordHash        String
+  name                String?
+  createdAt           DateTime             @default(now())
+  trucks              Truck[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Truck {
+  id            String       @id @default(cuid())
+  ownerId       String
+  owner         User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name          String
+  slug          String       @unique
+  theme         Theme        @default(NEON)
+  orientation   Orientation  @default(LANDSCAPE)
+  logoUrl       String?
+  specialText   String?
+  specialActive Boolean      @default(false)
+  onboardedAt   DateTime?
+  viewCount     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  categories    MenuCategory[]
+}
+
+model MenuCategory {
+  id        String     @id @default(cuid())
+  truckId   String
+  truck     Truck      @relation(fields: [truckId], references: [id], onDelete: Cascade)
+  name      String
+  order     Int        @default(0)
+  items     MenuItem[]
+  createdAt DateTime   @default(now())
+}
+
+model MenuItem {
+  id          String       @id @default(cuid())
+  categoryId  String
+  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  photoUrl    String?
+  soldOut     Boolean      @default(false)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
