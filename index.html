@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>30 Seconds — The Word Game</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- SCREEN: HOME -->
+  <section class="screen active" id="screen-home">
+    <div class="brand">
+      <h1>30<span>Seconds</span></h1>
+      <p class="tagline">The fast-talking, guess-it-quick word game</p>
+    </div>
+
+    <div class="card">
+      <h2>Choose a version</h2>
+      <div class="mode-grid">
+        <button class="mode-card" data-mode="adult">
+          <span class="mode-emoji">🎩</span>
+          <span class="mode-title">Adult</span>
+          <span class="mode-desc">Broader vocabulary, pop culture, trickier clues</span>
+        </button>
+        <button class="mode-card" data-mode="junior">
+          <span class="mode-emoji">🧸</span>
+          <span class="mode-title">Junior</span>
+          <span class="mode-desc">Easy, kid-friendly words for younger players</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>How to play</h2>
+      <ol class="rules-list">
+        <li>Split into 2 or more teams.</li>
+        <li>On your turn, one player describes 5 words to their team — without saying the word itself, part of it, or a "sounds like" rhyme.</li>
+        <li>You have <strong>30 seconds</strong>. Tap ✓ when your team guesses correctly, or ✗ to skip a word.</li>
+        <li>Score a point for every word your team guesses. First team to the target score wins!</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- SCREEN: SETUP -->
+  <section class="screen" id="screen-setup">
+    <button class="back-btn" data-target="screen-home">← Back</button>
+    <h2 id="setup-heading">Set up your game</h2>
+
+    <div class="card">
+      <label class="field-label">Number of teams</label>
+      <div class="stepper">
+        <button id="teams-minus" class="stepper-btn">−</button>
+        <span id="teams-count">2</span>
+        <button id="teams-plus" class="stepper-btn">+</button>
+      </div>
+
+      <div id="team-names" class="team-names"></div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Winning score</label>
+      <div class="target-grid" id="target-grid">
+        <button class="target-btn" data-target-score="20">20</button>
+        <button class="target-btn selected" data-target-score="30">30</button>
+        <button class="target-btn" data-target-score="40">40</button>
+        <button class="target-btn" data-target-score="50">50</button>
+      </div>
+    </div>
+
+    <button class="primary-btn" id="start-game-btn">Start Game 🚀</button>
+  </section>
+
+  <!-- SCREEN: GAME -->
+  <section class="screen" id="screen-game">
+    <div class="scoreboard" id="scoreboard"></div>
+
+    <div class="turn-banner">
+      <span id="turn-team-name">Team 1</span>'s turn
+    </div>
+
+    <div class="timer-wrap">
+      <svg class="timer-ring" viewBox="0 0 120 120">
+        <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+        <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="54"></circle>
+      </svg>
+      <div class="timer-number" id="timer-number">30</div>
+    </div>
+
+    <div id="pre-turn" class="pre-turn">
+      <p>Ready when you are — describe the 5 words without saying them!</p>
+      <button class="primary-btn" id="begin-turn-btn">Start My Turn</button>
+    </div>
+
+    <div id="word-panel" class="word-panel hidden">
+      <ul class="word-list" id="word-list"></ul>
+    </div>
+
+    <div id="post-turn" class="post-turn hidden">
+      <h3>Time's up!</h3>
+      <p><span id="turn-score">0</span> word(s) guessed this turn</p>
+      <button class="primary-btn" id="next-turn-btn">Next Team →</button>
+    </div>
+  </section>
+
+  <!-- SCREEN: WIN -->
+  <section class="screen" id="screen-win">
+    <div class="win-card">
+      <h1 class="win-title">🎉 <span id="winner-name">Team 1</span> wins!</h1>
+      <div id="final-scores" class="final-scores"></div>
+      <button class="primary-btn" id="play-again-btn">Play Again</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="words.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
