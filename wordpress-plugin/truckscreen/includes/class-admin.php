@@ -31,7 +31,7 @@ class TruckScreen_Admin {
 			'edit_posts',
 			'truckscreen',
 			array( __CLASS__, 'render_menu_page' ),
-			'dashicons-store',
+			self::menu_icon(),
 			26
 		);
 
@@ -81,6 +81,20 @@ class TruckScreen_Admin {
 			'truckscreen-setup',
 			array( __CLASS__, 'render_setup_page' )
 		);
+	}
+
+	/**
+	 * Builds the data URI WordPress needs for a custom SVG admin-menu icon.
+	 * The SVG itself is a single flat color — WordPress recolors it via CSS
+	 * to match the current admin color scheme, so it shouldn't carry any
+	 * color of its own.
+	 */
+	private static function menu_icon() {
+		$path = TRUCKSCREEN_DIR . 'assets/icon-menu.svg';
+		if ( ! file_exists( $path ) ) {
+			return 'dashicons-store';
+		}
+		return 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	}
 
 	public static function add_settings_link( $links ) {
