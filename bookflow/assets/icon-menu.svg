@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+	<!-- WP admin menu icon: kept as a plain black line-art shape on a
+	     transparent background (no fill except thin strokes) so
+	     WordPress can recolor it via its own admin-color-scheme mask. -->
+	<rect x="2.5" y="4.5" width="15" height="13" rx="2" fill="none" stroke="#000000" stroke-width="1.5"/>
+	<line x1="6" y1="2.5" x2="6" y2="6.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+	<line x1="14" y1="2.5" x2="14" y2="6.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round"/>
+	<line x1="2.5" y1="8.5" x2="17.5" y2="8.5" stroke="#000000" stroke-width="1.2"/>
+	<path d="M6 13 L9 16 L14 10" fill="none" stroke="#000000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -32,7 +32,7 @@ class BookFlow_Admin {
 			'manage_options',
 			'bookflow',
 			array( $this, 'render_dashboard_page' ),
-			'dashicons-calendar-alt',
+			self::get_menu_icon(),
 			26
 		);
 
@@ -43,6 +43,21 @@ class BookFlow_Admin {
 		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
 		add_submenu_page( 'bookflow', __( 'License', 'bookflow' ), __( 'License', 'bookflow' ), 'manage_options', 'bookflow-license', array( $this, 'render_license_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
+	}
+
+	/**
+	 * WordPress recolors an SVG data-URI menu icon to match the active
+	 * admin color scheme automatically (it uses the shape as a mask), so
+	 * assets/icon-menu.svg is a plain black-on-transparent line icon —
+	 * see that file's own comment. Falls back to a stock Dashicon if the
+	 * file is ever missing, so a stray deploy issue never breaks the menu.
+	 */
+	private static function get_menu_icon() {
+		$path = BOOKFLOW_PLUGIN_DIR . 'assets/icon-menu.svg';
+		if ( ! file_exists( $path ) ) {
+			return 'dashicons-calendar-alt';
+		}
+		return 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	}
 
 	public function maybe_enqueue_assets( $hook ) {

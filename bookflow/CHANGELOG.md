@@ -1,5 +1,15 @@
 # BookFlow Changelog
 
+## 1.5.1 — Brand icon
+
+- Added the actual brand icon (a calendar shape with a flowing checkmark,
+  indigo `#3D4EDB`) as `assets/icon.svg` plus 128×128/256×256 PNG
+  rasters for general use, and wired a monochrome line-art version
+  (`assets/icon-menu.svg`) into the WP admin menu as a proper SVG data
+  URI — replacing the placeholder Dashicon used since Phase 1. WordPress
+  recolors this automatically to match each admin's color scheme, the
+  same way built-in menu icons work.
+
 ## 1.5.0 — Phase 6: ReviewLoop integration hook
 
 **What's new**
