@@ -13,7 +13,7 @@ export default function SignupPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-slate-900">Set up your truck</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Set up your menu display</h1>
         <p className="mt-1 text-sm text-slate-500">
           Free to start. Takes about a minute — no credit card needed.
         </p>
@@ -24,8 +24,13 @@ export default function SignupPage() {
             <Input id="name" name="name" required placeholder="Jane Smith" />
           </div>
           <div>
-            <Label htmlFor="truckName">Food truck name</Label>
-            <Input id="truckName" name="truckName" required placeholder="Joe's Tacos" />
+            <Label htmlFor="truckName">Business name</Label>
+            <Input
+              id="truckName"
+              name="truckName"
+              required
+              placeholder="Joe's Tacos or Mama Rosa's Kitchen"
+            />
           </div>
           <div>
             <Label htmlFor="email">Email</Label>

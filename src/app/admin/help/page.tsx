@@ -17,7 +17,7 @@ const OPTIONS = [
       "Any old Android phone or tablet works great — it doesn't need a SIM card, just Wi-Fi.",
       "Open Chrome (or any browser) and type in your display link.",
       'Tap the menu (⋮) and look for "Add to Home Screen" — this creates an app icon that opens straight to full screen.',
-      "Prop the phone/tablet up facing outward on your truck (a cheap phone mount or stand works well).",
+      "Prop the phone/tablet up wherever you want it seen — a cheap phone mount or stand works well.",
       "Turn off auto-lock / screen timeout in the phone's Settings so it doesn't go to sleep (Settings → Display → Screen timeout → set to \"Never\").",
     ],
   },
@@ -74,7 +74,7 @@ export default function HelpPage() {
       <Card>
         <h2 className="mb-2 font-bold text-slate-900">Tips</h2>
         <ul className="list-disc space-y-1.5 pl-4 text-sm text-slate-600">
-          <li>Make sure the device is on Wi-Fi with a signal reachable at your truck.</li>
+          <li>Make sure the device is on Wi-Fi with a good signal wherever the screen is.</li>
           <li>If the screen briefly loses internet, it will keep showing your last saved menu instead of going blank.</li>
           <li>You can update your menu from your phone any time — changes appear on the screen within seconds.</li>
           <li>If a device&apos;s screen turns off automatically, look for a &quot;screen timeout&quot; or &quot;sleep&quot; setting and set it to never (or plug into &quot;always on&quot; power settings if available).</li>

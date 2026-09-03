@@ -21,16 +21,15 @@ export default function Home() {
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-5xl px-6 py-16 text-center">
         <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-orange-600">
-          For food truck owners
+          For food trucks and restaurants
         </p>
         <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-6xl">
           Turn any screen into a{" "}
           <span className="text-orange-600">live menu board</span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600">
-          Manage your menu from your phone. It updates on your truck&apos;s screen in
-          seconds — sold out items, daily specials, new prices, all without touching
-          the TV.
+          Manage your menu from your phone. It updates on your screen in seconds —
+          sold out items, daily specials, new prices, all without touching the TV.
         </p>
         <div className="mt-8 flex justify-center gap-3">
           <Link href="/signup">

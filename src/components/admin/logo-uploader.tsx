@@ -14,7 +14,7 @@ export function LogoUploader({ initialLogoUrl }: { initialLogoUrl: string | null
   return (
     <Card>
       <h2 className="mb-1 text-lg font-bold text-slate-900">Logo (optional)</h2>
-      <p className="mb-4 text-sm text-slate-500">Shown next to your truck name on the display.</p>
+      <p className="mb-4 text-sm text-slate-500">Shown next to your business name on the display.</p>
       <div className="flex items-center gap-4">
         {logoUrl ? (
           <Image src={logoUrl} alt="" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />

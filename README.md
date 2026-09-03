@@ -1,9 +1,26 @@
 # TruckScreen
 
-A digital menu display for food trucks: owners manage their menu from a
-phone-friendly dashboard, and a full-screen "display" page — opened on a
-TV, Fire Stick, or old tablet mounted on the truck — shows the live menu
-and updates itself automatically.
+A digital menu display for food trucks and restaurants: owners manage
+their menu from a phone-friendly dashboard, and a full-screen "display"
+page — opened on any TV, Fire Stick, or old tablet — shows the live menu
+and updates itself automatically. It's multi-tenant: any number of food
+trucks and restaurants can sign up, each with their own account, menu,
+and display link — nobody's data is visible to anyone else.
+
+## How it actually gets on a TV (no app, no USB drive)
+
+The display page is a normal, public webpage — nothing is downloaded or
+installed onto the TV. Any device with a web browser can open it and it
+will keep updating live, the same way a webpage on your laptop updates
+when you refresh it — except this one refreshes itself automatically.
+That's why a $30 Fire Stick, an old Android phone/tablet propped up, a
+cheap Android TV box, or a smart TV's built-in browser all work: they're
+just opening a link, the same as opening any other website. A USB drive
+would only be a frozen snapshot of the menu at the moment you copied it
+— it wouldn't reflect a sold-out toggle or a price change made five
+minutes later, which defeats the entire point of the product. This is
+also how virtually every commercial digital-signage product works
+(Screenly, Yodeck, Rise Vision, etc.) — a URL, opened in a browser.
 
 ## The stack, in plain English
 

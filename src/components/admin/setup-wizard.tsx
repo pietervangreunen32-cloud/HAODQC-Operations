@@ -73,8 +73,8 @@ export function SetupWizard({
         <Card>
           <h1 className="mb-1 text-xl font-bold text-slate-900">Your display is ready</h1>
           <p className="mb-4 text-sm text-slate-500">
-            Open this link on the screen mounted on your truck — it updates automatically
-            whenever you change your menu.
+            Open this link on the screen you want your menu displayed on — it updates
+            automatically whenever you change your menu.
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row">
             {/* eslint-disable-next-line @next/next/no-img-element */}

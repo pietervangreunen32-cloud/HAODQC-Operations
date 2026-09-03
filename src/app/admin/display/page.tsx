@@ -21,7 +21,7 @@ export default async function DisplayLinkPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Display link &amp; QR code</h1>
         <p className="text-sm text-slate-500">
-          Open this link on the screen mounted on your truck.
+          Open this link on the screen you want your menu displayed on.
         </p>
       </div>
 
