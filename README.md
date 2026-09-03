@@ -1,4 +1,4 @@
-# TruckScreen
+# MenuScreen
 
 A digital menu display for food trucks and restaurants: owners manage
 their menu from a phone-friendly dashboard, and a full-screen "display"

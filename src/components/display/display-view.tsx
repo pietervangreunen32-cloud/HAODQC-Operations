@@ -7,7 +7,7 @@ import { THEME_CLASSES, ThemeName } from "@/lib/themes";
 import { formatPrice, cn } from "@/lib/utils";
 
 const POLL_INTERVAL_MS = 20_000;
-const CACHE_KEY_PREFIX = "truckscreen:display:";
+const CACHE_KEY_PREFIX = "menuscreen:display:";
 
 export function DisplayView({
   slug,

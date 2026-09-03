@@ -1,14 +1,14 @@
-# TruckScreen — WordPress Plugin
+# MenuScreen — WordPress Plugin
 
-A WordPress plugin version of TruckScreen: each food truck owner installs
-it on their own WordPress site and manages their menu from the familiar
-wp-admin dashboard. This is a separate, alternative build from the
-Next.js app at the repo root — see that app's README for the standalone
-SaaS version.
+A WordPress plugin version of MenuScreen: each food truck or restaurant
+owner installs it on their own WordPress site and manages their menu
+from the familiar wp-admin dashboard. This is a separate, alternative
+build from the Next.js app at the repo root — see that app's README for
+the standalone multi-business version.
 
 ## Install
 
-1. Copy (or zip and upload) the `truckscreen/` folder into your site's
+1. Copy (or zip and upload) the `menuscreen/` folder into your site's
    `wp-content/plugins/` directory.
 2. Activate it under Plugins in wp-admin.
 3. You'll land on the setup wizard automatically — add a few items, pick
@@ -17,31 +17,31 @@ SaaS version.
 ## What's here
 
 ```
-truckscreen/
-  truckscreen.php          Main plugin file (header, bootstrap)
-  uninstall.php             Cleans up on delete (not on deactivate)
-  readme.txt                 WordPress.org-format plugin readme
-  includes/                  PHP classes: post type, settings, admin,
-                              AJAX handlers, REST endpoint, display routing
-  admin/                     wp-admin pages, CSS/JS, vendored QR code lib
-  public/                    The public, no-login, full-screen display
-                              page: template, CSS (4 themes), polling JS
+menuscreen/
+  menuscreen.php            Main plugin file (header, bootstrap)
+  uninstall.php              Cleans up on delete (not on deactivate)
+  readme.txt                  WordPress.org-format plugin readme
+  includes/                   PHP classes: post type, settings, admin,
+                               AJAX handlers, REST endpoint, display routing
+  admin/                      wp-admin pages, CSS/JS, vendored QR code lib
+  public/                     The public, no-login, full-screen display
+                               page: template, CSS (4 themes), polling JS
 ```
 
 ## How it's organized (plain English)
 
-* **Menu items** are a WordPress custom post type (`truckscreen_item`) —
+* **Menu items** are a WordPress custom post type (`menuscreen_item`) —
   editing one uses WordPress's normal, familiar "Add New Post" screen
   (title = item name, content = description, featured image = photo),
   plus a small "Price & Availability" box for price and sold-out.
 * **Categories** (Mains, Sides, Drinks, ...) are a custom taxonomy,
   exactly like WordPress's built-in Categories, with your own WordPress
   account managing them.
-* **Settings** (theme, orientation, truck name, logo, today's special)
-  live in a single options row, edited from Theme & Look.
-* **The public display** lives at `/truckscreen-display/` (or, on a site
+* **Settings** (theme, orientation, business name, logo, today's
+  special) live in a single options row, edited from Theme & Look.
+* **The public display** lives at `/menuscreen-display/` (or, on a site
   still using WordPress's default "Plain" permalinks, at
-  `/?truckscreen_display=1` — the plugin detects which one your site
+  `/?menuscreen_display=1` — the plugin detects which one your site
   needs and always links to the one that works) and polls a small REST
   endpoint every 20 seconds for changes, with no login required.
 
@@ -53,7 +53,7 @@ SQLite database integration, both from their GitHub repos, served with
 PHP's built-in server) and actually:
 
 * Installed WordPress, activated the plugin, and confirmed
-  `wp_options.active_plugins` lists `truckscreen/truckscreen.php` —
+  `wp_options.active_plugins` lists `menuscreen/menuscreen.php` —
   exactly the check from the WordPress.org "Plugin Requirements" lesson.
 * Deactivated and reactivated it and confirmed that array empties and
   refills correctly, with the starter categories seeded once (not
@@ -64,7 +64,7 @@ PHP's built-in server) and actually:
   or fatal errors from the plugin's code.
 * Published a real menu item through the native post editor, toggled it
   sold-out through the AJAX endpoint, added a category, and changed the
-  theme/orientation/truck name — and confirmed each change showed up
+  theme/orientation/business name — and confirmed each change showed up
   correctly in the public REST endpoint the display page reads from.
 * Confirmed the AJAX endpoints correctly reject a bad nonce (403) and an
   unauthenticated request.
@@ -73,11 +73,19 @@ PHP's built-in server) and actually:
   WordPress's default. It now falls back automatically so the link
   works immediately on a fresh install, with no settings change needed.
 
+The plugin was originally built and tested under the name TruckScreen,
+then renamed end-to-end (folder, files, PHP classes/constants, post
+type, taxonomy, option keys, AJAX actions, REST namespace, CSS/JS,
+text domain) to MenuScreen and re-verified against that same test
+instance — reactivated cleanly, no errors, all admin screens and the
+public display still working.
+
 ## Assumptions / scope notes
 
-- **One menu per WordPress site**, matching how a single food truck
-  would install this on their own site (see the earlier discussion on
-  multi-tenancy — this is the "single-truck plugin" option).
+- **One menu per WordPress site**, matching how a single food truck or
+  restaurant would install this on their own site (see the earlier
+  discussion on multi-tenancy — this is the "single-business plugin"
+  option; the Next.js app is the one built for many businesses at once).
 - **Currency is USD** in the price formatting — flag if you need a
   different one; it's a one-line change.
 - **QR code** is generated entirely in the browser using a small,

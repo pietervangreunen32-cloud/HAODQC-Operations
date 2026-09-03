@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TruckScreen — Digital menu displays for food trucks & restaurants",
+  title: "MenuScreen — Digital menu displays for food trucks & restaurants",
   description:
     "Turn any TV or old tablet into a live, editable menu display for your food truck or restaurant. No app installs, no special hardware.",
 };
