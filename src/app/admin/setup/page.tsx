@@ -1,12 +1,12 @@
 import QRCode from "qrcode";
-import { requireTruckWithMenu } from "@/lib/current-truck";
+import { requireBusinessWithMenu } from "@/lib/current-business";
 import { SetupWizard } from "@/components/admin/setup-wizard";
 
 export default async function SetupPage() {
-  const { truck } = await requireTruckWithMenu();
+  const { business } = await requireBusinessWithMenu();
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const displayUrl = `${appUrl}/display/${truck.slug}`;
+  const displayUrl = `${appUrl}/display/${business.slug}`;
   const qrDataUrl = await QRCode.toDataURL(displayUrl, {
     width: 240,
     margin: 1,
@@ -16,9 +16,9 @@ export default async function SetupPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <SetupWizard
-        categories={truck.categories}
-        theme={truck.theme}
-        orientation={truck.orientation}
+        categories={business.categories}
+        theme={business.theme}
+        orientation={business.orientation}
         displayUrl={displayUrl}
         qrDataUrl={qrDataUrl}
       />

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getDisplayData(slug: string) {
-  const truck = await prisma.truck.findUnique({
+  const business = await prisma.business.findUnique({
     where: { slug },
     include: {
       categories: {
@@ -10,18 +10,18 @@ export async function getDisplayData(slug: string) {
       },
     },
   });
-  if (!truck) return null;
+  if (!business) return null;
 
   return {
-    name: truck.name,
-    slug: truck.slug,
-    theme: truck.theme,
-    orientation: truck.orientation,
-    logoUrl: truck.logoUrl,
-    specialActive: truck.specialActive,
-    specialText: truck.specialText,
-    updatedAt: truck.updatedAt.toISOString(),
-    categories: truck.categories.map((c) => ({
+    name: business.name,
+    slug: business.slug,
+    theme: business.theme,
+    orientation: business.orientation,
+    logoUrl: business.logoUrl,
+    specialActive: business.specialActive,
+    specialText: business.specialText,
+    updatedAt: business.updatedAt.toISOString(),
+    categories: business.categories.map((c) => ({
       id: c.id,
       name: c.name,
       items: c.items.map((i) => ({

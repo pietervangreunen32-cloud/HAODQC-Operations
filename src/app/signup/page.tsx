@@ -24,10 +24,10 @@ export default function SignupPage() {
             <Input id="name" name="name" required placeholder="Jane Smith" />
           </div>
           <div>
-            <Label htmlFor="truckName">Business name</Label>
+            <Label htmlFor="businessName">Business name</Label>
             <Input
-              id="truckName"
-              name="truckName"
+              id="businessName"
+              name="businessName"
               required
               placeholder="Joe's Tacos or Mama Rosa's Kitchen"
             />

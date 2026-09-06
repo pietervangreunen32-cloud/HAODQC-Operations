@@ -15,13 +15,13 @@ export async function signupAction(
   formData: FormData
 ): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
-  const truckName = String(formData.get("truckName") ?? "").trim();
+  const businessName = String(formData.get("businessName") ?? "").trim();
   const email = String(formData.get("email") ?? "")
     .trim()
     .toLowerCase();
   const password = String(formData.get("password") ?? "");
 
-  if (!name || !truckName || !email || !password) {
+  if (!name || !businessName || !email || !password) {
     return { error: "Please fill in every field." };
   }
   if (password.length < 8) {
@@ -34,16 +34,16 @@ export async function signupAction(
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const slug = await uniqueSlug(truckName);
+  const slug = await uniqueSlug(businessName);
 
   await prisma.user.create({
     data: {
       name,
       email,
       passwordHash,
-      trucks: {
+      businesses: {
         create: {
-          name: truckName,
+          name: businessName,
           slug,
           categories: {
             create: [

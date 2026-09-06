@@ -1,15 +1,15 @@
 import QRCode from "qrcode";
 import Link from "next/link";
-import { requireTruck } from "@/lib/current-truck";
+import { requireBusiness } from "@/lib/current-business";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/admin/copy-link-button";
 
 export default async function DisplayLinkPage() {
-  const { truck } = await requireTruck();
+  const { business } = await requireBusiness();
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const displayUrl = `${appUrl}/display/${truck.slug}`;
+  const displayUrl = `${appUrl}/display/${business.slug}`;
   const qrDataUrl = await QRCode.toDataURL(displayUrl, {
     width: 320,
     margin: 1,
@@ -35,7 +35,7 @@ export default async function DisplayLinkPage() {
           </p>
           <div className="flex flex-wrap gap-2">
             <CopyLinkButton url={displayUrl} />
-            <Link href={`/display/${truck.slug}`} target="_blank">
+            <Link href={`/display/${business.slug}`} target="_blank">
               <Button variant="secondary">Open display ↗</Button>
             </Link>
           </div>

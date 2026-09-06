@@ -89,7 +89,7 @@ export function DisplayView({
               className="h-16 w-16 rounded-full object-cover sm:h-[72px] sm:w-[72px]"
             />
           )}
-          <h1 className={cn("text-4xl font-black tracking-tight sm:text-5xl", theme.truckName)}>
+          <h1 className={cn("text-4xl font-black tracking-tight sm:text-5xl", theme.businessName)}>
             {data.name}
           </h1>
           <div

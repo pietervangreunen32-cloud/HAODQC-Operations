@@ -38,7 +38,7 @@ also how virtually every commercial digital-signage product works
 ## Project structure
 
 ```
-prisma/schema.prisma        Data model (User, Truck, MenuCategory, MenuItem, ...)
+prisma/schema.prisma        Data model (User, Business, MenuCategory, MenuItem, ...)
 src/app/                    Pages (Next.js "App Router")
   page.tsx                  Public marketing/landing page
   signup/ login/ forgot-password/ reset-password/   Auth pages
@@ -69,7 +69,7 @@ the TV view.
 
 ## Testing it yourself
 
-1. **Sign up** at `/signup` — this also creates your one truck/menu, seeded
+1. **Sign up** at `/signup` — this also creates your one business/menu, seeded
    with three empty categories (Mains, Sides, Drinks).
 2. **Setup wizard** (`/admin/setup`) walks through adding an item, picking a
    theme, and showing your display link + QR code.
@@ -95,8 +95,8 @@ logged out) before handing this over, so the golden path is verified working.
    every 20 seconds, and keeps showing the last-loaded menu if a poll fails
    (so a brief Wi-Fi drop doesn't blank the screen).
 3. **Auth + multi-tenancy** — email/password accounts; every menu item,
-   category, and upload is scoped to the logged-in owner's truck and checked
-   server-side, so one owner can never see or edit another's data.
+   category, and upload is scoped to the logged-in owner's business and
+   checked server-side, so one owner can never see or edit another's data.
 4. **Themes + QR + setup wizard** — four built-in themes (Neon, Chalkboard,
    Minimalist, Colorful), a landscape/portrait switch, a QR code + copyable
    link, and a 3-step guided setup after signup.
@@ -125,13 +125,15 @@ Vercel's environment variables.
 ## Assumptions I made — please confirm or correct
 
 - **One menu per account.** The brief says "each account has one unique
-  menu," so I built it that way — signup creates exactly one truck. If you
-  later want one owner to run multiple trucks/menus, that's a bigger change
-  (a truck-switcher in the dashboard) and worth a separate conversation.
+  menu," so I built it that way — signup creates exactly one business. If
+  you later want one owner to run multiple businesses/menus, that's a
+  bigger change (a business-switcher in the dashboard) and worth a
+  separate conversation.
 - **Currency is hard-coded to USD** (`src/lib/utils.ts`, `formatPrice`).
   If you're outside the US (the brief mentions Afrikaans, which made me
   wonder), tell me the currency/locale and I'll make it a one-line change —
-  or make it a per-truck setting if you want owners to choose it themselves.
+  or make it a per-business setting if you want owners to choose it
+  themselves.
 - **Password reset has no real email sending wired up yet.** Since no email
   provider (Resend, Postmark, etc.) was configured, `/forgot-password`
   currently *displays* the reset link on screen instead of emailing it —
@@ -145,7 +147,7 @@ Vercel's environment variables.
   edit form, or true cross-category dragging, if that's something you need.
 - **Not yet built (deliberately deferred, per your "nice-to-haves only
   after the core works" instruction):** view-count analytics beyond the
-  simple counter already in the data model (`Truck.viewCount`, incremented
+  simple counter already in the data model (`Business.viewCount`, incremented
   on each display page load — not yet surfaced in the dashboard UI),
   multi-language toggle on the display, and time-of-day menu scheduling
   (e.g. breakfast vs. lunch). All three are additive and don't require

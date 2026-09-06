@@ -14,7 +14,7 @@ export default async function DisplayPage({
 
   // Fire-and-forget view counter — a rough proxy for how often this screen
   // has loaded. Don't await it on the critical path to first paint.
-  prisma.truck
+  prisma.business
     .update({ where: { slug }, data: { viewCount: { increment: 1 } } })
     .catch(() => {});
 

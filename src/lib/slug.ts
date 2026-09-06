@@ -6,14 +6,14 @@ export function slugify(input: string): string {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 60) || "truck";
+    .slice(0, 60) || "business";
 }
 
 export async function uniqueSlug(base: string): Promise<string> {
   const root = slugify(base);
   let candidate = root;
   let n = 1;
-  while (await prisma.truck.findUnique({ where: { slug: candidate } })) {
+  while (await prisma.business.findUnique({ where: { slug: candidate } })) {
     n += 1;
     candidate = `${root}-${n}`;
   }

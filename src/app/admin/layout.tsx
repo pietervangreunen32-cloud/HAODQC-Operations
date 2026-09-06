@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireTruck } from "@/lib/current-truck";
+import { requireBusiness } from "@/lib/current-business";
 import { logoutAction } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +15,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { truck } = await requireTruck();
+  const { business } = await requireBusiness();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -23,7 +23,7 @@ export default async function AdminLayout({
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-slate-900">MenuScreen</span>
-            <span className="hidden text-sm text-slate-400 sm:inline">/ {truck.name}</span>
+            <span className="hidden text-sm text-slate-400 sm:inline">/ {business.name}</span>
           </div>
           <nav className="flex flex-wrap items-center gap-1">
             {NAV_ITEMS.map((item) => (

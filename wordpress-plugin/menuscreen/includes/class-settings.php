@@ -21,7 +21,7 @@ class MenuScreen_Settings {
 
 	public static function defaults() {
 		return array(
-			'truck_name'     => get_bloginfo( 'name' ) ? get_bloginfo( 'name' ) : __( 'My Business', 'menuscreen' ),
+			'business_name'  => get_bloginfo( 'name' ) ? get_bloginfo( 'name' ) : __( 'My Business', 'menuscreen' ),
 			'theme'          => 'neon',
 			'orientation'    => 'landscape',
 			'logo_id'        => 0,

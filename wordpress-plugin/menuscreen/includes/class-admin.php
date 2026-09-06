@@ -205,9 +205,9 @@ class MenuScreen_Admin {
 		}
 		check_admin_referer( 'menuscreen_save_theme' );
 
-		$theme       = isset( $_POST['theme'] ) ? sanitize_key( wp_unslash( $_POST['theme'] ) ) : 'neon';
-		$orientation = isset( $_POST['orientation'] ) ? sanitize_key( wp_unslash( $_POST['orientation'] ) ) : 'landscape';
-		$truck_name  = isset( $_POST['truck_name'] ) ? sanitize_text_field( wp_unslash( $_POST['truck_name'] ) ) : '';
+		$theme         = isset( $_POST['theme'] ) ? sanitize_key( wp_unslash( $_POST['theme'] ) ) : 'neon';
+		$orientation   = isset( $_POST['orientation'] ) ? sanitize_key( wp_unslash( $_POST['orientation'] ) ) : 'landscape';
+		$business_name = isset( $_POST['business_name'] ) ? sanitize_text_field( wp_unslash( $_POST['business_name'] ) ) : '';
 
 		if ( ! in_array( $theme, MenuScreen_Settings::THEMES, true ) ) {
 			$theme = 'neon';
@@ -220,8 +220,8 @@ class MenuScreen_Admin {
 			'theme'       => $theme,
 			'orientation' => $orientation,
 		);
-		if ( '' !== $truck_name ) {
-			$values['truck_name'] = $truck_name;
+		if ( '' !== $business_name ) {
+			$values['business_name'] = $business_name;
 		}
 		if ( isset( $_POST['logo_id'] ) ) {
 			$values['logo_id'] = absint( $_POST['logo_id'] );

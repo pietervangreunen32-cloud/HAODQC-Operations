@@ -1,4 +1,4 @@
-// TruckScreen data model.
+// MenuScreen data model.
 //
 // Local development uses SQLite (zero setup, file-based). For production,
 // point DATABASE_URL at a Postgres database (e.g. Supabase) and change
@@ -32,7 +32,7 @@ model User {
   passwordHash        String
   name                String?
   createdAt           DateTime             @default(now())
-  trucks              Truck[]
+  businesses          Business[]
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -46,7 +46,7 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 }
 
-model Truck {
+model Business {
   id            String       @id @default(cuid())
   ownerId       String
   owner         User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -65,13 +65,13 @@ model Truck {
 }
 
 model MenuCategory {
-  id        String     @id @default(cuid())
-  truckId   String
-  truck     Truck      @relation(fields: [truckId], references: [id], onDelete: Cascade)
-  name      String
-  order     Int        @default(0)
-  items     MenuItem[]
-  createdAt DateTime   @default(now())
+  id          String     @id @default(cuid())
+  businessId  String
+  business    Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name        String
+  order       Int        @default(0)
+  items       MenuItem[]
+  createdAt   DateTime   @default(now())
 }
 
 model MenuItem {

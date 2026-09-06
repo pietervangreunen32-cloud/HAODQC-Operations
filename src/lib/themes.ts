@@ -29,7 +29,7 @@ export const THEME_CLASSES: Record<
   {
     page: string;
     heading: string;
-    truckName: string;
+    businessName: string;
     categoryTitle: string;
     card: string;
     itemName: string;
@@ -43,7 +43,7 @@ export const THEME_CLASSES: Record<
   NEON: {
     page: "bg-black text-white",
     heading: "text-fuchsia-400",
-    truckName: "text-white drop-shadow-[0_0_18px_rgba(255,45,149,0.8)]",
+    businessName: "text-white drop-shadow-[0_0_18px_rgba(255,45,149,0.8)]",
     categoryTitle:
       "text-cyan-300 border-b-2 border-cyan-400/60 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)]",
     card: "bg-white/5 border border-fuchsia-500/30 backdrop-blur",
@@ -57,7 +57,7 @@ export const THEME_CLASSES: Record<
   CHALKBOARD: {
     page: "bg-[#1f2a24] text-[#f5f0e6]",
     heading: "text-[#f5f0e6]",
-    truckName: "text-[#f5f0e6]",
+    businessName: "text-[#f5f0e6]",
     categoryTitle: "text-amber-200 border-b-2 border-dashed border-amber-200/50",
     card: "bg-white/5 border border-white/10",
     itemName: "text-[#f5f0e6]",
@@ -70,7 +70,7 @@ export const THEME_CLASSES: Record<
   MINIMALIST: {
     page: "bg-white text-slate-900",
     heading: "text-slate-900",
-    truckName: "text-slate-900",
+    businessName: "text-slate-900",
     categoryTitle: "text-slate-900 border-b-2 border-slate-900",
     card: "bg-slate-50 border border-slate-200",
     itemName: "text-slate-900",
@@ -83,7 +83,7 @@ export const THEME_CLASSES: Record<
   COLORFUL: {
     page: "bg-gradient-to-br from-orange-500 via-rose-600 to-teal-600 text-white",
     heading: "text-white",
-    truckName: "text-white drop-shadow-lg",
+    businessName: "text-white drop-shadow-lg",
     categoryTitle: "text-white border-b-2 border-white/70",
     card: "bg-white/15 border border-white/30 backdrop-blur",
     itemName: "text-white",

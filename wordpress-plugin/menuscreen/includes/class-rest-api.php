@@ -98,7 +98,7 @@ class MenuScreen_Rest_Api {
 		}
 
 		return array(
-			'name'          => $settings['truck_name'],
+			'name'          => $settings['business_name'],
 			'theme'         => $settings['theme'],
 			'orientation'   => $settings['orientation'],
 			'logoUrl'       => $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'thumbnail' ) : null,

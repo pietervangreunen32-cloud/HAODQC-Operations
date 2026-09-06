@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { requireTruckWithMenu } from "@/lib/current-truck";
+import { requireBusinessWithMenu } from "@/lib/current-business";
 import { MenuBoard } from "@/components/admin/menu-board";
 import { SpecialBanner } from "@/components/admin/special-banner";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminMenuPage() {
-  const { truck } = await requireTruckWithMenu();
+  const { business } = await requireBusinessWithMenu();
 
   return (
     <div className="space-y-6">
@@ -16,14 +16,14 @@ export default async function AdminMenuPage() {
             Changes show up on your display within seconds.
           </p>
         </div>
-        <Link href={`/display/${truck.slug}`} target="_blank">
+        <Link href={`/display/${business.slug}`} target="_blank">
           <Button variant="secondary">Preview display ↗</Button>
         </Link>
       </div>
 
-      <SpecialBanner initialActive={truck.specialActive} initialText={truck.specialText ?? ""} />
+      <SpecialBanner initialActive={business.specialActive} initialText={business.specialText ?? ""} />
 
-      <MenuBoard categories={truck.categories} />
+      <MenuBoard categories={business.categories} />
     </div>
   );
 }

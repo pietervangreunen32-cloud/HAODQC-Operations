@@ -48,7 +48,7 @@ $logo_url    = $settings['logo_id'] ? wp_get_attachment_image_url( $settings['lo
 
 		<div class="menuscreen-card">
 			<h2><?php esc_html_e( 'Business name', 'menuscreen' ); ?></h2>
-			<input type="text" name="truck_name" class="regular-text" value="<?php echo esc_attr( $settings['truck_name'] ); ?>" />
+			<input type="text" name="business_name" class="regular-text" value="<?php echo esc_attr( $settings['business_name'] ); ?>" />
 		</div>
 
 		<div class="menuscreen-card">
