@@ -35,6 +35,19 @@ if ( ! defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ) {
 }
 
 /**
+ * Your Easy Digital Downloads store URL and exact product name — fill
+ * these in once your EDD store (with the Software Licensing + Recurring
+ * Payments extensions) is live. Until then, license activation will fail
+ * gracefully rather than error, since store.reviewloop.app doesn't exist.
+ */
+if ( ! defined( 'REVIEWLOOP_LICENSE_STORE_URL' ) ) {
+	define( 'REVIEWLOOP_LICENSE_STORE_URL', 'https://store.reviewloop.app' );
+}
+if ( ! defined( 'REVIEWLOOP_LICENSE_ITEM_NAME' ) ) {
+	define( 'REVIEWLOOP_LICENSE_ITEM_NAME', 'ReviewLoop Pro' );
+}
+
+/**
  * Autoload plugin classes on demand (class-reviewloop-xxx.php naming convention).
  */
 spl_autoload_register( function ( $class_name ) {

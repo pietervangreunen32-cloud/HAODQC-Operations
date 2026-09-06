@@ -1,21 +1,19 @@
 <?php
 /**
- * Pro license gating and activation against a central license server.
+ * Pro license gating and activation against an Easy Digital Downloads (EDD)
+ * store running the official "Software Licensing" + "Recurring Payments"
+ * extensions. That store is separate infrastructure you run yourself (see
+ * REVIEWLOOP_LICENSE_STORE_URL below) — this class is the client side,
+ * built against EDD's real, documented Software Licensing API:
  *
- * IMPORTANT ASSUMPTION (flagged for confirmation): REVIEWLOOP_LICENSE_SERVER_URL
- * points at a license/subscription API that does not exist yet — it is
- * separate infrastructure (a small backend + Stripe/payment integration)
- * that has to be built and hosted outside this plugin's codebase, the same
- * way the brief asked for a "central license server" as a later phase. This
- * class implements the client side against the contract documented below
- * so that server can be built to match it:
+ *   GET {store_url}/?edd_action=activate_license&license=KEY&item_name=NAME&url=SITE
+ *   GET {store_url}/?edd_action=deactivate_license&license=KEY&item_name=NAME&url=SITE
+ *   GET {store_url}/?edd_action=check_license&license=KEY&item_name=NAME&url=SITE
  *
- *   POST {server}/activate    { license_key, site_url }  -> { status: active|invalid, expires_at }
- *   POST {server}/deactivate  { license_key, site_url }  -> { status: ok }
- *   POST {server}/validate    { license_key, site_url }  -> { status: active|expired|invalid, expires_at }
- *
- * Until that server exists, activation will always fail gracefully (Pro
- * stays locked) rather than error.
+ * Each returns JSON like { success: true, license: "valid", expires: "...",
+ * ... } — see https://easydigitaldownloads.com/docs/activate-remote-updates/
+ * for the full field reference. "item_name" must exactly match the
+ * product name you create in EDD (REVIEWLOOP_LICENSE_ITEM_NAME below).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,38 +27,73 @@ class ReviewLoop_License {
 		return isset( $settings['license_status'] ) && 'active' === $settings['license_status'];
 	}
 
-	private static function server_url() {
-		return defined( 'REVIEWLOOP_LICENSE_SERVER_URL' ) ? REVIEWLOOP_LICENSE_SERVER_URL : 'https://license.reviewloop.app/api/v1';
+	private static function store_url() {
+		return defined( 'REVIEWLOOP_LICENSE_STORE_URL' ) ? REVIEWLOOP_LICENSE_STORE_URL : 'https://store.reviewloop.app';
 	}
 
-	public static function activate( $license_key ) {
-		$response = wp_remote_post(
-			trailingslashit( self::server_url() ) . 'activate',
+	private static function item_name() {
+		return defined( 'REVIEWLOOP_LICENSE_ITEM_NAME' ) ? REVIEWLOOP_LICENSE_ITEM_NAME : 'ReviewLoop Pro';
+	}
+
+	private static function call( $edd_action, $license_key ) {
+		$url = add_query_arg(
 			array(
-				'timeout' => 15,
-				'body'    => array(
-					'license_key' => $license_key,
-					'site_url'    => home_url(),
-				),
-			)
+				'edd_action' => $edd_action,
+				'license'    => rawurlencode( $license_key ),
+				'item_name'  => rawurlencode( self::item_name() ),
+				'url'        => rawurlencode( home_url() ),
+			),
+			self::store_url()
 		);
 
+		$response = wp_remote_get( $url, array( 'timeout' => 15 ) );
+
 		if ( is_wp_error( $response ) ) {
-			return new WP_Error( 'reviewloop_license_unreachable', __( 'Could not reach the license server. Please try again shortly.', 'reviewloop' ) );
+			return $response;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
-		if ( empty( $body['status'] ) || 'active' !== $body['status'] ) {
+		return is_array( $body ) ? $body : new WP_Error( 'reviewloop_license_bad_response', __( 'The license server returned an unexpected response.', 'reviewloop' ) );
+	}
+
+	/**
+	 * Turns EDD's "license" status field into a message a non-technical
+	 * business owner will actually understand.
+	 */
+	private static function error_for_status( $license_status ) {
+		$messages = array(
+			'expired'            => __( 'This license has expired. Please renew your subscription.', 'reviewloop' ),
+			'disabled'           => __( 'This license has been disabled. Please contact support.', 'reviewloop' ),
+			'revoked'            => __( 'This license has been disabled. Please contact support.', 'reviewloop' ),
+			'site_inactive'      => __( 'This license isn\'t active for this site.', 'reviewloop' ),
+			'item_name_mismatch' => __( 'This license key doesn\'t match ReviewLoop Pro.', 'reviewloop' ),
+			'no_activations_left' => __( 'This license has already been activated on its maximum number of sites. Deactivate it elsewhere first, or upgrade your plan.', 'reviewloop' ),
+			'invalid'            => __( 'That license key isn\'t valid.', 'reviewloop' ),
+			'key_mismatch'       => __( 'That license key isn\'t valid.', 'reviewloop' ),
+			'missing'            => __( 'That license key isn\'t valid.', 'reviewloop' ),
+		);
+
+		return isset( $messages[ $license_status ] ) ? $messages[ $license_status ] : __( 'That license key isn\'t valid or active.', 'reviewloop' );
+	}
+
+	public static function activate( $license_key ) {
+		$body = self::call( 'activate_license', $license_key );
+
+		if ( is_wp_error( $body ) ) {
+			return new WP_Error( 'reviewloop_license_unreachable', __( 'Could not reach the license server. Please try again shortly.', 'reviewloop' ) );
+		}
+
+		if ( empty( $body['success'] ) || 'valid' !== $body['license'] ) {
 			ReviewLoop_Settings::update( array( 'license_key' => $license_key, 'license_status' => 'inactive' ) );
-			return new WP_Error( 'reviewloop_license_invalid', __( 'That license key isn\'t valid or active.', 'reviewloop' ) );
+			return new WP_Error( 'reviewloop_license_invalid', self::error_for_status( isset( $body['license'] ) ? $body['license'] : 'invalid' ) );
 		}
 
 		ReviewLoop_Settings::update(
 			array(
-				'license_key'    => $license_key,
-				'license_status' => 'active',
-				'license_expires' => isset( $body['expires_at'] ) ? $body['expires_at'] : '',
+				'license_key'     => $license_key,
+				'license_status'  => 'active',
+				'license_expires' => isset( $body['expires'] ) ? $body['expires'] : '',
 			)
 		);
 
@@ -71,16 +104,7 @@ class ReviewLoop_License {
 		$settings = ReviewLoop_Settings::get_all();
 
 		if ( ! empty( $settings['license_key'] ) ) {
-			wp_remote_post(
-				trailingslashit( self::server_url() ) . 'deactivate',
-				array(
-					'timeout' => 15,
-					'body'    => array(
-						'license_key' => $settings['license_key'],
-						'site_url'    => home_url(),
-					),
-				)
-			);
+			self::call( 'deactivate_license', $settings['license_key'] );
 		}
 
 		ReviewLoop_Settings::update( array( 'license_status' => 'inactive' ) );
@@ -97,25 +121,19 @@ class ReviewLoop_License {
 			return;
 		}
 
-		$response = wp_remote_post(
-			trailingslashit( self::server_url() ) . 'validate',
-			array(
-				'timeout' => 15,
-				'body'    => array(
-					'license_key' => $settings['license_key'],
-					'site_url'    => home_url(),
-				),
-			)
-		);
+		$body = self::call( 'check_license', $settings['license_key'] );
 
-		if ( is_wp_error( $response ) ) {
+		if ( is_wp_error( $body ) ) {
 			return; // Don't lock a business out over a transient network issue.
 		}
 
-		$body = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		if ( empty( $body['status'] ) || 'active' !== $body['status'] ) {
+		if ( empty( $body['success'] ) || 'valid' !== $body['license'] ) {
 			ReviewLoop_Settings::update( array( 'license_status' => 'inactive' ) );
+			return;
+		}
+
+		if ( isset( $body['expires'] ) ) {
+			ReviewLoop_Settings::update( array( 'license_expires' => $body['expires'] ) );
 		}
 	}
 }
