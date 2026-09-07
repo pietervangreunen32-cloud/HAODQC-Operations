@@ -35,16 +35,12 @@ if ( ! defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ) {
 }
 
 /**
- * Your Easy Digital Downloads store URL and exact product name — fill
- * these in once your EDD store (with the Software Licensing + Recurring
- * Payments extensions) is live. Until then, license activation will fail
- * gracefully rather than error, since store.reviewloop.app doesn't exist.
+ * Where the self-hosted license server (the "reviewloop-license-server"
+ * plugin, running on ops.growthcraft.org.za) exposes its REST API. Change
+ * this if the license server ever moves.
  */
-if ( ! defined( 'REVIEWLOOP_LICENSE_STORE_URL' ) ) {
-	define( 'REVIEWLOOP_LICENSE_STORE_URL', 'https://store.reviewloop.app' );
-}
-if ( ! defined( 'REVIEWLOOP_LICENSE_ITEM_NAME' ) ) {
-	define( 'REVIEWLOOP_LICENSE_ITEM_NAME', 'ReviewLoop Pro' );
+if ( ! defined( 'REVIEWLOOP_LICENSE_SERVER_URL' ) ) {
+	define( 'REVIEWLOOP_LICENSE_SERVER_URL', 'https://ops.growthcraft.org.za/wp-json/reviewloop-license/v1' );
 }
 
 /**
