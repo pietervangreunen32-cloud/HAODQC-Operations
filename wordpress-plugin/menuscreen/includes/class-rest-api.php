@@ -79,6 +79,10 @@ class MenuScreen_Rest_Api {
 
 			$data_items = array();
 			foreach ( $items as $item ) {
+				$sold_out = (bool) get_post_meta( $item->ID, '_menuscreen_sold_out', true );
+				if ( $sold_out && ! empty( $settings['hide_sold_out_items'] ) ) {
+					continue;
+				}
 				$thumbnail_id = get_post_thumbnail_id( $item );
 				$data_items[] = array(
 					'id'          => $item->ID,
@@ -86,7 +90,7 @@ class MenuScreen_Rest_Api {
 					'description' => wp_strip_all_tags( $item->post_content ),
 					'price'       => (float) get_post_meta( $item->ID, '_menuscreen_price', true ),
 					'photoUrl'    => $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'medium' ) : null,
-					'soldOut'     => (bool) get_post_meta( $item->ID, '_menuscreen_sold_out', true ),
+					'soldOut'     => $sold_out,
 				);
 			}
 
@@ -96,6 +100,8 @@ class MenuScreen_Rest_Api {
 				'items' => $data_items,
 			);
 		}
+
+		$font_meta = MenuScreen_Settings::font_meta( $settings['custom_font'] );
 
 		return array(
 			'name'          => $settings['business_name'],
@@ -107,6 +113,13 @@ class MenuScreen_Rest_Api {
 			'currency'      => $settings['currency'],
 			'updatedAt'     => current_time( 'timestamp' ), // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 			'categories'    => $data_categories,
+			'custom'        => array(
+				'primaryColor'    => $settings['custom_primary_color'],
+				'backgroundColor' => $settings['custom_background_color'],
+				'textColor'       => $settings['custom_text_color'],
+				'fontFamily'      => $font_meta['family'],
+				'googleFontQuery' => $font_meta['google'],
+			),
 		);
 	}
 }

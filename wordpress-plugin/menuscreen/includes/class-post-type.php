@@ -20,6 +20,9 @@ class MenuScreen_Post_Type {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'save_meta_box' ) );
 		add_action( 'init', array( __CLASS__, 'register_post_meta' ) );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'enforce_plan_limit' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'plan_limit_notice' ) );
+		add_action( 'created_term', array( __CLASS__, 'ensure_order_meta' ), 10, 3 );
 
 		// Sensible defaults for the native edit screen: a photo and a
 		// description are exactly what an item needs, nothing more.
@@ -109,6 +112,95 @@ class MenuScreen_Post_Type {
 				},
 			)
 		);
+	}
+
+	/**
+	 * Sampler plan is capped at MenuScreen_Plans::limit() published items.
+	 * Runs on wp_insert_post_data (before the row is written) so an item
+	 * that would cross the limit is saved as a draft instead of published
+	 * — it isn't lost, just held back until the plan is upgraded or room
+	 * opens up. Already-published items are left alone on every re-save.
+	 */
+	public static function enforce_plan_limit( $data, $postarr ) {
+		if ( self::POST_TYPE !== $data['post_type'] || 'publish' !== $data['post_status'] ) {
+			return $data;
+		}
+
+		$limit = MenuScreen_Plans::limit();
+		if ( null === $limit ) {
+			return $data;
+		}
+
+		$post_id       = isset( $postarr['ID'] ) ? (int) $postarr['ID'] : 0;
+		$was_published = $post_id && 'publish' === get_post_status( $post_id );
+		if ( $was_published ) {
+			return $data;
+		}
+
+		$count = MenuScreen_Plans::published_item_count( $post_id );
+		if ( $count >= $limit ) {
+			$data['post_status'] = 'draft';
+			set_transient( 'menuscreen_plan_limit_notice_' . get_current_user_id(), $limit, 30 );
+		}
+
+		return $data;
+	}
+
+	public static function plan_limit_notice() {
+		$key   = 'menuscreen_plan_limit_notice_' . get_current_user_id();
+		$limit = get_transient( $key );
+		if ( ! $limit ) {
+			return;
+		}
+		delete_transient( $key );
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p>
+				<?php
+				printf(
+					/* translators: %d: item limit */
+					esc_html__( 'Your Sampler plan is limited to %d menu items, so this item was saved as a draft instead of published. Upgrade to Rush for unlimited items.', 'menuscreen' ),
+					(int) $limit
+				);
+				?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-plans' ) ); ?>"><?php esc_html_e( 'View plans', 'menuscreen' ); ?></a>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Category order (menuscreen_order term meta) is required for a
+	 * category to show up at all -- the admin Menu page and the
+	 * display's REST payload both query categories with
+	 * meta_key=menuscreen_order, orderby=meta_value_num, which silently
+	 * EXCLUDES any term missing that meta row. Our own "Add category"
+	 * and CSV import already set it, but WordPress's native Categories
+	 * screen for this taxonomy (show_ui is on) does not -- this safety
+	 * net assigns an order to any menuscreen_category term created any
+	 * other way, so it never just vanishes.
+	 */
+	public static function ensure_order_meta( $term_id, $tt_id, $taxonomy ) {
+		if ( self::TAXONOMY !== $taxonomy ) {
+			return;
+		}
+		if ( '' !== get_term_meta( $term_id, 'menuscreen_order', true ) ) {
+			return;
+		}
+
+		$existing_max = get_terms(
+			array(
+				'taxonomy'   => self::TAXONOMY,
+				'hide_empty' => false,
+				'meta_key'   => 'menuscreen_order', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'orderby'    => 'meta_value_num',
+				'order'      => 'DESC',
+				'number'     => 1,
+				'fields'     => 'ids',
+			)
+		);
+		$next_order = ! empty( $existing_max ) ? (int) get_term_meta( $existing_max[0], 'menuscreen_order', true ) + 1 : 0;
+		update_term_meta( $term_id, 'menuscreen_order', $next_order );
 	}
 
 	public static function sanitize_price( $value ) {

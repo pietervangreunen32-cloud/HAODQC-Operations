@@ -145,6 +145,12 @@
 		} );
 	}
 
+	function initCsvToggle() {
+		$( '#menuscreen-toggle-csv' ).on( 'click', function () {
+			$( '#menuscreen-csv-import' ).toggle();
+		} );
+	}
+
 	function initQrCode() {
 		var $container = $( '#menuscreen-qr' );
 		if ( ! $container.length || typeof qrcode === 'undefined' ) {
@@ -164,6 +170,7 @@
 		initAddCategory();
 		initCopyLink();
 		initLogoUploader();
+		initCsvToggle();
 		initQrCode();
 	} );
 } )( jQuery );

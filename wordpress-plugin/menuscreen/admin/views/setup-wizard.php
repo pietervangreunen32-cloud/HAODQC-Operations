@@ -45,7 +45,7 @@ if ( isset( $item_count->draft ) ) {
 			<a class="button button-primary" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . MenuScreen_Post_Type::POST_TYPE ) ); ?>">
 				<?php esc_html_e( '+ Add a menu item', 'menuscreen' ); ?>
 			</a>
-			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen' ) ); ?>">
+			<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-menu' ) ); ?>">
 				<?php esc_html_e( 'Manage categories', 'menuscreen' ); ?>
 			</a>
 		</div>

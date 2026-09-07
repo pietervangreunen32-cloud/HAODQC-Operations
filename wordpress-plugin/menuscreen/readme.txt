@@ -4,7 +4,7 @@ Tags: menu, digital signage, food truck, restaurant, display
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,12 @@ browser.
 * A shareable display link with an auto-generated QR code, generated entirely in your browser (no external service call).
 * A first-activation setup wizard and a plain-English "how to put this on your TV" guide.
 * The display page keeps showing the last-loaded menu if the screen's internet briefly drops, instead of going blank.
+* An owner Dashboard with at-a-glance stats (items, sold out, categories, display loads) and current plan usage.
+* Three plans — Sampler (free, 10 items), Rush, and Fleet — with the Sampler item limit actually enforced (an item over the limit saves as a draft with a clear notice, not silently blocked).
+* Bulk CSV import for menu items (Rush plan and up), with per-row error reporting.
+* A Custom theme (Fleet plan) with your own brand colors and a choice of Google Fonts, alongside the four built-in themes.
+* A "hide sold-out items entirely" display option.
+* A Plans & Billing page — manual plan switching, configurable upgrade links, and automatic plan upgrades from WooCommerce order completion if WooCommerce is active on the same site.
 
 = Where the display page lives =
 
@@ -67,6 +73,14 @@ categories it created; photos already in your Media Library are left
 alone.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added an owner Dashboard (stats + plan usage at a glance).
+* Added Sampler / Rush / Fleet plans, with the Sampler 10-item limit actually enforced.
+* Added bulk CSV import for menu items (Rush plan and up).
+* Added a Custom theme with brand colors and Google Fonts (Fleet plan), plus a "hide sold-out items entirely" display option.
+* Added a Plans & Billing page: manual plan switching, configurable upgrade links, and automatic WooCommerce order-driven upgrades.
+* Menu management moved to its own "Menu" submenu — the top-level MenuScreen page is now the Dashboard.
 
 = 1.0.0 =
 * Initial release.

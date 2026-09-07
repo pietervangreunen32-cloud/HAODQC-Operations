@@ -20,6 +20,11 @@ class MenuScreen_Admin {
 		add_action( 'admin_post_menuscreen_save_theme', array( __CLASS__, 'handle_save_theme' ) );
 		add_action( 'admin_post_menuscreen_save_special', array( __CLASS__, 'handle_save_special' ) );
 		add_action( 'admin_post_menuscreen_finish_setup', array( __CLASS__, 'handle_finish_setup' ) );
+		add_action( 'admin_post_menuscreen_save_custom_branding', array( __CLASS__, 'handle_save_custom_branding' ) );
+		add_action( 'admin_post_menuscreen_save_functionality', array( __CLASS__, 'handle_save_functionality' ) );
+		add_action( 'admin_post_menuscreen_save_plan', array( __CLASS__, 'handle_save_plan' ) );
+		add_action( 'admin_post_menuscreen_save_upgrade_urls', array( __CLASS__, 'handle_save_upgrade_urls' ) );
+		add_action( 'admin_post_menuscreen_save_woo_products', array( __CLASS__, 'handle_save_woo_products' ) );
 		add_filter( 'plugin_action_links_' . MENUSCREEN_BASENAME, array( __CLASS__, 'add_settings_link' ) );
 		add_action( 'admin_footer-post-new.php', array( __CLASS__, 'maybe_preselect_category' ) );
 	}
@@ -30,9 +35,18 @@ class MenuScreen_Admin {
 			__( 'MenuScreen', 'menuscreen' ),
 			'edit_posts',
 			'menuscreen',
-			array( __CLASS__, 'render_menu_page' ),
+			array( __CLASS__, 'render_dashboard_page' ),
 			self::menu_icon(),
 			26
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Dashboard', 'menuscreen' ),
+			__( 'Dashboard', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen',
+			array( __CLASS__, 'render_dashboard_page' )
 		);
 
 		add_submenu_page(
@@ -40,7 +54,7 @@ class MenuScreen_Admin {
 			__( 'Menu', 'menuscreen' ),
 			__( 'Menu', 'menuscreen' ),
 			'edit_posts',
-			'menuscreen',
+			'menuscreen-menu',
 			array( __CLASS__, 'render_menu_page' )
 		);
 
@@ -71,6 +85,15 @@ class MenuScreen_Admin {
 			array( __CLASS__, 'render_help_page' )
 		);
 
+		add_submenu_page(
+			'menuscreen',
+			__( 'Plans & Billing', 'menuscreen' ),
+			__( 'Plans & Billing', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-plans',
+			array( __CLASS__, 'render_plans_page' )
+		);
+
 		// Not added to any menu — only reachable via the activation redirect
 		// or the "Setup wizard" link on the Menu page.
 		add_submenu_page(
@@ -98,7 +121,7 @@ class MenuScreen_Admin {
 	}
 
 	public static function add_settings_link( $links ) {
-		$link = '<a href="' . esc_url( admin_url( 'admin.php?page=menuscreen' ) ) . '">' . esc_html__( 'Menu', 'menuscreen' ) . '</a>';
+		$link = '<a href="' . esc_url( admin_url( 'admin.php?page=menuscreen-menu' ) ) . '">' . esc_html__( 'Menu', 'menuscreen' ) . '</a>';
 		array_unshift( $links, $link );
 		return $links;
 	}
@@ -177,6 +200,10 @@ class MenuScreen_Admin {
 
 	// ---------- Page renders ----------
 
+	public static function render_dashboard_page() {
+		require MENUSCREEN_DIR . 'admin/views/dashboard-page.php';
+	}
+
 	public static function render_menu_page() {
 		require MENUSCREEN_DIR . 'admin/views/menu-page.php';
 	}
@@ -195,6 +222,10 @@ class MenuScreen_Admin {
 
 	public static function render_setup_page() {
 		require MENUSCREEN_DIR . 'admin/views/setup-wizard.php';
+	}
+
+	public static function render_plans_page() {
+		require MENUSCREEN_DIR . 'admin/views/plans-page.php';
 	}
 
 	// ---------- Form handlers (admin-post.php) ----------
@@ -259,6 +290,111 @@ class MenuScreen_Admin {
 		MenuScreen_Settings::update( array( 'onboarded' => true ) );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=menuscreen' ) );
+		exit;
+	}
+
+	public static function handle_save_custom_branding() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_custom_branding' );
+
+		if ( ! MenuScreen_Plans::at_least( 'fleet' ) ) {
+			wp_safe_redirect( add_query_arg( 'menuscreen_error', rawurlencode( __( 'Custom branding requires the Fleet plan.', 'menuscreen' ) ), wp_get_referer() ) );
+			exit;
+		}
+
+		$primary    = isset( $_POST['primary_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['primary_color'] ) ) : '';
+		$background = isset( $_POST['background_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['background_color'] ) ) : '';
+		$text       = isset( $_POST['text_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['text_color'] ) ) : '';
+		$font       = isset( $_POST['font'] ) ? sanitize_key( wp_unslash( $_POST['font'] ) ) : '';
+
+		if ( ! $primary || ! $background || ! $text ) {
+			wp_safe_redirect( add_query_arg( 'menuscreen_error', rawurlencode( __( 'Please choose valid colors.', 'menuscreen' ) ), wp_get_referer() ) );
+			exit;
+		}
+		if ( ! in_array( $font, MenuScreen_Settings::CUSTOM_FONTS, true ) ) {
+			$font = 'poppins';
+		}
+
+		MenuScreen_Settings::update(
+			array(
+				'theme'                    => 'custom',
+				'custom_primary_color'     => $primary,
+				'custom_background_color' => $background,
+				'custom_text_color'       => $text,
+				'custom_font'             => $font,
+			)
+		);
+
+		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', wp_get_referer() ) );
+		exit;
+	}
+
+	public static function handle_save_functionality() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_functionality' );
+
+		MenuScreen_Settings::update(
+			array(
+				'hide_sold_out_items' => ! empty( $_POST['hide_sold_out_items'] ),
+			)
+		);
+
+		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', wp_get_referer() ) );
+		exit;
+	}
+
+	public static function handle_save_plan() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_plan' );
+
+		$plan = isset( $_POST['plan'] ) ? sanitize_key( wp_unslash( $_POST['plan'] ) ) : 'sampler';
+		if ( ! in_array( $plan, MenuScreen_Plans::PLANS, true ) ) {
+			$plan = 'sampler';
+		}
+
+		MenuScreen_Settings::update( array( 'plan' => $plan ) );
+
+		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', admin_url( 'admin.php?page=menuscreen-plans' ) ) );
+		exit;
+	}
+
+	public static function handle_save_upgrade_urls() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_upgrade_urls' );
+
+		MenuScreen_Settings::update(
+			array(
+				'upgrade_url_rush'  => isset( $_POST['upgrade_url_rush'] ) ? esc_url_raw( wp_unslash( $_POST['upgrade_url_rush'] ) ) : '',
+				'upgrade_url_fleet' => isset( $_POST['upgrade_url_fleet'] ) ? esc_url_raw( wp_unslash( $_POST['upgrade_url_fleet'] ) ) : '',
+			)
+		);
+
+		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', admin_url( 'admin.php?page=menuscreen-plans' ) ) );
+		exit;
+	}
+
+	public static function handle_save_woo_products() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_woo_products' );
+
+		MenuScreen_Settings::update(
+			array(
+				'woo_rush_product_id'  => isset( $_POST['woo_rush_product_id'] ) ? absint( $_POST['woo_rush_product_id'] ) : 0,
+				'woo_fleet_product_id' => isset( $_POST['woo_fleet_product_id'] ) ? absint( $_POST['woo_fleet_product_id'] ) : 0,
+			)
+		);
+
+		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', admin_url( 'admin.php?page=menuscreen-plans' ) ) );
 		exit;
 	}
 }

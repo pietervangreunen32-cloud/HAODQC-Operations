@@ -13,6 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $settings = MenuScreen_Settings::all();
 
+$plan_limit    = MenuScreen_Plans::limit();
+$item_count    = MenuScreen_Plans::published_item_count();
+$at_limit      = null !== $plan_limit && $item_count >= $plan_limit;
+$can_import_csv = MenuScreen_Plans::at_least( 'rush' );
+$csv_result    = get_transient( 'menuscreen_csv_result_' . get_current_user_id() );
+if ( $csv_result ) {
+	delete_transient( 'menuscreen_csv_result_' . get_current_user_id() );
+}
+
 $categories = get_terms(
 	array(
 		'taxonomy'   => MenuScreen_Post_Type::TAXONOMY,
@@ -33,11 +42,91 @@ if ( is_wp_error( $categories ) ) {
 		<a href="<?php echo esc_url( MenuScreen_Display::get_display_url() ); ?>" target="_blank" class="button" style="margin-left:8px;">
 			<?php esc_html_e( 'Preview display ↗', 'menuscreen' ); ?>
 		</a>
+		<button type="button" class="button" id="menuscreen-toggle-csv">
+			<?php esc_html_e( 'Import from CSV', 'menuscreen' ); ?>
+			<?php if ( ! $can_import_csv ) : ?>
+				<span class="menuscreen-plan-pill"><?php esc_html_e( 'Rush plan', 'menuscreen' ); ?></span>
+			<?php endif; ?>
+		</button>
 	</p>
 
 	<?php if ( isset( $_GET['menuscreen_saved'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Saved.', 'menuscreen' ); ?></p></div>
 	<?php endif; ?>
+
+	<?php if ( $at_limit ) : ?>
+		<div class="notice notice-warning">
+			<p>
+				<?php
+				printf(
+					/* translators: %d: item limit */
+					esc_html__( "You've used all %d items on the Sampler plan. Publishing a new item will save it as a draft until you upgrade.", 'menuscreen' ),
+					(int) $plan_limit
+				);
+				?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-plans' ) ); ?>"><?php esc_html_e( 'Upgrade to Rush', 'menuscreen' ); ?></a>
+			</p>
+		</div>
+	<?php endif; ?>
+
+	<div id="menuscreen-csv-import" class="menuscreen-card" style="<?php echo $csv_result ? '' : 'display:none;'; ?>">
+		<h2><?php esc_html_e( 'Import menu items from CSV', 'menuscreen' ); ?></h2>
+		<?php if ( ! $can_import_csv ) : ?>
+			<p>
+				<?php esc_html_e( 'Bulk CSV import is a Rush plan feature.', 'menuscreen' ); ?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-plans' ) ); ?>"><?php esc_html_e( 'Upgrade to Rush', 'menuscreen' ); ?></a>
+				<?php esc_html_e( 'to import many items at once.', 'menuscreen' ); ?>
+			</p>
+		<?php else : ?>
+			<p class="description">
+				<?php esc_html_e( 'Columns: category, name, description, price, sold_out. Categories that don\'t exist yet are created automatically.', 'menuscreen' ); ?>
+			</p>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
+				<input type="hidden" name="action" value="menuscreen_import_csv" />
+				<?php wp_nonce_field( 'menuscreen_import_csv' ); ?>
+				<input type="file" name="csv" accept=".csv,text/csv" required />
+				<button type="submit" class="button button-primary"><?php esc_html_e( 'Import', 'menuscreen' ); ?></button>
+			</form>
+		<?php endif; ?>
+
+		<?php if ( $csv_result ) : ?>
+			<?php if ( ! empty( $csv_result['error'] ) ) : ?>
+				<div class="notice notice-error inline"><p><?php echo esc_html( $csv_result['error'] ); ?></p></div>
+			<?php else : ?>
+				<div class="notice notice-success inline">
+					<p>
+						<?php
+						printf(
+							/* translators: 1: items created, 2: categories created */
+							esc_html__( 'Added %1$d item(s) and %2$d new categor(y/ies).', 'menuscreen' ),
+							(int) $csv_result['items_created'],
+							(int) $csv_result['categories_created']
+						);
+						?>
+					</p>
+					<?php if ( ! empty( $csv_result['skipped'] ) ) : ?>
+						<p><strong><?php esc_html_e( 'Skipped rows:', 'menuscreen' ); ?></strong></p>
+						<ul style="list-style:disc;margin-left:20px;">
+							<?php foreach ( array_slice( $csv_result['skipped'], 0, 10 ) as $reason ) : ?>
+								<li><?php echo esc_html( $reason ); ?></li>
+							<?php endforeach; ?>
+						</ul>
+						<?php if ( count( $csv_result['skipped'] ) > 10 ) : ?>
+							<p>
+								<?php
+								printf(
+									/* translators: %d: number of additional skipped rows not shown */
+									esc_html__( '…and %d more.', 'menuscreen' ),
+									count( $csv_result['skipped'] ) - 10
+								);
+								?>
+							</p>
+						<?php endif; ?>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
+	</div>
 
 	<div class="menuscreen-card">
 		<h2><?php esc_html_e( "Today's Special", 'menuscreen' ); ?></h2>

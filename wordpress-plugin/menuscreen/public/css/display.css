@@ -203,3 +203,16 @@ html, body {
 .menuscreen-theme-colorful .menuscreen-item-price { color: #fef08a; }
 .menuscreen-theme-colorful .menuscreen-sold-out-badge { background: rgba(0,0,0,.6); color: #fff; }
 .menuscreen-theme-colorful .menuscreen-special { background: #fde047; color: #1e293b; }
+
+.menuscreen-theme-custom {
+	background: var(--menuscreen-background, #0f172a);
+	color: var(--menuscreen-text, #fff);
+	font-family: var(--menuscreen-font, inherit);
+}
+.menuscreen-theme-custom .menuscreen-business-name { color: var(--menuscreen-text, #fff); }
+.menuscreen-theme-custom .menuscreen-category-title { color: var(--menuscreen-primary, #ea580c); border-color: var(--menuscreen-primary, #ea580c); }
+.menuscreen-theme-custom .menuscreen-menu-item { background: color-mix(in srgb, var(--menuscreen-primary, #ea580c) 10%, transparent); border: 1px solid color-mix(in srgb, var(--menuscreen-primary, #ea580c) 30%, transparent); }
+.menuscreen-theme-custom .menuscreen-item-desc { opacity: 0.75; }
+.menuscreen-theme-custom .menuscreen-item-price { color: var(--menuscreen-primary, #ea580c); }
+.menuscreen-theme-custom .menuscreen-sold-out-badge { background: var(--menuscreen-primary, #ea580c); color: #fff; }
+.menuscreen-theme-custom .menuscreen-special { background: var(--menuscreen-primary, #ea580c); color: #fff; }

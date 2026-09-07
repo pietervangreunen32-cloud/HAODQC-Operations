@@ -42,9 +42,34 @@
 		}
 	}
 
+	function ensureGoogleFont( query ) {
+		var id = 'menuscreen-custom-font';
+		var existing = document.getElementById( id );
+		var href = 'https://fonts.googleapis.com/css2?family=' + query + '&display=swap';
+		if ( existing ) {
+			if ( existing.getAttribute( 'href' ) !== href ) {
+				existing.setAttribute( 'href', href );
+			}
+			return;
+		}
+		var link = document.createElement( 'link' );
+		link.id = id;
+		link.rel = 'stylesheet';
+		link.href = href;
+		document.head.appendChild( link );
+	}
+
 	function render( data ) {
 		document.title = data.name + ' — Menu';
 		document.body.className = 'menuscreen-display menuscreen-theme-' + data.theme + ' menuscreen-orientation-' + data.orientation;
+
+		if ( 'custom' === data.theme && data.custom ) {
+			document.body.style.setProperty( '--menuscreen-primary', data.custom.primaryColor );
+			document.body.style.setProperty( '--menuscreen-background', data.custom.backgroundColor );
+			document.body.style.setProperty( '--menuscreen-text', data.custom.textColor );
+			document.body.style.setProperty( '--menuscreen-font', data.custom.fontFamily );
+			ensureGoogleFont( data.custom.googleFontQuery );
+		}
 
 		var html = '';
 

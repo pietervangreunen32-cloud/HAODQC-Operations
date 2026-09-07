@@ -30,10 +30,13 @@ class MenuScreen {
 
 	private function includes() {
 		require_once MENUSCREEN_DIR . 'includes/class-settings.php';
+		require_once MENUSCREEN_DIR . 'includes/class-plans.php';
 		require_once MENUSCREEN_DIR . 'includes/class-post-type.php';
 		require_once MENUSCREEN_DIR . 'includes/class-display.php';
 		require_once MENUSCREEN_DIR . 'includes/class-rest-api.php';
 		require_once MENUSCREEN_DIR . 'includes/class-ajax.php';
+		require_once MENUSCREEN_DIR . 'includes/class-csv-import.php';
+		require_once MENUSCREEN_DIR . 'includes/class-woocommerce.php';
 
 		// The admin dashboard (menu pages, uploads, wizard) is only needed in wp-admin.
 		if ( is_admin() ) {
@@ -48,6 +51,8 @@ class MenuScreen {
 		MenuScreen_Display::init();
 		MenuScreen_Rest_Api::init();
 		MenuScreen_Ajax::init();
+		MenuScreen_Csv_Import::init();
+		MenuScreen_Woocommerce::init();
 
 		if ( is_admin() ) {
 			MenuScreen_Admin::init();
