@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { createItem } from "@/lib/actions/menu";
+import { createCombo } from "@/lib/actions/combos";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 
-export function AddItemForm({ categoryId }: { categoryId: string }) {
+export function AddComboForm() {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -13,9 +13,7 @@ export function AddItemForm({ categoryId }: { categoryId: string }) {
 
   if (!open) {
     return (
-      <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-        + Add item
-      </Button>
+      <Button onClick={() => setOpen(true)}>+ Add combo</Button>
     );
   }
 
@@ -24,10 +22,9 @@ export function AddItemForm({ categoryId }: { categoryId: string }) {
       ref={formRef}
       action={(formData) => {
         setError(null);
-        formData.set("categoryId", categoryId);
         startTransition(async () => {
           try {
-            await createItem(formData);
+            await createCombo(formData);
             formRef.current?.reset();
             setOpen(false);
           } catch (e) {
@@ -39,39 +36,27 @@ export function AddItemForm({ categoryId }: { categoryId: string }) {
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor={`new-name-${categoryId}`}>Name</Label>
-          <Input id={`new-name-${categoryId}`} name="name" required placeholder="Carne Asada Taco" />
+          <Label htmlFor="new-combo-name">Name</Label>
+          <Input id="new-combo-name" name="name" required placeholder="Crunch Combo" />
         </div>
         <div>
-          <Label htmlFor={`new-price-${categoryId}`}>Price ($)</Label>
-          <Input
-            id={`new-price-${categoryId}`}
-            name="price"
-            type="number"
-            step="0.01"
-            min="0"
-            required
-            placeholder="4.50"
-          />
+          <Label htmlFor="new-combo-price">Price ($)</Label>
+          <Input id="new-combo-price" name="price" type="number" step="0.01" min="0" required placeholder="12.00" />
         </div>
       </div>
       <div>
-        <Label htmlFor={`new-desc-${categoryId}`}>Description (optional)</Label>
-        <Textarea id={`new-desc-${categoryId}`} name="description" rows={2} />
-      </div>
-      <div>
-        <Label htmlFor={`new-photo-${categoryId}`}>Set product image (optional)</Label>
-        <Input
-          id={`new-photo-${categoryId}`}
-          name="photo"
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
+        <Label htmlFor="new-combo-desc">Description</Label>
+        <Textarea
+          id="new-combo-desc"
+          name="description"
+          rows={2}
+          placeholder="6 bites, crispy fries and 1 dipping sauce."
         />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={pending}>
-          {pending ? "Adding…" : "Add item"}
+          {pending ? "Adding…" : "Add combo"}
         </Button>
         <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(false)}>
           Cancel

@@ -8,6 +8,10 @@ export async function getDisplayData(slug: string) {
         orderBy: { order: "asc" },
         include: { items: { orderBy: { order: "asc" } } },
       },
+      combos: {
+        where: { active: true },
+        orderBy: { order: "asc" },
+      },
     },
   });
   if (!business) return null;
@@ -21,18 +25,35 @@ export async function getDisplayData(slug: string) {
     specialActive: business.specialActive,
     specialText: business.specialText,
     updatedAt: business.updatedAt.toISOString(),
+    custom: {
+      primaryColor: business.customPrimaryColor,
+      backgroundColor: business.customBackgroundColor,
+      textColor: business.customTextColor,
+      font: business.customFont,
+    },
     categories: business.categories.map((c) => ({
       id: c.id,
       name: c.name,
-      items: c.items.map((i) => ({
-        id: i.id,
-        name: i.name,
-        description: i.description,
-        price: i.price,
-        photoUrl: i.photoUrl,
-        soldOut: i.soldOut,
-      })),
+      items: c.items
+        .filter((i) => !(business.hideSoldOutItems && i.soldOut))
+        .map((i) => ({
+          id: i.id,
+          name: i.name,
+          description: i.description,
+          price: i.price,
+          photoUrl: i.photoUrl,
+          soldOut: i.soldOut,
+        })),
     })),
+    combos:
+      business.showCombosOnDisplay
+        ? business.combos.map((c) => ({
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            price: c.price,
+          }))
+        : [],
   };
 }
 

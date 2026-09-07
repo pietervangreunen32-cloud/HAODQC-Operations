@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CategoryData } from "@/lib/types";
-import { ThemeName } from "@/lib/themes";
+import { ThemeNameOrCustom } from "@/lib/themes";
 import { MenuBoard } from "@/components/admin/menu-board";
 import { ThemePicker } from "@/components/admin/theme-picker";
 import { CopyLinkButton } from "@/components/admin/copy-link-button";
@@ -22,7 +22,7 @@ export function SetupWizard({
   qrDataUrl,
 }: {
   categories: CategoryData[];
-  theme: ThemeName;
+  theme: ThemeNameOrCustom;
   orientation: "LANDSCAPE" | "PORTRAIT";
   displayUrl: string;
   qrDataUrl: string;
@@ -117,7 +117,7 @@ export function SetupWizard({
             onClick={() =>
               startTransition(async () => {
                 await completeOnboarding();
-                router.push("/admin");
+                router.push("/admin/dashboard");
               })
             }
           >

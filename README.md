@@ -100,6 +100,25 @@ logged out) before handing this over, so the golden path is verified working.
 4. **Themes + QR + setup wizard** — four built-in themes (Neon, Chalkboard,
    Minimalist, Colorful), a landscape/portrait switch, a QR code + copyable
    link, and a 3-step guided setup after signup.
+5. **Combos & upsells** — bundle items into a combo (name, description,
+   price), shown as their own section on the display; can be hidden without
+   deleting them.
+6. **Owner dashboard** — a landing page after login showing menu/combo
+   counts, display view count, and current plan usage at a glance.
+7. **Bulk CSV import** — upload a CSV (category, name, description, price,
+   sold_out) to add many items at once; unknown categories are created
+   automatically, bad rows are skipped with a reason shown, not silently
+   dropped.
+8. **Custom branding (Fleet plan)** — a 5th "Custom" theme with a color
+   picker (accent/background/text) and a choice of 6 self-hosted Google
+   Fonts, live-previewed before saving. Plus a "hide sold-out items
+   entirely" display toggle as an example of a functionality setting,
+   alongside the combos visibility toggle.
+9. **Plans (Sampler / Rush / Fleet)** — the data model, limits, and pricing
+   are defined (`src/lib/plans.ts`) and the dashboard shows real usage
+   against them, but there's no billing yet — every account is Sampler
+   and nothing is actually blocked except CSV import past the Sampler
+   item limit (see Assumptions below).
 
 ## Deploying to production
 
@@ -145,13 +164,30 @@ Vercel's environment variables.
   one category into another.** To move an item to a different category
   today you'd delete and re-add it; I can add a category dropdown on the
   edit form, or true cross-category dragging, if that's something you need.
-- **Not yet built (deliberately deferred, per your "nice-to-haves only
-  after the core works" instruction):** view-count analytics beyond the
-  simple counter already in the data model (`Business.viewCount`, incremented
-  on each display page load — not yet surfaced in the dashboard UI),
-  multi-language toggle on the display, and time-of-day menu scheduling
-  (e.g. breakfast vs. lunch). All three are additive and don't require
-  reworking anything already built — happy to add any of them next.
+- **Not yet built (deliberately deferred):** multi-language toggle on the
+  display, and time-of-day menu scheduling (e.g. breakfast vs. lunch).
+  Both are additive and don't require reworking anything already built.
+- **Combos show as a persistent section, not a rotating slide.** The
+  inspiration example (Dip 'n Crunch) rotates a "Make it a Combo" slide
+  into a single-item-at-a-time TV rotation; MenuScreen's display shows
+  every category at once instead, so combos are just one more
+  always-visible section rather than something to rotate in and out. If
+  you want the rotating-slideshow style instead, that's a different
+  display model and worth a separate conversation.
+- **Currency mismatch, worth resolving:** the app still hard-codes USD for
+  item prices (flagged above, unresolved), but I priced the Rush/Fleet
+  plans in Rand (`src/lib/plans.ts`) since your example was in Rand. If
+  your customers are priced in Rand, the item-price currency should
+  probably switch too — one change, just flagging that these two numbers
+  currently don't match.
+- **Plans exist as data, not yet as a real gate.** `Business.plan`
+  defaults to Sampler for everyone; nothing charges anyone yet. The one
+  place I did add real enforcement is CSV import — it skips rows past the
+  Sampler 10-item limit with a clear reason — since bulk-adding past a
+  limit in one shot seemed worth guarding against even before billing
+  exists. Manually adding items one-by-one is not yet blocked at the
+  Sampler limit; that, plus PayFast/PayPal checkout and an upgrade flow,
+  is the last stage we agreed to do once everything else was in place.
 - **Long menus scroll rather than paginate/auto-scroll** on the display
   page. For a very large menu on a small TV this may not all fit on
   screen at once; if that turns out to matter in practice, an auto-scrolling

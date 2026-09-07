@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
-import { ItemData } from "@/lib/types";
-import { deleteItem, toggleSoldOut, updateItem } from "@/lib/actions/menu";
+import { ComboData } from "@/lib/types";
+import { deleteCombo, toggleComboActive, updateCombo } from "@/lib/actions/combos";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { formatPrice, cn } from "@/lib/utils";
 import { SortableItem, DragHandle } from "@/components/admin/sortable";
 
-export function ItemRow({ item }: { item: ItemData }) {
+export function ComboRow({ combo }: { combo: ComboData }) {
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +19,10 @@ export function ItemRow({ item }: { item: ItemData }) {
         <form
           action={(formData) => {
             setError(null);
-            formData.set("itemId", item.id);
+            formData.set("comboId", combo.id);
             startTransition(async () => {
               try {
-                await updateItem(formData);
+                await updateCombo(formData);
                 setEditing(false);
               } catch (e) {
                 setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -34,40 +33,31 @@ export function ItemRow({ item }: { item: ItemData }) {
         >
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <Label htmlFor={`name-${item.id}`}>Name</Label>
-              <Input id={`name-${item.id}`} name="name" defaultValue={item.name} required />
+              <Label htmlFor={`combo-name-${combo.id}`}>Name</Label>
+              <Input id={`combo-name-${combo.id}`} name="name" defaultValue={combo.name} required />
             </div>
             <div>
-              <Label htmlFor={`price-${item.id}`}>Price ($)</Label>
+              <Label htmlFor={`combo-price-${combo.id}`}>Price ($)</Label>
               <Input
-                id={`price-${item.id}`}
+                id={`combo-price-${combo.id}`}
                 name="price"
                 type="number"
                 step="0.01"
                 min="0"
-                defaultValue={item.price}
+                defaultValue={combo.price}
                 required
               />
             </div>
           </div>
           <div>
-            <Label htmlFor={`desc-${item.id}`}>Description (optional)</Label>
+            <Label htmlFor={`combo-desc-${combo.id}`}>Description</Label>
             <Textarea
-              id={`desc-${item.id}`}
+              id={`combo-desc-${combo.id}`}
               name="description"
               rows={2}
-              defaultValue={item.description ?? ""}
+              defaultValue={combo.description ?? ""}
+              placeholder="6 bites, crispy fries and 1 dipping sauce."
             />
-          </div>
-          <div>
-            <Label htmlFor={`photo-${item.id}`}>Set product image (optional)</Label>
-            <Input id={`photo-${item.id}`} name="photo" type="file" accept="image/png,image/jpeg,image/webp" />
-            {item.photoUrl && (
-              <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-                <input type="checkbox" name="removePhoto" className="rounded" />
-                Remove current photo
-              </label>
-            )}
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-2">
@@ -84,51 +74,40 @@ export function ItemRow({ item }: { item: ItemData }) {
   }
 
   return (
-    <SortableItem id={item.id}>
+    <SortableItem id={combo.id}>
       {({ attributes, listeners }) => (
         <div
           className={cn(
             "flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3",
-            item.soldOut && "opacity-60"
+            !combo.active && "opacity-60"
           )}
         >
           <DragHandle attributes={attributes} listeners={listeners} />
-          {item.photoUrl ? (
-            <Image
-              src={item.photoUrl}
-              alt=""
-              width={48}
-              height={48}
-              className="h-12 w-12 rounded-md object-cover"
-            />
-          ) : (
-            <div className="h-12 w-12 rounded-md bg-slate-100" />
-          )}
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-2">
-              <span className="truncate font-medium text-slate-900">{item.name}</span>
-              {item.soldOut && (
-                <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-700">
-                  SOLD OUT
+              <span className="truncate font-medium text-slate-900">{combo.name}</span>
+              {!combo.active && (
+                <span className="rounded bg-slate-200 px-1.5 py-0.5 text-xs font-semibold text-slate-600">
+                  HIDDEN
                 </span>
               )}
             </div>
-            {item.description && (
-              <p className="truncate text-sm text-slate-500">{item.description}</p>
+            {combo.description && (
+              <p className="truncate text-sm text-slate-500">{combo.description}</p>
             )}
           </div>
           <span className="whitespace-nowrap font-medium text-slate-700">
-            {formatPrice(item.price)}
+            {formatPrice(combo.price)}
           </span>
           <Button
-            variant={item.soldOut ? "secondary" : "danger"}
+            variant={combo.active ? "secondary" : "primary"}
             size="sm"
             disabled={pending}
             onClick={() =>
-              startTransition(() => toggleSoldOut(item.id, !item.soldOut))
+              startTransition(() => toggleComboActive(combo.id, !combo.active))
             }
           >
-            {item.soldOut ? "Mark available" : "Sold out"}
+            {combo.active ? "Hide" : "Show"}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
             Edit
@@ -138,8 +117,8 @@ export function ItemRow({ item }: { item: ItemData }) {
             size="sm"
             disabled={pending}
             onClick={() => {
-              if (confirm(`Delete "${item.name}"?`)) {
-                startTransition(() => deleteItem(item.id));
+              if (confirm(`Delete "${combo.name}"?`)) {
+                startTransition(() => deleteCombo(combo.id));
               }
             }}
           >

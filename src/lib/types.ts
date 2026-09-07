@@ -14,3 +14,12 @@ export type CategoryData = {
   order: number;
   items: ItemData[];
 };
+
+export type ComboData = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  active: boolean;
+  order: number;
+};

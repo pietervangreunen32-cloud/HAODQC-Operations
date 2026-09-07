@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireBusinessWithMenu } from "@/lib/current-business";
 import { MenuBoard } from "@/components/admin/menu-board";
 import { SpecialBanner } from "@/components/admin/special-banner";
+import { CsvImportForm } from "@/components/admin/csv-import-form";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminMenuPage() {
@@ -16,9 +17,12 @@ export default async function AdminMenuPage() {
             Changes show up on your display within seconds.
           </p>
         </div>
-        <Link href={`/display/${business.slug}`} target="_blank">
-          <Button variant="secondary">Preview display ↗</Button>
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <CsvImportForm />
+          <Link href={`/display/${business.slug}`} target="_blank">
+            <Button variant="secondary">Preview display ↗</Button>
+          </Link>
+        </div>
       </div>
 
       <SpecialBanner initialActive={business.specialActive} initialText={business.specialText ?? ""} />

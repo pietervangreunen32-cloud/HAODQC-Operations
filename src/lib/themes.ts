@@ -1,6 +1,42 @@
 export const THEMES = ["NEON", "CHALKBOARD", "MINIMALIST", "COLORFUL"] as const;
 export type ThemeName = (typeof THEMES)[number];
 
+// CUSTOM is a separate, Fleet-plan theme: its colors come from the
+// business's own customPrimaryColor/customBackgroundColor/etc. fields
+// (applied as inline styles in DisplayView) rather than a fixed class set
+// here, so it isn't part of THEMES/THEME_META (the pickable preset list).
+export type ThemeNameOrCustom = ThemeName | "CUSTOM";
+
+// A curated, small list rather than free-text font entry — keeps the
+// display fast (only the fonts actually offered ever get loaded) and
+// avoids arbitrary text ending up in a Google Fonts URL.
+export const CUSTOM_FONTS = [
+  { value: "poppins", label: "Poppins (clean & modern)", family: "Poppins:wght@400;700;900" },
+  { value: "inter", label: "Inter (neutral & readable)", family: "Inter:wght@400;700;900" },
+  { value: "playfair", label: "Playfair Display (elegant serif)", family: "Playfair+Display:wght@700;900" },
+  { value: "bebas", label: "Bebas Neue (bold & condensed)", family: "Bebas+Neue" },
+  { value: "caveat", label: "Caveat (handwritten)", family: "Caveat:wght@600;700" },
+  { value: "oswald", label: "Oswald (punchy & condensed)", family: "Oswald:wght@400;700" },
+] as const;
+export type CustomFontValue = (typeof CUSTOM_FONTS)[number]["value"];
+
+export function customFontFamily(value: string | null | undefined) {
+  const found = CUSTOM_FONTS.find((f) => f.value === value);
+  return found ? found.family : CUSTOM_FONTS[0].family;
+}
+
+export function customFontCss(value: string | null | undefined) {
+  const found = CUSTOM_FONTS.find((f) => f.value === value) ?? CUSTOM_FONTS[0];
+  // The part before ":" in the Google Fonts family string is the actual
+  // CSS font-family name (spaces restored from the URL's "+" separator).
+  return found.family.split(":")[0].replace(/\+/g, " ");
+}
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+export function isValidHexColor(value: string): boolean {
+  return HEX_COLOR_RE.test(value);
+}
+
 export const THEME_META: Record<ThemeName, { label: string; blurb: string; swatch: string }> = {
   NEON: {
     label: "Dark Neon",

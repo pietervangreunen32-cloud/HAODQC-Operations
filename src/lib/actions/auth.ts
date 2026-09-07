@@ -95,7 +95,7 @@ export async function loginAction(
     throw error;
   }
 
-  redirect("/admin");
+  redirect("/admin/dashboard");
 }
 
 export async function logoutAction() {

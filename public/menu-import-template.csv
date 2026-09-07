@@ -1,0 +1,5 @@
+category,name,description,price,sold_out
+Mains,Carne Asada Taco,"Grilled steak, onions and cilantro",4.50,FALSE
+Mains,Chicken Taco,Marinated grilled chicken,4.00,FALSE
+Sides,Chips & Salsa,House-made tortilla chips,3.50,FALSE
+Drinks,Horchata,Iced rice and cinnamon drink,3.00,FALSE

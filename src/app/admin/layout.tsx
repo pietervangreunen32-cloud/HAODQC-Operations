@@ -4,8 +4,10 @@ import { logoutAction } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
+  { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin", label: "Menu" },
-  { href: "/admin/theme", label: "Theme" },
+  { href: "/admin/combos", label: "Combos" },
+  { href: "/admin/theme", label: "Theme & Settings" },
   { href: "/admin/display", label: "Display & QR" },
   { href: "/admin/help", label: "Put it on a TV" },
 ];

@@ -19,11 +19,22 @@ enum Theme {
   CHALKBOARD
   MINIMALIST
   COLORFUL
+  CUSTOM
 }
 
 enum Orientation {
   LANDSCAPE
   PORTRAIT
+}
+
+// Sampler = free tier (limited products). Rush = unlimited products + more
+// features. Fleet = everything, including custom branding. Billing/upgrade
+// flow and enforcement of these limits comes later — this field exists now
+// so the dashboard can show real plan/usage info ahead of that.
+enum Plan {
+  SAMPLER
+  RUSH
+  FLEET
 }
 
 model User {
@@ -47,21 +58,43 @@ model PasswordResetToken {
 }
 
 model Business {
-  id            String       @id @default(cuid())
-  ownerId       String
-  owner         User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  name          String
-  slug          String       @unique
-  theme         Theme        @default(NEON)
-  orientation   Orientation  @default(LANDSCAPE)
-  logoUrl       String?
-  specialText   String?
-  specialActive Boolean      @default(false)
-  onboardedAt   DateTime?
-  viewCount     Int          @default(0)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  categories    MenuCategory[]
+  id                   String         @id @default(cuid())
+  ownerId              String
+  owner                User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name                 String
+  slug                 String         @unique
+  theme                Theme          @default(NEON)
+  orientation          Orientation    @default(LANDSCAPE)
+  logoUrl              String?
+  specialText          String?
+  specialActive        Boolean        @default(false)
+  onboardedAt          DateTime?
+  viewCount            Int            @default(0)
+  plan                 Plan           @default(SAMPLER)
+  showCombosOnDisplay  Boolean        @default(true)
+  hideSoldOutItems     Boolean        @default(false)
+  // Only used when theme = CUSTOM (Fleet-tier branding).
+  customPrimaryColor   String?
+  customBackgroundColor String?
+  customTextColor      String?
+  customFont           String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  categories           MenuCategory[]
+  combos               Combo[]
+}
+
+model Combo {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model MenuCategory {

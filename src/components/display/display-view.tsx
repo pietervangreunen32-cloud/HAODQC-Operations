@@ -4,10 +4,29 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { DisplayData } from "@/lib/display-data";
 import { THEME_CLASSES, ThemeName } from "@/lib/themes";
+import { customFontClassName } from "@/lib/custom-fonts";
 import { formatPrice, cn } from "@/lib/utils";
 
 const POLL_INTERVAL_MS = 20_000;
 const CACHE_KEY_PREFIX = "menuscreen:display:";
+
+// Same shape as an entry in THEME_CLASSES, but every color points at a CSS
+// variable set inline on the wrapper below — Tailwind v4 supports opacity
+// modifiers (e.g. /30) on arbitrary var() colors, so this reuses the exact
+// same utility patterns the 4 preset themes use.
+const CUSTOM_THEME_CLASSES = {
+  page: "bg-[var(--mc-bg)] text-[var(--mc-text)]",
+  heading: "text-[var(--mc-primary)]",
+  businessName: "text-[var(--mc-primary)]",
+  categoryTitle: "text-[var(--mc-primary)] border-b-2 border-[var(--mc-primary)]/60",
+  card: "bg-[var(--mc-primary)]/10 border border-[var(--mc-primary)]/30",
+  itemName: "text-[var(--mc-text)]",
+  itemDesc: "text-[var(--mc-text)]/70",
+  price: "text-[var(--mc-primary)]",
+  soldOutCard: "opacity-40 grayscale",
+  soldOutBadge: "bg-[var(--mc-primary)] text-[var(--mc-bg)]",
+  special: "bg-[var(--mc-primary)] text-[var(--mc-bg)]",
+};
 
 export function DisplayView({
   slug,
@@ -73,11 +92,27 @@ export function DisplayView({
     };
   }, [slug]);
 
-  const theme = THEME_CLASSES[data.theme as ThemeName] ?? THEME_CLASSES.NEON;
+  const isCustom = data.theme === "CUSTOM";
+  const theme = isCustom ? CUSTOM_THEME_CLASSES : (THEME_CLASSES[data.theme as ThemeName] ?? THEME_CLASSES.NEON);
   const isPortrait = data.orientation === "PORTRAIT";
 
+  const customVars = isCustom
+    ? ({
+        "--mc-bg": data.custom.backgroundColor || "#0f172a",
+        "--mc-text": data.custom.textColor || "#ffffff",
+        "--mc-primary": data.custom.primaryColor || "#ea580c",
+      } as React.CSSProperties)
+    : undefined;
+
   return (
-    <div className={cn("min-h-screen w-full overflow-hidden", theme.page)}>
+    <div
+      className={cn(
+        "min-h-screen w-full overflow-hidden",
+        theme.page,
+        isCustom && customFontClassName(data.custom.font)
+      )}
+      style={customVars}
+    >
       <div className="mx-auto flex h-screen max-w-[1800px] flex-col px-8 py-6 sm:px-12">
         <header className="mb-4 flex items-center gap-4">
           {data.logoUrl && (
@@ -175,6 +210,36 @@ export function DisplayView({
               </div>
             </section>
           ))}
+
+          {data.combos.length > 0 && (
+            <section className="min-w-0">
+              <h2
+                className={cn(
+                  "mb-3 rounded-xl px-4 py-2 text-2xl font-bold uppercase tracking-wide sm:text-3xl",
+                  theme.special
+                )}
+              >
+                Combos &amp; Upsells
+              </h2>
+              <div className="space-y-3">
+                {data.combos.map((combo) => (
+                  <div key={combo.id} className={cn("relative flex items-center gap-4 rounded-xl p-4", theme.card)}>
+                    <div className="min-w-0 flex-1">
+                      <span className={cn("text-xl font-bold sm:text-2xl", theme.itemName)}>
+                        {combo.name}
+                      </span>
+                      {combo.description && (
+                        <p className={cn("mt-0.5 text-base", theme.itemDesc)}>{combo.description}</p>
+                      )}
+                    </div>
+                    <span className={cn("shrink-0 text-xl font-bold sm:text-2xl", theme.price)}>
+                      {formatPrice(combo.price)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </div>

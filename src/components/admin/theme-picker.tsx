@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateOrientation, updateTheme } from "@/lib/actions/settings";
-import { THEME_META, THEMES, ThemeName } from "@/lib/themes";
+import { THEME_META, THEMES, ThemeNameOrCustom } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ export function ThemePicker({
   initialTheme,
   initialOrientation,
 }: {
-  initialTheme: ThemeName;
+  initialTheme: ThemeNameOrCustom;
   initialOrientation: "LANDSCAPE" | "PORTRAIT";
 }) {
   const [theme, setTheme] = useState(initialTheme);
