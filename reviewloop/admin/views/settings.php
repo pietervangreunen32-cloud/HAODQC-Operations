@@ -104,21 +104,21 @@ $settings = ReviewLoop_Settings::get_all();
 						<p class="description"><?php esc_html_e( 'Only enter the API key for whichever provider you pick above. If you choose "None", new reviews will simply wait on the Reviews screen for you to type a reply yourself.', 'reviewloop' ); ?></p>
 					</td>
 				</tr>
-				<tr>
+				<tr data-ai-key-for="claude">
 					<th><label for="anthropic_api_key"><?php esc_html_e( 'Anthropic API key', 'reviewloop' ); ?></label></th>
 					<td>
 						<input type="password" id="anthropic_api_key" name="anthropic_api_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $settings['anthropic_api_key'] ); ?>">
 						<p class="description"><?php esc_html_e( 'Get a key from console.anthropic.com.', 'reviewloop' ); ?></p>
 					</td>
 				</tr>
-				<tr>
+				<tr data-ai-key-for="openai">
 					<th><label for="openai_api_key"><?php esc_html_e( 'OpenAI API key', 'reviewloop' ); ?></label></th>
 					<td>
 						<input type="password" id="openai_api_key" name="openai_api_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $settings['openai_api_key'] ); ?>">
 						<p class="description"><?php esc_html_e( 'Get a key from platform.openai.com.', 'reviewloop' ); ?></p>
 					</td>
 				</tr>
-				<tr>
+				<tr data-ai-key-for="gemini">
 					<th><label for="gemini_api_key"><?php esc_html_e( 'Gemini API key', 'reviewloop' ); ?></label></th>
 					<td>
 						<input type="password" id="gemini_api_key" name="gemini_api_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $settings['gemini_api_key'] ); ?>">

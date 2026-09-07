@@ -69,9 +69,8 @@ class ReviewLoop_License_Settings {
 	}
 
 	public function render_panel( $settings ) {
-		$plan          = ReviewLoop_License::get_plan();
-		$starter_price = defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month';
-		$pro_price     = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
+		$plan      = ReviewLoop_License::get_plan();
+		$pro_price = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
 		?>
 		<div class="reviewloop-panel">
 			<h2><?php esc_html_e( 'Plan & License', 'reviewloop' ); ?></h2>
@@ -90,22 +89,7 @@ class ReviewLoop_License_Settings {
 				<?php endif; ?>
 			</p>
 
-			<table class="widefat" style="max-width:640px;margin-bottom:16px;">
-				<thead>
-					<tr>
-						<th></th>
-						<th><?php esc_html_e( 'Free', 'reviewloop' ); ?></th>
-						<th><?php echo esc_html( sprintf( __( 'Starter (%s)', 'reviewloop' ), $starter_price ) ); ?></th>
-						<th><?php echo esc_html( sprintf( __( 'Pro (%s)', 'reviewloop' ), $pro_price ) ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr><td><?php esc_html_e( 'Message sequence + AI replies', 'reviewloop' ); ?></td><td>✓</td><td>✓</td><td>✓</td></tr>
-					<tr><td><?php esc_html_e( 'AI-reply approvals', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Up to 10 total', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Unlimited', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Unlimited', 'reviewloop' ); ?></td></tr>
-					<tr><td><?php esc_html_e( 'CSV bulk import', 'reviewloop' ); ?></td><td>—</td><td>✓</td><td>✓</td></tr>
-					<tr><td><?php esc_html_e( 'WooCommerce auto-hook', 'reviewloop' ); ?></td><td>—</td><td>—</td><td>✓</td></tr>
-				</tbody>
-			</table>
+			<?php echo ReviewLoop_License::render_plan_cards(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
 			<?php if ( 'pro' === $plan ) : ?>
 				<table class="form-table">

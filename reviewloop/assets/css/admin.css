@@ -232,3 +232,170 @@
 	color: var(--rl-muted);
 	font-size: 13px;
 }
+
+/* Educational "why this matters" intro blocks on the dashboard */
+.rl-info-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 16px;
+}
+
+.rl-info-block h3 {
+	margin: 0 0 6px;
+	font-size: 14px;
+	color: var(--rl-ink);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.rl-info-block h3 .rl-info-letter {
+	flex: 0 0 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--rl-primary-light);
+	color: var(--rl-primary-dark);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.rl-info-block p,
+.rl-info-block ul {
+	margin: 0;
+	color: var(--rl-muted);
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.rl-info-block ul {
+	padding-left: 18px;
+}
+
+/* Pricing cards, styled to match the GrowthCraft plan cards */
+.rl-plans-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 20px;
+}
+
+@media (max-width: 900px) {
+	.rl-plans-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.rl-plan-card {
+	background: var(--rl-bg);
+	border: 1px solid var(--rl-border);
+	border-radius: 14px;
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+}
+
+.rl-plan-card--highlight {
+	background: linear-gradient(160deg, #0b3a34, #062421);
+	border-color: #062421;
+	color: #fff;
+}
+
+.rl-plan-badge {
+	display: inline-block;
+	align-self: flex-start;
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: var(--rl-primary-light);
+	color: var(--rl-primary-dark);
+	margin-bottom: 14px;
+}
+
+.rl-plan-card--highlight .rl-plan-badge {
+	background: var(--rl-primary);
+	color: #fff;
+}
+
+.rl-plan-card h3 {
+	margin: 0 0 4px;
+	font-size: 20px;
+}
+
+.rl-plan-price {
+	font-weight: 700;
+	font-size: 14px;
+	margin-bottom: 16px;
+}
+
+.rl-plan-card--highlight .rl-plan-price {
+	color: #d7f5ef;
+}
+
+.rl-plan-features {
+	list-style: none;
+	margin: 0 0 16px;
+	padding: 0;
+	flex-grow: 1;
+}
+
+.rl-plan-features li {
+	padding: 5px 0 5px 22px;
+	position: relative;
+	font-size: 13px;
+}
+
+.rl-plan-features li::before {
+	content: "✓";
+	position: absolute;
+	left: 0;
+	color: var(--rl-primary);
+	font-weight: 700;
+}
+
+.rl-plan-card--highlight .rl-plan-features li::before {
+	color: #4be3c9;
+}
+
+.rl-plan-description {
+	font-size: 12px;
+	font-style: italic;
+	color: var(--rl-muted);
+	margin-bottom: 18px;
+}
+
+.rl-plan-card--highlight .rl-plan-description {
+	color: #a9cec7;
+}
+
+.rl-plan-cta {
+	display: block;
+	text-align: center;
+	padding: 10px 16px;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 13px;
+	text-decoration: none;
+	background: var(--rl-ink);
+	color: #fff !important;
+}
+
+.rl-plan-card--highlight .rl-plan-cta {
+	background: var(--rl-primary);
+}
+
+.rl-plan-cta.rl-plan-cta-current {
+	background: transparent;
+	border: 1px solid var(--rl-border);
+	color: var(--rl-muted) !important;
+	cursor: default;
+}
+
+.rl-plan-card--highlight .rl-plan-cta.rl-plan-cta-current {
+	border-color: rgba(255,255,255,.3);
+	color: #fff !important;
+}

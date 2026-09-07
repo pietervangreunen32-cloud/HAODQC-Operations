@@ -29,5 +29,22 @@
 				$panels.filter( '[data-tab="' + target + '"]' ).show();
 			} );
 		} );
+
+		// Settings screen: only show the API key field for the AI provider currently selected.
+		var $aiProvider = $( '#ai_provider' );
+		if ( $aiProvider.length ) {
+			var $aiKeyRows = $( '[data-ai-key-for]' );
+
+			var syncAiKeyRows = function () {
+				var selected = $aiProvider.val();
+				$aiKeyRows.each( function () {
+					var $row = $( this );
+					$row.toggle( $row.data( 'ai-key-for' ) === selected );
+				} );
+			};
+
+			syncAiKeyRows();
+			$aiProvider.on( 'change', syncAiKeyRows );
+		}
 	} );
 } )( jQuery );

@@ -165,4 +165,82 @@ class ReviewLoop_License {
 			ReviewLoop_Settings::update( $update );
 		}
 	}
+
+	/**
+	 * The 3-card plan comparison shown on both the Dashboard and the
+	 * Settings screen — kept in one place so the two never drift apart.
+	 * Returns HTML (already escaped internally); echo it directly.
+	 */
+	public static function render_plan_cards() {
+		$current       = self::get_plan();
+		$starter_price = defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month';
+		$pro_price     = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
+		$pricing_url   = defined( 'REVIEWLOOP_PRICING_URL' ) ? REVIEWLOOP_PRICING_URL : '#';
+		$free_limit    = defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ? REVIEWLOOP_FREE_REPLY_LIMIT : 10;
+
+		$plans = array(
+			'free'    => array(
+				'badge'       => __( 'Free', 'reviewloop' ),
+				'name'        => __( 'Free', 'reviewloop' ),
+				'price'       => __( '$0/month', 'reviewloop' ),
+				'features'    => array(
+					__( 'Manual customer entry', 'reviewloop' ),
+					__( 'Full message sequence (check-in, review ask, reminder)', 'reviewloop' ),
+					__( 'AI reply drafting — Claude, OpenAI, or Gemini', 'reviewloop' ),
+					sprintf( /* translators: %d: reply limit */ __( 'Up to %d review replies total', 'reviewloop' ), $free_limit ),
+				),
+				'description' => __( 'Best for trying ReviewLoop before you commit.', 'reviewloop' ),
+			),
+			'starter' => array(
+				'badge'       => __( 'Popular', 'reviewloop' ),
+				'name'        => __( 'Starter', 'reviewloop' ),
+				/* translators: %s: price display, e.g. $20/month */
+				'price'       => sprintf( __( 'From %s', 'reviewloop' ), $starter_price ),
+				'features'    => array(
+					__( 'Everything in Free', 'reviewloop' ),
+					__( 'Unlimited AI-drafted (or self-written) replies', 'reviewloop' ),
+					__( 'Bulk CSV import (QuickBooks, Sage, etc.)', 'reviewloop' ),
+				),
+				'description' => __( 'Best for businesses ready to automate reviews without limits.', 'reviewloop' ),
+			),
+			'pro'     => array(
+				'badge'       => __( 'Pro', 'reviewloop' ),
+				'name'        => __( 'Pro', 'reviewloop' ),
+				/* translators: %s: price display, e.g. $49/month */
+				'price'       => sprintf( __( 'From %s', 'reviewloop' ), $pro_price ),
+				'features'    => array(
+					__( 'Everything in Starter', 'reviewloop' ),
+					__( 'Automatic WooCommerce order sync', 'reviewloop' ),
+					__( 'Priority support', 'reviewloop' ),
+				),
+				'description' => __( 'Best for businesses selling through WooCommerce.', 'reviewloop' ),
+			),
+		);
+
+		ob_start();
+		?>
+		<div class="rl-plans-grid">
+			<?php foreach ( $plans as $key => $plan ) : ?>
+				<?php $is_current = ( $key === $current ); ?>
+				<div class="rl-plan-card<?php echo 'starter' === $key ? ' rl-plan-card--highlight' : ''; ?>">
+					<span class="rl-plan-badge"><?php echo esc_html( $plan['badge'] ); ?></span>
+					<h3><?php echo esc_html( $plan['name'] ); ?></h3>
+					<div class="rl-plan-price"><?php echo esc_html( $plan['price'] ); ?></div>
+					<ul class="rl-plan-features">
+						<?php foreach ( $plan['features'] as $feature ) : ?>
+							<li><?php echo esc_html( $feature ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+					<p class="rl-plan-description"><?php echo esc_html( $plan['description'] ); ?></p>
+					<?php if ( $is_current ) : ?>
+						<span class="rl-plan-cta rl-plan-cta-current"><?php esc_html_e( 'Current Plan', 'reviewloop' ); ?></span>
+					<?php elseif ( 'free' !== $key ) : ?>
+						<a class="rl-plan-cta" href="<?php echo esc_url( $pricing_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( sprintf( /* translators: %s: plan name */ __( 'Upgrade to %s', 'reviewloop' ), $plan['name'] ) ); ?></a>
+					<?php endif; ?>
+				</div>
+			<?php endforeach; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
 }

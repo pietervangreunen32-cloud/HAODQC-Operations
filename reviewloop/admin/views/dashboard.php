@@ -1,9 +1,9 @@
 <?php
 /**
- * Dashboard: at-a-glance pipeline counts, recent activity, pending AI
- * replies, plus enough plain-language "why this matters" content that a
- * non-technical owner understands the point of the plugin without leaving
- * wp-admin. Kept read-only — all actions live on their dedicated screens.
+ * Dashboard: leads with plain-language "what is this and why does it
+ * matter" content and the plan comparison, then the pipeline stats and
+ * recent activity below. Kept read-only — all actions live on their
+ * dedicated screens.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,8 +19,6 @@ $recent      = ReviewLoop_Customer::get_list( array( 'per_page' => 5 ) );
 $pending_replies = class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::count_pending_approval() : 0;
 $replies_used     = class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::count_posted_lifetime() : 0;
 $free_limit       = defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ? REVIEWLOOP_FREE_REPLY_LIMIT : 10;
-$starter_price    = defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month';
-$pro_price        = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
 ?>
 <div class="wrap reviewloop-wrap">
 	<div class="reviewloop-header">
@@ -39,6 +37,45 @@ $pro_price        = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_P
 			<p class="rl-tagline"><?php esc_html_e( 'Request. Review. Reply. On autopilot — without ever spamming a customer.', 'reviewloop' ); ?></p>
 		</div>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-add-customer' ) ); ?>" class="button button-primary"><?php esc_html_e( '+ Add Customer', 'reviewloop' ); ?></a>
+	</div>
+
+	<div class="reviewloop-panel">
+		<h2><?php esc_html_e( 'Why this matters for your business', 'reviewloop' ); ?></h2>
+		<div class="rl-info-grid">
+			<div class="rl-info-block">
+				<h3><span class="rl-info-letter">A</span> <?php esc_html_e( 'What is ReviewLoop', 'reviewloop' ); ?></h3>
+				<p><?php esc_html_e( 'A WordPress plugin that quietly asks happy customers for a Google review after you\'ve done the work for them, and drafts replies to reviews as they come in — so your reputation builds itself in the background.', 'reviewloop' ); ?></p>
+			</div>
+			<div class="rl-info-block">
+				<h3><span class="rl-info-letter">B</span> <?php esc_html_e( 'How it works', 'reviewloop' ); ?></h3>
+				<ul>
+					<li><?php esc_html_e( 'Add a customer after the job is done, with their consent confirmed.', 'reviewloop' ); ?></li>
+					<li><?php esc_html_e( 'A short, honest message sequence goes out — check-in, then a genuine review request, one reminder at most.', 'reviewloop' ); ?></li>
+					<li><?php esc_html_e( 'New Google reviews get an AI-drafted reply, waiting for your approval.', 'reviewloop' ); ?></li>
+				</ul>
+			</div>
+			<div class="rl-info-block">
+				<h3><span class="rl-info-letter">C</span> <?php esc_html_e( 'Benefits of using it', 'reviewloop' ); ?></h3>
+				<ul>
+					<li><?php esc_html_e( 'No more remembering to ask for reviews — it happens automatically.', 'reviewloop' ); ?></li>
+					<li><?php esc_html_e( 'Unhappy customers are never pushed for a review — they\'re flagged for you instead.', 'reviewloop' ); ?></li>
+					<li><?php esc_html_e( 'Every reply is on-brand and ready in seconds, not something you have to sit down and write.', 'reviewloop' ); ?></li>
+				</ul>
+			</div>
+			<div class="rl-info-block">
+				<h3><span class="rl-info-letter">D</span> <?php esc_html_e( 'Reviews, rankings, and replying', 'reviewloop' ); ?></h3>
+				<ul>
+					<li><?php esc_html_e( 'Recent, genuine reviews are one of the signals Google uses to rank local businesses in Maps and search.', 'reviewloop' ); ?></li>
+					<li><?php esc_html_e( 'Star rating and review count are often the first thing a customer compares before visiting your website.', 'reviewloop' ); ?></li>
+					<li><?php esc_html_e( 'Replying — especially to negative reviews — shows you\'re engaged, and Google has said it can help local ranking too.', 'reviewloop' ); ?></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="reviewloop-panel">
+		<h2><?php esc_html_e( 'Plans', 'reviewloop' ); ?></h2>
+		<?php echo ReviewLoop_License::render_plan_cards(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</div>
 
 	<div class="reviewloop-cards">
@@ -68,7 +105,7 @@ $pro_price        = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_P
 			<div style="background:#0f9d8c;height:10px;width:<?php echo esc_attr( min( 100, round( ( $replies_used / max( 1, $free_limit ) ) * 100 ) ) ); ?>%;"></div>
 		</div>
 		<?php if ( $replies_used >= $free_limit ) : ?>
-			<p style="margin-top:12px;"><strong><?php esc_html_e( 'You\'ve used all your free replies.', 'reviewloop' ); ?></strong> <?php echo esc_html( sprintf( __( 'Upgrade to Starter (%s) for unlimited AI replies plus CSV import.', 'reviewloop' ), $starter_price ) ); ?></p>
+			<p style="margin-top:12px;"><strong><?php esc_html_e( 'You\'ve used all your free replies.', 'reviewloop' ); ?></strong> <?php esc_html_e( 'Upgrade above for unlimited AI replies plus CSV import.', 'reviewloop' ); ?></p>
 		<?php endif; ?>
 	</div>
 	<?php endif; ?>
@@ -78,7 +115,6 @@ $pro_price        = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_P
 		<?php if ( empty( $recent ) ) : ?>
 			<div class="rl-empty-state">
 				<p><?php esc_html_e( 'No customers yet. Add your first one to start the review request sequence.', 'reviewloop' ); ?></p>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-add-customer' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Add Customer', 'reviewloop' ); ?></a>
 			</div>
 		<?php else : ?>
 			<table class="widefat striped">
@@ -104,63 +140,4 @@ $pro_price        = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_P
 			<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-customers' ) ); ?>"><?php esc_html_e( 'View all customers →', 'reviewloop' ); ?></a></p>
 		<?php endif; ?>
 	</div>
-
-	<div class="reviewloop-panel">
-		<h2><?php esc_html_e( 'How ReviewLoop works', 'reviewloop' ); ?></h2>
-		<div class="rl-onboarding-steps">
-			<div class="rl-onboarding-step">
-				<div class="rl-step-number">1</div>
-				<div>
-					<h3><?php esc_html_e( 'Add a customer after you\'ve done the work', 'reviewloop' ); ?></h3>
-					<p><?php esc_html_e( 'Manually, from a CSV export of your accounting/CRM system, or automatically from WooCommerce orders — with their consent confirmed first.', 'reviewloop' ); ?></p>
-				</div>
-			</div>
-			<div class="rl-onboarding-step">
-				<div class="rl-step-number">2</div>
-				<div>
-					<h3><?php esc_html_e( 'A short, honest message sequence goes out', 'reviewloop' ); ?></h3>
-					<p><?php esc_html_e( 'A friendly check-in, then a genuine review request — only to customers who didn\'t flag a problem. One reminder at most, then it stops for good.', 'reviewloop' ); ?></p>
-				</div>
-			</div>
-			<div class="rl-onboarding-step">
-				<div class="rl-step-number">3</div>
-				<div>
-					<h3><?php esc_html_e( 'New Google reviews get an AI-drafted reply', 'reviewloop' ); ?></h3>
-					<p><?php esc_html_e( 'Waiting for your approval by default — thankful in tone for positive reviews, calm and solution-focused for negative ones.', 'reviewloop' ); ?></p>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div class="reviewloop-panel">
-		<h2><?php esc_html_e( 'Why this matters for your business', 'reviewloop' ); ?></h2>
-		<ul style="line-height:1.8;">
-			<li><?php esc_html_e( 'More recent, genuine reviews are one of the signals Google uses to rank local businesses in Maps and local search — a steady trickle of new reviews tends to help more than a handful from years ago.', 'reviewloop' ); ?></li>
-			<li><?php esc_html_e( 'Star rating and review count are often the first thing a potential customer compares between you and a competitor before they ever visit your website.', 'reviewloop' ); ?></li>
-			<li><?php esc_html_e( 'Replying to reviews — especially negative ones — shows every future customer reading them that you\'re engaged and take feedback seriously, which builds trust even when a review isn\'t glowing.', 'reviewloop' ); ?></li>
-			<li><?php esc_html_e( 'Google has said publicly that responding to reviews can help local ranking and shows customers you value their feedback.', 'reviewloop' ); ?></li>
-		</ul>
-	</div>
-
-	<?php if ( 'free' === $plan ) : ?>
-	<div class="reviewloop-panel">
-		<h2><?php esc_html_e( 'Plans', 'reviewloop' ); ?></h2>
-		<table class="widefat" style="max-width:640px;">
-			<thead>
-				<tr><th></th><th><?php esc_html_e( 'Free', 'reviewloop' ); ?></th><th><?php echo esc_html( sprintf( __( 'Starter (%s)', 'reviewloop' ), $starter_price ) ); ?></th><th><?php echo esc_html( sprintf( __( 'Pro (%s)', 'reviewloop' ), $pro_price ) ); ?></th></tr>
-			</thead>
-			<tbody>
-				<tr><td><?php esc_html_e( 'AI-reply approvals', 'reviewloop' ); ?></td><td><?php echo esc_html( sprintf( __( 'Up to %d total', 'reviewloop' ), $free_limit ) ); ?></td><td><?php esc_html_e( 'Unlimited', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Unlimited', 'reviewloop' ); ?></td></tr>
-				<tr><td><?php esc_html_e( 'CSV bulk import', 'reviewloop' ); ?></td><td>—</td><td>✓</td><td>✓</td></tr>
-				<tr><td><?php esc_html_e( 'WooCommerce auto-hook', 'reviewloop' ); ?></td><td>—</td><td>—</td><td>✓</td></tr>
-			</tbody>
-		</table>
-		<p style="margin-top:12px;"><a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button button-primary"><?php esc_html_e( 'View plans in Settings', 'reviewloop' ); ?></a></p>
-	</div>
-	<?php elseif ( 'starter' === $plan ) : ?>
-	<div class="rl-upgrade-box">
-		<p><strong><?php esc_html_e( 'ReviewLoop Pro', 'reviewloop' ); ?></strong> — <?php echo esc_html( sprintf( __( 'add the WooCommerce auto-hook for %s.', 'reviewloop' ), $pro_price ) ); ?></p>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button"><?php esc_html_e( 'Upgrade to Pro', 'reviewloop' ); ?></a>
-	</div>
-	<?php endif; ?>
 </div>

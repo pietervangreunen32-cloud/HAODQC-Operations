@@ -48,6 +48,15 @@ if ( ! defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ) {
 }
 
 /**
+ * Where the "Upgrade" buttons on the plan cards send the owner to actually
+ * subscribe — the checkout page on the license server site. Update this
+ * once that page exists; until then it just points at the site root.
+ */
+if ( ! defined( 'REVIEWLOOP_PRICING_URL' ) ) {
+	define( 'REVIEWLOOP_PRICING_URL', 'https://ops.growthcraft.org.za/pricing/' );
+}
+
+/**
  * Where the self-hosted license server (the "reviewloop-license-server"
  * plugin, running on ops.growthcraft.org.za) exposes its REST API. Change
  * this if the license server ever moves.
