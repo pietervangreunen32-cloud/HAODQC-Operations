@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireBusiness } from "@/lib/current-business";
 import { saveUpload } from "@/lib/uploads";
+import { planLimit } from "@/lib/plans";
 
 async function assertOwnsCategory(categoryId: string, businessId: string) {
   const category = await prisma.menuCategory.findFirst({
@@ -98,6 +99,16 @@ export async function createItem(formData: FormData) {
 
   if (!name) throw new Error("Item name is required.");
   if (!Number.isFinite(price) || price < 0) throw new Error("Enter a valid price.");
+
+  const limit = planLimit(business.plan);
+  if (limit !== null) {
+    const itemCount = await prisma.menuItem.count({ where: { category: { businessId: business.id } } });
+    if (itemCount >= limit) {
+      throw new Error(
+        `Your Sampler plan is limited to ${limit} menu items. Upgrade to Rush for unlimited items.`
+      );
+    }
+  }
 
   const photoUrl = photo ? await saveUpload(photo, business.id) : null;
 

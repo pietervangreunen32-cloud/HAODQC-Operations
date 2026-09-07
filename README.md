@@ -119,6 +119,67 @@ logged out) before handing this over, so the golden path is verified working.
    against them, but there's no billing yet — every account is Sampler
    and nothing is actually blocked except CSV import past the Sampler
    item limit (see Assumptions below).
+10. **Plan enforcement + WooCommerce billing** — Sampler's 10-item limit is
+    now enforced on manual "Add item" too (not just CSV), and combos/CSV
+    import (Rush+) and custom branding (Fleet) are blocked server-side with
+    a clear upgrade prompt in the UI, not just hidden. A new `/admin/upgrade`
+    page shows the three plans and links out to WooCommerce checkout for
+    Rush/Fleet. See "Billing (Rush/Fleet plans via WooCommerce)" below for
+    how the two systems talk to each other.
+
+## Billing (Rush/Fleet plans via WooCommerce)
+
+MenuScreen itself never touches card details. Rush and Fleet are sold as
+regular WooCommerce products on a separate WordPress site you control —
+MenuScreen just links out to checkout there, and WooCommerce calls back
+into MenuScreen when an order completes so the account's plan updates
+automatically.
+
+**Setup, one time:**
+
+1. In WooCommerce, create two products (e.g. "MenuScreen Rush" and
+   "MenuScreen Fleet") priced however you like — simple products for
+   one-time purchases, or subscription products if you have the
+   **WooCommerce Subscriptions** extension installed for recurring billing.
+   Note each product's ID (visible in the product's edit-page URL).
+2. Set these environment variables (in `.env` locally, or your host's env
+   vars in production):
+   - `WOOCOMMERCE_SITE_URL` — the WordPress site's base URL, e.g.
+     `https://shop.example.com`
+   - `WOOCOMMERCE_RUSH_PRODUCT_ID` / `WOOCOMMERCE_FLEET_PRODUCT_ID` — the
+     product IDs from step 1
+   - `WOOCOMMERCE_WEBHOOK_SECRET` — any long random string; you'll enter
+     the same value in WooCommerce in step 3
+3. In WooCommerce → Settings → Advanced → Webhooks, add a webhook:
+   - **Topic:** "Order updated" (and also "Subscription updated" if you're
+     using WooCommerce Subscriptions)
+   - **Delivery URL:** `https://<your-menuscreen-domain>/api/webhooks/woocommerce`
+   - **Secret:** the same string as `WOOCOMMERCE_WEBHOOK_SECRET`
+   - **API version:** any v3 (WooCommerce Legacy REST API works too)
+
+**How a purchase connects back to a MenuScreen account:** by email. The
+`/admin/upgrade` page tells the owner to check out using the same email
+address as their MenuScreen login. When WooCommerce calls the webhook, the
+order's billing email is matched against `User.email` — no account
+linking or login step is needed. If someone checks out with a different
+email than their MenuScreen account, the webhook has nothing to match and
+silently no-ops (the payment still succeeds on WooCommerce's side; you'd
+need to manually set their `Business.plan` in that case).
+
+**What the webhook does:** verifies the request really came from
+WooCommerce (HMAC-SHA256 signature over the raw body using the shared
+secret — WooCommerce computes and sends this natively, no extra plugin
+needed), then reads the order/subscription status and line items:
+- `completed` / `processing` / `active` → sets `Business.plan` to
+  whichever of Rush/Fleet the line item's product ID maps to.
+- `cancelled` / `refunded` / `failed` / `expired` / `on-hold` /
+  `pending-cancel` → drops the account back to Sampler, but only if it was
+  currently on the plan tied to that order (so an unrelated cancelled
+  order can't accidentally downgrade someone still paying via another one).
+
+Until the env vars above are set, `/admin/upgrade`'s Upgrade buttons show
+"billing isn't set up yet" instead of a broken link, and the webhook
+endpoint returns 501 — both fail safely rather than silently.
 
 ## Deploying to production
 
@@ -180,14 +241,15 @@ Vercel's environment variables.
   your customers are priced in Rand, the item-price currency should
   probably switch too — one change, just flagging that these two numbers
   currently don't match.
-- **Plans exist as data, not yet as a real gate.** `Business.plan`
-  defaults to Sampler for everyone; nothing charges anyone yet. The one
-  place I did add real enforcement is CSV import — it skips rows past the
-  Sampler 10-item limit with a clear reason — since bulk-adding past a
-  limit in one shot seemed worth guarding against even before billing
-  exists. Manually adding items one-by-one is not yet blocked at the
-  Sampler limit; that, plus PayFast/PayPal checkout and an upgrade flow,
-  is the last stage we agreed to do once everything else was in place.
+- **Plans are now enforced, and billed through WooCommerce, not PayFast/PayPal.**
+  `Business.plan` defaults to Sampler and starts changing for real once a
+  Rush/Fleet purchase completes on WooCommerce (see "Billing" above). The
+  Sampler 10-item limit is enforced on both manual "Add item" and CSV
+  import; combos and CSV import require Rush+; custom branding requires
+  Fleet — all blocked server-side with an upgrade prompt in the UI, not
+  just hidden. What's still manual: if a customer checks out with a
+  different email than their MenuScreen login, there's nothing to
+  auto-match, so their plan needs setting by hand.
 - **Long menus scroll rather than paginate/auto-scroll** on the display
   page. For a very large menu on a small TV this may not all fit on
   screen at once; if that turns out to matter in practice, an auto-scrolling

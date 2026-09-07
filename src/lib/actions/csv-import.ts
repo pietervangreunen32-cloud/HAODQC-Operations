@@ -4,7 +4,7 @@ import Papa from "papaparse";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireBusiness } from "@/lib/current-business";
-import { planLimit } from "@/lib/plans";
+import { planAtLeast, planLimit } from "@/lib/plans";
 
 type CsvRow = {
   category?: string;
@@ -33,6 +33,9 @@ export async function importMenuCsv(
   formData: FormData
 ): Promise<CsvImportState> {
   const { business } = await requireBusiness();
+  if (!planAtLeast(business.plan, "RUSH")) {
+    return { error: "Bulk CSV import requires the Rush plan or higher. Upgrade to import many items at once." };
+  }
 
   const file = formData.get("csv") as File | null;
   if (!file || file.size === 0) {

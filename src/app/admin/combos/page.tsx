@@ -18,7 +18,11 @@ export default async function CombosPage() {
           Give customers a reason to spend a little more.
         </p>
       </div>
-      <CombosBoard combos={combos} initialShowOnDisplay={business.showCombosOnDisplay} />
+      <CombosBoard
+        combos={combos}
+        initialShowOnDisplay={business.showCombosOnDisplay}
+        plan={business.plan}
+      />
     </div>
   );
 }

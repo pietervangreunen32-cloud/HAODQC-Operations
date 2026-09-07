@@ -47,3 +47,7 @@ export const PLAN_META: Record<
 export function planLimit(plan: PlanName): number | null {
   return PLAN_META[plan].productLimit;
 }
+
+export function planAtLeast(plan: PlanName, min: PlanName): boolean {
+  return PLANS.indexOf(plan) >= PLANS.indexOf(min);
+}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireBusiness } from "@/lib/current-business";
+import { planAtLeast } from "@/lib/plans";
 
 async function assertOwnsCombo(comboId: string, businessId: string) {
   const combo = await prisma.combo.findFirst({ where: { id: comboId, businessId } });
@@ -16,6 +17,9 @@ function revalidateCombos() {
 
 export async function createCombo(formData: FormData) {
   const { business } = await requireBusiness();
+  if (!planAtLeast(business.plan, "RUSH")) {
+    throw new Error("Combos & upsells require the Rush plan or higher. Upgrade to unlock this feature.");
+  }
 
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();

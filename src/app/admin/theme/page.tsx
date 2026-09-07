@@ -17,6 +17,7 @@ export default async function ThemePage() {
       <LogoUploader initialLogoUrl={business.logoUrl} />
       <CustomThemeEditor
         isActive={business.theme === "CUSTOM"}
+        plan={business.plan}
         initialPrimaryColor={business.customPrimaryColor || "#ea580c"}
         initialBackgroundColor={business.customBackgroundColor || "#0f172a"}
         initialTextColor={business.customTextColor || "#ffffff"}

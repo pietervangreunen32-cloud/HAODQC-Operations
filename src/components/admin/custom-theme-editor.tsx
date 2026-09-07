@@ -6,15 +6,18 @@ import { CUSTOM_FONTS, customFontCss } from "@/lib/themes";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/input";
+import { PlanName, planAtLeast } from "@/lib/plans";
 
 export function CustomThemeEditor({
   isActive,
+  plan,
   initialPrimaryColor,
   initialBackgroundColor,
   initialTextColor,
   initialFont,
 }: {
   isActive: boolean;
+  plan: PlanName;
   initialPrimaryColor: string;
   initialBackgroundColor: string;
   initialTextColor: string;
@@ -26,6 +29,7 @@ export function CustomThemeEditor({
   const [font, setFont] = useState(initialFont || CUSTOM_FONTS[0].value);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const canUseCustomTheme = planAtLeast(plan, "FLEET");
 
   return (
     <Card>
@@ -43,6 +47,16 @@ export function CustomThemeEditor({
       <p className="mb-4 text-sm text-slate-500">
         Match your own brand colors and pick a display font instead of one of the built-in themes.
       </p>
+
+      {!canUseCustomTheme && (
+        <p className="mb-4 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-800">
+          Custom branding requires the Fleet plan.{" "}
+          <a href="/admin/upgrade" className="font-medium underline">
+            Upgrade to Fleet
+          </a>{" "}
+          to unlock this.
+        </p>
+      )}
 
       <form
         action={(formData) => {
@@ -118,7 +132,7 @@ export function CustomThemeEditor({
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" disabled={pending || !canUseCustomTheme}>
             {pending ? "Saving…" : "Use this custom theme"}
           </Button>
         </div>

@@ -4,16 +4,40 @@ import { useActionState, useState } from "react";
 import { importMenuCsv } from "@/lib/actions/csv-import";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PlanName, planAtLeast } from "@/lib/plans";
 
-export function CsvImportForm() {
+export function CsvImportForm({ plan }: { plan: PlanName }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(importMenuCsv, undefined);
+  const canImport = planAtLeast(plan, "RUSH");
 
   if (!open) {
     return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button variant="secondary" onClick={() => setOpen(true)} className="gap-2">
         Import from CSV
+        {!canImport && (
+          <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+            Rush plan
+          </span>
+        )}
       </Button>
+    );
+  }
+
+  if (!canImport) {
+    return (
+      <Card className="w-full basis-full">
+        <p className="text-sm text-slate-600">
+          Bulk CSV import is a Rush plan feature.{" "}
+          <a href="/admin/upgrade" className="font-medium text-orange-600 hover:underline">
+            Upgrade to Rush
+          </a>{" "}
+          to import many items at once.
+        </p>
+        <Button variant="secondary" size="sm" className="mt-3" onClick={() => setOpen(false)}>
+          Close
+        </Button>
+      </Card>
     );
   }
 

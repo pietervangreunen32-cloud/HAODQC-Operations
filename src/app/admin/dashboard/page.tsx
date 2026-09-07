@@ -67,6 +67,11 @@ export default async function DashboardPage() {
             <p className="text-sm text-slate-500">
               {limit === null ? "Unlimited menu items" : `${itemCount} of ${limit} menu items used`}
             </p>
+            {business.plan !== "FLEET" && (
+              <Link href="/admin/upgrade" className="text-sm font-medium text-orange-600 hover:underline">
+                Upgrade plan →
+              </Link>
+            )}
           </div>
         </div>
         {limit !== null && (

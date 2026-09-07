@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/admin/theme", label: "Theme & Settings" },
   { href: "/admin/display", label: "Display & QR" },
   { href: "/admin/help", label: "Put it on a TV" },
+  { href: "/admin/upgrade", label: "Plans & billing" },
 ];
 
 export default async function AdminLayout({

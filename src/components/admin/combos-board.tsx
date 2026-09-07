@@ -19,13 +19,16 @@ import { reorderCombos, updateShowCombosOnDisplay } from "@/lib/actions/combos";
 import { ComboRow } from "@/components/admin/combo-row";
 import { AddComboForm } from "@/components/admin/add-combo-form";
 import { Card } from "@/components/ui/card";
+import { PlanName, planAtLeast } from "@/lib/plans";
 
 export function CombosBoard({
   combos,
   initialShowOnDisplay,
+  plan,
 }: {
   combos: ComboData[];
   initialShowOnDisplay: boolean;
+  plan: PlanName;
 }) {
   const [prevCombos, setPrevCombos] = useState(combos);
   const [items, setItems] = useState(combos);
@@ -38,6 +41,7 @@ export function CombosBoard({
   }
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const canUseCombos = planAtLeast(plan, "RUSH");
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -54,7 +58,14 @@ export function CombosBoard({
       <Card>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Combos &amp; Upsells</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900">Combos &amp; Upsells</h2>
+              {!canUseCombos && (
+                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+                  Rush plan
+                </span>
+              )}
+            </div>
             <p className="text-sm text-slate-500">
               Bundle items together at a set price — shown as their own section on your display.
             </p>
@@ -90,7 +101,19 @@ export function CombosBoard({
         </p>
       )}
 
-      <AddComboForm />
+      {canUseCombos ? (
+        <AddComboForm />
+      ) : (
+        <Card>
+          <p className="text-sm text-slate-600">
+            Combos &amp; upsells are a Rush plan feature.{" "}
+            <a href="/admin/upgrade" className="font-medium text-orange-600 hover:underline">
+              Upgrade to Rush
+            </a>{" "}
+            to start bundling items.
+          </p>
+        </Card>
+      )}
     </div>
   );
 }

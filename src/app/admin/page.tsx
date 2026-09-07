@@ -4,9 +4,14 @@ import { MenuBoard } from "@/components/admin/menu-board";
 import { SpecialBanner } from "@/components/admin/special-banner";
 import { CsvImportForm } from "@/components/admin/csv-import-form";
 import { Button } from "@/components/ui/button";
+import { planLimit } from "@/lib/plans";
 
 export default async function AdminMenuPage() {
   const { business } = await requireBusinessWithMenu();
+
+  const itemCount = business.categories.reduce((sum, cat) => sum + cat.items.length, 0);
+  const limit = planLimit(business.plan);
+  const atLimit = limit !== null && itemCount >= limit;
 
   return (
     <div className="space-y-6">
@@ -18,12 +23,23 @@ export default async function AdminMenuPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <CsvImportForm />
+          <CsvImportForm plan={business.plan} />
           <Link href={`/display/${business.slug}`} target="_blank">
             <Button variant="secondary">Preview display ↗</Button>
           </Link>
         </div>
       </div>
+
+      {atLimit && (
+        <div className="rounded-lg bg-orange-50 px-4 py-3 text-sm text-orange-800">
+          You&apos;ve used all {limit} items on the Sampler plan. Adding a new item will fail until
+          you{" "}
+          <Link href="/admin/upgrade" className="font-medium underline">
+            upgrade to Rush
+          </Link>{" "}
+          for unlimited items.
+        </div>
+      )}
 
       <SpecialBanner initialActive={business.specialActive} initialText={business.specialText ?? ""} />
 

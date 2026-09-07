@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireBusiness } from "@/lib/current-business";
 import { saveUpload } from "@/lib/uploads";
 import { CUSTOM_FONTS, THEMES, ThemeName, isValidHexColor } from "@/lib/themes";
+import { planAtLeast } from "@/lib/plans";
 
 export async function updateTheme(theme: ThemeName) {
   const { business } = await requireBusiness();
@@ -40,6 +41,9 @@ export async function completeOnboarding() {
 
 export async function updateCustomBranding(formData: FormData) {
   const { business } = await requireBusiness();
+  if (!planAtLeast(business.plan, "FLEET")) {
+    throw new Error("Custom branding requires the Fleet plan. Upgrade to unlock custom colors and fonts.");
+  }
 
   const primaryColor = String(formData.get("primaryColor") ?? "");
   const backgroundColor = String(formData.get("backgroundColor") ?? "");
