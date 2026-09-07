@@ -25,7 +25,23 @@ class ReviewLoop_Activator {
 		set_transient( 'reviewloop_activation_redirect', true, 30 );
 	}
 
-	private static function create_tables() {
+	/**
+	 * Runs dbDelta again on every version bump, so an existing install
+	 * (no re-activation involved) still picks up new/changed columns —
+	 * e.g. the message_type column added for configurable sequence length.
+	 * dbDelta only ever adds/alters, never drops, so this is safe to call
+	 * on every admin page load once the version differs.
+	 */
+	public static function maybe_upgrade() {
+		if ( get_option( 'reviewloop_db_version' ) === REVIEWLOOP_DB_VERSION ) {
+			return;
+		}
+
+		self::create_tables();
+		update_option( 'reviewloop_db_version', REVIEWLOOP_DB_VERSION );
+	}
+
+	public static function create_tables() {
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -68,6 +84,7 @@ class ReviewLoop_Activator {
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			customer_id BIGINT UNSIGNED NOT NULL,
 			sequence_step TINYINT UNSIGNED NOT NULL,
+			message_type VARCHAR(20) NOT NULL DEFAULT 'check_in',
 			channel VARCHAR(20) NOT NULL DEFAULT 'email',
 			status VARCHAR(20) NOT NULL DEFAULT 'scheduled',
 			scheduled_at DATETIME NULL,
@@ -114,22 +131,8 @@ class ReviewLoop_Activator {
 	}
 
 	private static function seed_default_settings() {
-		$defaults = array(
-			'business_name'            => get_bloginfo( 'name' ),
-			'reply_email'               => get_bloginfo( 'admin_email' ),
-			'google_review_link'        => '',
-			'message_gap_days'          => 4,
-			'reminder_gap_days'         => 5,
-			'auto_approve_positive'     => false,
-			'positive_rating_threshold' => 4,
-			'woocommerce_auto_hook'     => false,
-			'license_key'               => '',
-			'license_status'            => 'inactive',
-			'onboarding_complete'       => false,
-		);
-
 		if ( false === get_option( 'reviewloop_settings' ) ) {
-			add_option( 'reviewloop_settings', $defaults );
+			add_option( 'reviewloop_settings', ReviewLoop_Settings::defaults() );
 		}
 	}
 }

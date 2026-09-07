@@ -30,17 +30,24 @@ $viewing       = $viewing_id ? ReviewLoop_Review::get( $viewing_id ) : null;
 			<?php if ( 'posted' === $viewing->reply_status ) : ?>
 				<h3><?php esc_html_e( 'Posted reply', 'reviewloop' ); ?></h3>
 				<p><?php echo esc_html( $viewing->final_reply_text ); ?></p>
+			<?php elseif ( ReviewLoop_Review::free_limit_reached() ) : ?>
+				<div class="rl-upgrade-box">
+					<p><?php echo esc_html( sprintf( __( 'You\'ve used all %d free replies. Upgrade to keep replying to new reviews.', 'reviewloop' ), defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ? REVIEWLOOP_FREE_REPLY_LIMIT : 10 ) ); ?></p>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button"><?php esc_html_e( 'Upgrade', 'reviewloop' ); ?></a>
+				</div>
 			<?php else : ?>
-				<h3><?php esc_html_e( 'AI-drafted reply', 'reviewloop' ); ?></h3>
+				<h3><?php echo esc_html( 'manual' === ReviewLoop_Settings::get( 'ai_provider' ) ? __( 'Write your reply', 'reviewloop' ) : __( 'AI-drafted reply', 'reviewloop' ) ); ?></h3>
 				<form method="post">
 					<?php wp_nonce_field( 'reviewloop_review_action' ); ?>
 					<input type="hidden" name="review_id" value="<?php echo esc_attr( $viewing->id ); ?>">
-					<textarea name="reply_text" rows="5" class="large-text"><?php echo esc_textarea( $viewing->ai_draft_text ); ?></textarea>
-					<p class="description"><?php esc_html_e( 'Edit the draft above if you\'d like, then approve to post it publicly on Google.', 'reviewloop' ); ?></p>
+					<textarea name="reply_text" rows="5" class="large-text" placeholder="<?php echo esc_attr( 'manual' === ReviewLoop_Settings::get( 'ai_provider' ) ? __( 'Type your reply to this review…', 'reviewloop' ) : '' ); ?>"><?php echo esc_textarea( $viewing->ai_draft_text ); ?></textarea>
+					<p class="description"><?php esc_html_e( 'Edit the text above if you\'d like, then approve to post it publicly on Google.', 'reviewloop' ); ?></p>
 					<p>
 						<button type="submit" name="reviewloop_action" value="approve_reply" class="button button-primary"><?php esc_html_e( 'Approve & Post', 'reviewloop' ); ?></button>
-						<button type="submit" name="reviewloop_action" value="regenerate_draft" class="button"><?php esc_html_e( 'Regenerate draft', 'reviewloop' ); ?></button>
-						<button type="submit" name="reviewloop_action" value="reject_reply" class="button rl-confirm" data-confirm="<?php esc_attr_e( 'Discard this draft without posting?', 'reviewloop' ); ?>"><?php esc_html_e( 'Reject', 'reviewloop' ); ?></button>
+						<?php if ( 'manual' !== ReviewLoop_Settings::get( 'ai_provider' ) ) : ?>
+							<button type="submit" name="reviewloop_action" value="regenerate_draft" class="button"><?php esc_html_e( 'Regenerate draft', 'reviewloop' ); ?></button>
+						<?php endif; ?>
+						<button type="submit" name="reviewloop_action" value="reject_reply" class="button rl-confirm" data-confirm="<?php esc_attr_e( 'Discard this without posting?', 'reviewloop' ); ?>"><?php esc_html_e( 'Reject', 'reviewloop' ); ?></button>
 					</p>
 				</form>
 			<?php endif; ?>

@@ -77,6 +77,26 @@ class ReviewLoop_Review {
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE reply_status = %s", 'pending_approval' ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
+	/**
+	 * Lifetime count of reviews actually replied to (posted) — the free
+	 * tier's usage metric. Not reset monthly; once the free limit is hit,
+	 * it stays hit until the site upgrades.
+	 */
+	public static function count_posted_lifetime() {
+		global $wpdb;
+		$table = ReviewLoop_DB::reviews_table();
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE reply_status = %s", 'posted' ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	public static function free_limit_reached() {
+		if ( ReviewLoop_License::is_pro_active() ) {
+			return false;
+		}
+
+		$limit = defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ? REVIEWLOOP_FREE_REPLY_LIMIT : 10;
+		return self::count_posted_lifetime() >= $limit;
+	}
+
 	public static function save_ai_draft( $review_id, $draft_text ) {
 		global $wpdb;
 		$wpdb->update(

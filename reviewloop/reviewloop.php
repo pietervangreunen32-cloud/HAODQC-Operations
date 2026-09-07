@@ -3,7 +3,7 @@
  * Plugin Name:       ReviewLoop
  * Plugin URI:        https://reviewloop.app
  * Description:       Automatically request Google reviews from customers without spamming them, and get AI-drafted replies to post once reviews come in. Built for small businesses.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            ReviewLoop
@@ -19,19 +19,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'REVIEWLOOP_VERSION', '1.4.0' );
+define( 'REVIEWLOOP_VERSION', '1.5.0' );
 define( 'REVIEWLOOP_PLUGIN_FILE', __FILE__ );
 define( 'REVIEWLOOP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'REVIEWLOOP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'REVIEWLOOP_DB_VERSION', '1.0.0' );
+define( 'REVIEWLOOP_DB_VERSION', '1.1.0' );
 
 /**
- * Starting price shown in upgrade prompts — a config value, not logic, so
- * it can change without touching code. Actual billing/enforcement happens
- * on the license server, not in this plugin.
+ * Free tier limit: how many reviews it will draft/post AI replies for
+ * (lifetime, not monthly) before every paid tier's "unlimited" becomes the
+ * only way to keep going. A config value, not logic, so it can change
+ * without touching the gating code that reads it.
  */
+if ( ! defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ) {
+	define( 'REVIEWLOOP_FREE_REPLY_LIMIT', 10 );
+}
+
+/**
+ * Starting prices shown in upgrade prompts — config values, not logic, so
+ * they can change without touching code. Actual billing/enforcement
+ * happens on the license server, not in this plugin.
+ */
+if ( ! defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ) {
+	define( 'REVIEWLOOP_STARTER_PRICE_DISPLAY', '$20/month' );
+}
 if ( ! defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ) {
-	define( 'REVIEWLOOP_PRO_PRICE_DISPLAY', '$20/month' );
+	define( 'REVIEWLOOP_PRO_PRICE_DISPLAY', '$49/month' );
 }
 
 /**

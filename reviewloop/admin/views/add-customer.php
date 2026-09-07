@@ -9,13 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$is_pro = ReviewLoop_License::is_pro_active();
+$has_access = ReviewLoop_License::is_at_least( 'starter' );
 ?>
 <div class="wrap reviewloop-wrap">
 	<div class="reviewloop-header">
 		<div>
 			<h1><?php esc_html_e( 'Add Customer', 'reviewloop' ); ?></h1>
-			<p class="rl-tagline"><?php esc_html_e( 'Add one customer at a time, or unlock bulk import with Pro.', 'reviewloop' ); ?></p>
+			<p class="rl-tagline"><?php esc_html_e( 'Add one customer at a time, or unlock bulk import with Starter.', 'reviewloop' ); ?></p>
 		</div>
 	</div>
 
@@ -68,13 +68,13 @@ $is_pro = ReviewLoop_License::is_pro_active();
 
 	<div class="reviewloop-panel" style="max-width:560px;">
 		<h2><?php esc_html_e( 'Bulk import from CSV', 'reviewloop' ); ?></h2>
-		<?php if ( $is_pro ) : ?>
+		<?php if ( $has_access ) : ?>
 			<p><?php esc_html_e( 'Upload a spreadsheet exported from QuickBooks, Sage, or any system with a CSV export.', 'reviewloop' ); ?></p>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-import' ) ); ?>" class="button"><?php esc_html_e( 'Go to CSV Import', 'reviewloop' ); ?></a>
 		<?php else : ?>
 			<div class="rl-upgrade-box">
-				<p><?php esc_html_e( 'Import customers in bulk from a QuickBooks/Sage CSV export — this is a Pro feature.', 'reviewloop' ); ?></p>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings&tab=license' ) ); ?>" class="button"><?php esc_html_e( 'Upgrade to Pro', 'reviewloop' ); ?></a>
+				<p><?php esc_html_e( 'Import customers in bulk from a QuickBooks/Sage CSV export — this is a Starter feature.', 'reviewloop' ); ?></p>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button"><?php esc_html_e( 'View plans', 'reviewloop' ); ?></a>
 			</div>
 		<?php endif; ?>
 	</div>

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class RLS_License {
 
-	public static function create_pending( $m_payment_id, $email, $name, $amount, $currency ) {
+	public static function create_pending( $m_payment_id, $email, $name, $plan, $amount, $currency ) {
 		global $wpdb;
 		$now = current_time( 'mysql' );
 
@@ -22,13 +22,14 @@ class RLS_License {
 				'm_payment_id'   => $m_payment_id,
 				'customer_email' => $email,
 				'customer_name'  => $name,
+				'plan'           => in_array( $plan, array( 'starter', 'pro' ), true ) ? $plan : 'starter',
 				'status'         => 'pending',
 				'amount'         => $amount,
 				'currency'       => $currency,
 				'created_at'     => $now,
 				'updated_at'     => $now,
 			),
-			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 
 		return (int) $wpdb->insert_id;
@@ -151,6 +152,17 @@ class RLS_License {
 		);
 	}
 
+	public static function admin_set_plan( $license_id, $plan ) {
+		global $wpdb;
+		$wpdb->update(
+			RLS_DB::licenses_table(),
+			array( 'plan' => $plan, 'updated_at' => current_time( 'mysql' ) ),
+			array( 'id' => $license_id ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
+	}
+
 	private static function generate_key() {
 		$segments = array();
 		for ( $i = 0; $i < 4; $i++ ) {
@@ -186,7 +198,7 @@ class RLS_License {
 			array( '%d' )
 		);
 
-		return array( 'status' => 'active' );
+		return array( 'status' => 'active', 'plan' => $license->plan );
 	}
 
 	public static function handle_deactivate_request( $license_key, $site_url ) {
@@ -213,6 +225,6 @@ class RLS_License {
 			return array( 'status' => 'invalid' );
 		}
 
-		return array( 'status' => $license->status );
+		return array( 'status' => $license->status, 'plan' => $license->plan );
 	}
 }

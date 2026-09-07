@@ -43,6 +43,17 @@ class RLS_Admin_Menu {
 			wp_safe_redirect( add_query_arg( array( 'page' => 'rls-licenses', 'rls_msg' => 'updated' ), admin_url( 'admin.php' ) ) );
 			exit;
 		}
+
+		if ( 'set_license_plan' === $action ) {
+			check_admin_referer( 'rls_license_action' );
+			$id   = isset( $_POST['license_id'] ) ? absint( $_POST['license_id'] ) : 0;
+			$plan = isset( $_POST['new_plan'] ) ? sanitize_key( wp_unslash( $_POST['new_plan'] ) ) : '';
+			if ( $id && in_array( $plan, array( 'starter', 'pro' ), true ) ) {
+				RLS_License::admin_set_plan( $id, $plan );
+			}
+			wp_safe_redirect( add_query_arg( array( 'page' => 'rls-licenses', 'rls_msg' => 'updated' ), admin_url( 'admin.php' ) ) );
+			exit;
+		}
 	}
 
 	public function render_notices() {

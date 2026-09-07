@@ -33,11 +33,15 @@ class ReviewLoop_Settings {
 			'woocommerce_auto_hook'     => false,
 			'license_key'               => '',
 			'license_status'            => 'inactive',
+			'license_plan'              => '',
 			'license_expires'           => '',
 			'woocommerce_consent_attested' => false,
 			'onboarding_complete'       => false,
 			'delete_data_on_uninstall'  => false,
+			'ai_provider'               => 'claude',
 			'anthropic_api_key'         => '',
+			'openai_api_key'            => '',
+			'gemini_api_key'            => '',
 			'google_client_id'          => '',
 			'google_client_secret'      => '',
 			'google_access_token'       => '',
@@ -46,6 +50,10 @@ class ReviewLoop_Settings {
 			'google_location_name'      => '',
 			'google_connected'          => false,
 			'reply_voice_notes'         => '',
+			'sequence_length'           => 3,
+			'message_check_in_text'     => '',
+			'message_review_ask_text'   => '',
+			'message_reminder_text'     => '',
 		);
 	}
 
@@ -60,8 +68,18 @@ class ReviewLoop_Settings {
 		$current['auto_approve_positive']     = ! empty( $post['auto_approve_positive'] );
 		$current['positive_rating_threshold'] = isset( $post['positive_rating_threshold'] ) ? min( 5, max( 1, absint( $post['positive_rating_threshold'] ) ) ) : $current['positive_rating_threshold'];
 		$current['delete_data_on_uninstall']  = ! empty( $post['delete_data_on_uninstall'] );
-		$current['anthropic_api_key']         = isset( $post['anthropic_api_key'] ) ? sanitize_text_field( wp_unslash( $post['anthropic_api_key'] ) ) : $current['anthropic_api_key'];
 		$current['reply_voice_notes']         = isset( $post['reply_voice_notes'] ) ? sanitize_textarea_field( wp_unslash( $post['reply_voice_notes'] ) ) : $current['reply_voice_notes'];
+
+		$allowed_providers            = array( 'claude', 'openai', 'gemini', 'manual' );
+		$current['ai_provider']       = isset( $post['ai_provider'] ) && in_array( $post['ai_provider'], $allowed_providers, true ) ? $post['ai_provider'] : $current['ai_provider'];
+		$current['anthropic_api_key'] = isset( $post['anthropic_api_key'] ) ? sanitize_text_field( wp_unslash( $post['anthropic_api_key'] ) ) : $current['anthropic_api_key'];
+		$current['openai_api_key']    = isset( $post['openai_api_key'] ) ? sanitize_text_field( wp_unslash( $post['openai_api_key'] ) ) : $current['openai_api_key'];
+		$current['gemini_api_key']    = isset( $post['gemini_api_key'] ) ? sanitize_text_field( wp_unslash( $post['gemini_api_key'] ) ) : $current['gemini_api_key'];
+
+		$current['sequence_length']         = isset( $post['sequence_length'] ) ? min( 3, max( 1, absint( $post['sequence_length'] ) ) ) : $current['sequence_length'];
+		$current['message_check_in_text']   = isset( $post['message_check_in_text'] ) ? sanitize_textarea_field( wp_unslash( $post['message_check_in_text'] ) ) : $current['message_check_in_text'];
+		$current['message_review_ask_text'] = isset( $post['message_review_ask_text'] ) ? sanitize_textarea_field( wp_unslash( $post['message_review_ask_text'] ) ) : $current['message_review_ask_text'];
+		$current['message_reminder_text']   = isset( $post['message_reminder_text'] ) ? sanitize_textarea_field( wp_unslash( $post['message_reminder_text'] ) ) : $current['message_reminder_text'];
 
 		update_option( 'reviewloop_settings', $current );
 
@@ -75,7 +93,7 @@ class ReviewLoop_Settings {
 	 * touch its own two keys rather than reset absent checkboxes to false.
 	 */
 	public static function save_woocommerce_toggle( $post ) {
-		if ( ! ReviewLoop_License::is_pro_active() ) {
+		if ( ! ReviewLoop_License::is_at_least( 'pro' ) ) {
 			return self::get_all();
 		}
 

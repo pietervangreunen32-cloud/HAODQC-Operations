@@ -1,9 +1,14 @@
 <?php
 /**
- * The 3-step sequence: check-in -> review request -> one reminder, then a
- * hard stop. Every advance re-checks opt-out, negative-signal, and
- * already-reviewed/clicked flags immediately before sending, so a customer
- * can never receive a step that's no longer appropriate for them.
+ * The message sequence: an optional check-in, the review ask, and an
+ * optional one-time reminder — length configurable by the owner (1-3
+ * messages), then a hard stop. Every advance re-checks opt-out,
+ * negative-signal, and already-reviewed/clicked flags immediately before
+ * sending, so a customer can never receive a step that's no longer
+ * appropriate for them. What comes after a given message is decided by its
+ * *type* (check_in / review_ask / reminder), not a fixed position, so
+ * changing the sequence length mid-flight never leaves an in-progress
+ * customer in a broken state.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,22 +23,44 @@ class ReviewLoop_Message_Engine {
 			return;
 		}
 
-		self::schedule_step( $customer_id, 1, current_time( 'mysql' ) );
+		$length = (int) ReviewLoop_Settings::get( 'sequence_length', 3 );
+		self::schedule_step( $customer_id, self::first_type( $length ), 1, current_time( 'mysql' ) );
 	}
 
-	private static function schedule_step( $customer_id, $step, $scheduled_at ) {
+	private static function first_type( $length ) {
+		return $length >= 2 ? 'check_in' : 'review_ask';
+	}
+
+	/**
+	 * What type of message logically follows the one just sent, given the
+	 * *current* sequence length setting. A check-in is always followed by
+	 * the review ask (that's the entire point of the check-in); the
+	 * reminder only exists if the setting currently allows a 3rd message.
+	 */
+	private static function next_type_after( $type, $length ) {
+		if ( 'check_in' === $type ) {
+			return 'review_ask';
+		}
+		if ( 'review_ask' === $type && $length >= 3 ) {
+			return 'reminder';
+		}
+		return null;
+	}
+
+	private static function schedule_step( $customer_id, $message_type, $sequence_step, $scheduled_at ) {
 		global $wpdb;
 
 		$wpdb->insert(
 			ReviewLoop_DB::messages_table(),
 			array(
 				'customer_id'   => $customer_id,
-				'sequence_step' => $step,
+				'sequence_step' => $sequence_step,
+				'message_type'  => $message_type,
 				'channel'       => 'email',
 				'status'        => 'scheduled',
 				'scheduled_at'  => $scheduled_at,
 			),
-			array( '%d', '%d', '%s', '%s', '%s' )
+			array( '%d', '%d', '%s', '%s', '%s', '%s' )
 		);
 	}
 
@@ -56,25 +83,26 @@ class ReviewLoop_Message_Engine {
 
 	private static function process_message( $message ) {
 		$customer = ReviewLoop_Customer::get( $message->customer_id );
+		$type     = $message->message_type ? $message->message_type : 'check_in'; // Rows created before this column existed.
 
 		if ( ! $customer || $customer->opt_out ) {
 			self::mark_skipped( $message->id );
 			return;
 		}
 
-		if ( 2 === (int) $message->sequence_step && (int) $customer->negative_signal === 1 ) {
+		if ( 'review_ask' === $type && (int) $customer->negative_signal === 1 ) {
 			self::mark_skipped( $message->id );
 			self::update_customer_status( $customer->id, 'negative_flagged' );
 			return;
 		}
 
-		if ( 3 === (int) $message->sequence_step && ( (int) $customer->clicked_review_link === 1 || (int) $customer->reviewed === 1 ) ) {
+		if ( 'reminder' === $type && ( (int) $customer->clicked_review_link === 1 || (int) $customer->reviewed === 1 ) ) {
 			self::mark_skipped( $message->id );
 			self::update_customer_status( $customer->id, $customer->reviewed ? 'reviewed' : 'completed' );
 			return;
 		}
 
-		$sent = ReviewLoop_Mailer::send_sequence_step( $customer, (int) $message->sequence_step );
+		$sent = ReviewLoop_Mailer::send_sequence_step( $customer, $type );
 
 		global $wpdb;
 
@@ -86,7 +114,7 @@ class ReviewLoop_Message_Engine {
 				array( '%s', '%s' ),
 				array( '%d' )
 			);
-			self::advance_sequence( $customer, (int) $message->sequence_step );
+			self::advance_sequence( $customer, $type, (int) $message->sequence_step );
 		} else {
 			$wpdb->update(
 				ReviewLoop_DB::messages_table(),
@@ -98,18 +126,24 @@ class ReviewLoop_Message_Engine {
 		}
 	}
 
-	private static function advance_sequence( $customer, $step_sent ) {
+	private static function advance_sequence( $customer, $type_sent, $step_sent ) {
 		$settings = ReviewLoop_Settings::get_all();
+		$length   = (int) $settings['sequence_length'];
 
-		if ( 1 === $step_sent ) {
-			self::update_customer_status( $customer->id, 'active' );
-			self::schedule_step( $customer->id, 2, self::add_days( current_time( 'mysql' ), (int) $settings['message_gap_days'] ) );
-		} elseif ( 2 === $step_sent ) {
-			self::update_customer_status( $customer->id, 'awaiting_review' );
-			self::schedule_step( $customer->id, 3, self::add_days( current_time( 'mysql' ), (int) $settings['reminder_gap_days'] ) );
-		} elseif ( 3 === $step_sent ) {
-			self::update_customer_status( $customer->id, 'completed' );
+		$status_after_send = array(
+			'check_in'   => 'active',
+			'review_ask' => 'awaiting_review',
+			'reminder'   => 'completed',
+		);
+		self::update_customer_status( $customer->id, $status_after_send[ $type_sent ] );
+
+		$next_type = self::next_type_after( $type_sent, $length );
+		if ( ! $next_type ) {
+			return;
 		}
+
+		$gap_days = 'reminder' === $next_type ? (int) $settings['reminder_gap_days'] : (int) $settings['message_gap_days'];
+		self::schedule_step( $customer->id, $next_type, $step_sent + 1, self::add_days( current_time( 'mysql' ), $gap_days ) );
 	}
 
 	public static function cancel_pending_messages( $customer_id ) {

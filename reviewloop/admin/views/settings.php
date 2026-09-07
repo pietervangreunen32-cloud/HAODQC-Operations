@@ -48,8 +48,19 @@ $settings = ReviewLoop_Settings::get_all();
 		</div>
 
 		<div class="reviewloop-panel">
-			<h2><?php esc_html_e( 'Message timing', 'reviewloop' ); ?></h2>
+			<h2><?php esc_html_e( 'Message sequence', 'reviewloop' ); ?></h2>
 			<table class="form-table">
+				<tr>
+					<th><label for="sequence_length"><?php esc_html_e( 'Messages before/including the review ask', 'reviewloop' ); ?></label></th>
+					<td>
+						<select id="sequence_length" name="sequence_length">
+							<option value="1" <?php selected( (int) $settings['sequence_length'], 1 ); ?>><?php esc_html_e( '1 — just the review ask, no check-in or reminder', 'reviewloop' ); ?></option>
+							<option value="2" <?php selected( (int) $settings['sequence_length'], 2 ); ?>><?php esc_html_e( '2 — a check-in, then the review ask (no reminder)', 'reviewloop' ); ?></option>
+							<option value="3" <?php selected( (int) $settings['sequence_length'], 3 ); ?>><?php esc_html_e( '3 — check-in, review ask, and one reminder (recommended)', 'reviewloop' ); ?></option>
+						</select>
+						<p class="description"><?php esc_html_e( 'Whatever you choose, this is always the maximum — the sequence hard-stops after the last message, and stops immediately at any point if the customer opts out, reviews, or flags a problem.', 'reviewloop' ); ?></p>
+					</td>
+				</tr>
 				<tr>
 					<th><label for="message_gap_days"><?php esc_html_e( 'Days between check-in and review request', 'reviewloop' ); ?></label></th>
 					<td><input type="number" min="1" id="message_gap_days" name="message_gap_days" class="small-text" value="<?php echo esc_attr( $settings['message_gap_days'] ); ?>"></td>
@@ -59,17 +70,59 @@ $settings = ReviewLoop_Settings::get_all();
 					<td><input type="number" min="1" id="reminder_gap_days" name="reminder_gap_days" class="small-text" value="<?php echo esc_attr( $settings['reminder_gap_days'] ); ?>"></td>
 				</tr>
 			</table>
-			<p class="description"><?php esc_html_e( 'The sequence always hard-stops after the reminder — no customer receives more than 3 messages.', 'reviewloop' ); ?></p>
+
+			<h3><?php esc_html_e( 'Customize your messages (optional)', 'reviewloop' ); ?></h3>
+			<p class="description"><?php esc_html_e( 'Leave any of these blank to use ReviewLoop\'s default wording. Whatever you write replaces the opening text only — the feedback buttons, review link, and unsubscribe footer are always added automatically so opt-out and the "don\'t ask unhappy customers" safeguard keep working. Use {first_name} to insert the customer\'s name.', 'reviewloop' ); ?></p>
+			<table class="form-table">
+				<tr>
+					<th><label for="message_check_in_text"><?php esc_html_e( 'Check-in message', 'reviewloop' ); ?></label></th>
+					<td><textarea id="message_check_in_text" name="message_check_in_text" rows="3" class="large-text" placeholder="<?php esc_attr_e( 'e.g. Hi {first_name}, thanks again for choosing us recently — how did everything go?', 'reviewloop' ); ?>"><?php echo esc_textarea( $settings['message_check_in_text'] ); ?></textarea></td>
+				</tr>
+				<tr>
+					<th><label for="message_review_ask_text"><?php esc_html_e( 'Review ask message', 'reviewloop' ); ?></label></th>
+					<td><textarea id="message_review_ask_text" name="message_review_ask_text" rows="3" class="large-text" placeholder="<?php esc_attr_e( 'e.g. We\'re so glad it went well! A quick Google review would really help us out.', 'reviewloop' ); ?>"><?php echo esc_textarea( $settings['message_review_ask_text'] ); ?></textarea></td>
+				</tr>
+				<tr>
+					<th><label for="message_reminder_text"><?php esc_html_e( 'Reminder message', 'reviewloop' ); ?></label></th>
+					<td><textarea id="message_reminder_text" name="message_reminder_text" rows="3" class="large-text" placeholder="<?php esc_attr_e( 'e.g. Just a gentle nudge — if you have a moment, we\'d still love your feedback!', 'reviewloop' ); ?>"><?php echo esc_textarea( $settings['message_reminder_text'] ); ?></textarea></td>
+				</tr>
+			</table>
 		</div>
 
 		<div class="reviewloop-panel">
 			<h2><?php esc_html_e( 'AI reply drafting', 'reviewloop' ); ?></h2>
 			<table class="form-table">
 				<tr>
+					<th><label for="ai_provider"><?php esc_html_e( 'Draft replies using', 'reviewloop' ); ?></label></th>
+					<td>
+						<select id="ai_provider" name="ai_provider">
+							<option value="claude" <?php selected( $settings['ai_provider'], 'claude' ); ?>><?php esc_html_e( 'Claude (Anthropic)', 'reviewloop' ); ?></option>
+							<option value="openai" <?php selected( $settings['ai_provider'], 'openai' ); ?>><?php esc_html_e( 'ChatGPT (OpenAI)', 'reviewloop' ); ?></option>
+							<option value="gemini" <?php selected( $settings['ai_provider'], 'gemini' ); ?>><?php esc_html_e( 'Gemini (Google)', 'reviewloop' ); ?></option>
+							<option value="manual" <?php selected( $settings['ai_provider'], 'manual' ); ?>><?php esc_html_e( 'None — I\'ll write my own replies', 'reviewloop' ); ?></option>
+						</select>
+						<p class="description"><?php esc_html_e( 'Only enter the API key for whichever provider you pick above. If you choose "None", new reviews will simply wait on the Reviews screen for you to type a reply yourself.', 'reviewloop' ); ?></p>
+					</td>
+				</tr>
+				<tr>
 					<th><label for="anthropic_api_key"><?php esc_html_e( 'Anthropic API key', 'reviewloop' ); ?></label></th>
 					<td>
 						<input type="password" id="anthropic_api_key" name="anthropic_api_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $settings['anthropic_api_key'] ); ?>">
-						<p class="description"><?php esc_html_e( 'Used to draft replies to new Google reviews in your voice. Get a key from console.anthropic.com.', 'reviewloop' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Get a key from console.anthropic.com.', 'reviewloop' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th><label for="openai_api_key"><?php esc_html_e( 'OpenAI API key', 'reviewloop' ); ?></label></th>
+					<td>
+						<input type="password" id="openai_api_key" name="openai_api_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $settings['openai_api_key'] ); ?>">
+						<p class="description"><?php esc_html_e( 'Get a key from platform.openai.com.', 'reviewloop' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th><label for="gemini_api_key"><?php esc_html_e( 'Gemini API key', 'reviewloop' ); ?></label></th>
+					<td>
+						<input type="password" id="gemini_api_key" name="gemini_api_key" class="regular-text" autocomplete="off" value="<?php echo esc_attr( $settings['gemini_api_key'] ); ?>">
+						<p class="description"><?php esc_html_e( 'Get a key from aistudio.google.com.', 'reviewloop' ); ?></p>
 					</td>
 				</tr>
 				<tr>

@@ -49,6 +49,16 @@ $licenses  = RLS_License::get_list( array( 'per_page' => 50, 'search' => $search
 							</select>
 							<button type="submit" class="button button-small"><?php esc_html_e( 'Update', 'reviewloop-license-server' ); ?></button>
 						</form>
+						<form method="post" style="display:inline;">
+							<?php wp_nonce_field( 'rls_license_action' ); ?>
+							<input type="hidden" name="rls_action" value="set_license_plan">
+							<input type="hidden" name="license_id" value="<?php echo esc_attr( $license->id ); ?>">
+							<select name="new_plan">
+								<option value="starter" <?php selected( $license->plan, 'starter' ); ?>><?php esc_html_e( 'Starter', 'reviewloop-license-server' ); ?></option>
+								<option value="pro" <?php selected( $license->plan, 'pro' ); ?>><?php esc_html_e( 'Pro', 'reviewloop-license-server' ); ?></option>
+							</select>
+							<button type="submit" class="button button-small"><?php esc_html_e( 'Change plan', 'reviewloop-license-server' ); ?></button>
+						</form>
 					</td>
 				</tr>
 			<?php endforeach; ?>

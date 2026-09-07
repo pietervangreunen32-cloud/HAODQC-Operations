@@ -1,7 +1,8 @@
 <?php
 /**
- * Renders the Pro license panel on the Settings screen (activation form,
- * status, WooCommerce auto-hook toggle) and handles activate/deactivate.
+ * Renders the plan/license panel on the Settings screen (activation form,
+ * status, tier comparison, WooCommerce auto-hook toggle) and handles
+ * activate/deactivate.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -57,7 +58,7 @@ class ReviewLoop_License_Settings {
 
 		$msg = sanitize_key( wp_unslash( $_GET['rl_msg'] ) );
 		$map = array(
-			'license_activated'   => array( 'success', __( 'ReviewLoop Pro is active. Thanks for supporting the plugin!', 'reviewloop' ) ),
+			'license_activated'   => array( 'success', __( 'Your license is active. Thanks for supporting the plugin!', 'reviewloop' ) ),
 			'license_deactivated' => array( 'success', __( 'License deactivated on this site.', 'reviewloop' ) ),
 			'license_invalid'     => array( 'error', __( 'That license key could not be activated. Please check it and try again.', 'reviewloop' ) ),
 		);
@@ -68,19 +69,45 @@ class ReviewLoop_License_Settings {
 	}
 
 	public function render_panel( $settings ) {
-		$is_pro = ReviewLoop_License::is_pro_active();
-		$price  = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$20/month';
+		$plan          = ReviewLoop_License::get_plan();
+		$starter_price = defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month';
+		$pro_price     = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
 		?>
 		<div class="reviewloop-panel">
-			<h2><?php esc_html_e( 'ReviewLoop Pro', 'reviewloop' ); ?></h2>
+			<h2><?php esc_html_e( 'Plan & License', 'reviewloop' ); ?></h2>
 
-			<?php if ( $is_pro ) : ?>
-				<p><span class="rl-badge rl-badge-pro"><?php esc_html_e( 'Pro active', 'reviewloop' ); ?></span>
-				<?php if ( ! empty( $settings['license_expires'] ) ) : ?>
-					<?php echo esc_html( sprintf( __( 'Renews/expires: %s', 'reviewloop' ), $settings['license_expires'] ) ); ?>
+			<p>
+				<?php esc_html_e( 'Current plan:', 'reviewloop' ); ?>
+				<?php if ( 'pro' === $plan ) : ?>
+					<span class="rl-badge rl-badge-pro"><?php esc_html_e( 'Pro', 'reviewloop' ); ?></span>
+				<?php elseif ( 'starter' === $plan ) : ?>
+					<span class="rl-badge rl-badge-pro"><?php esc_html_e( 'Starter', 'reviewloop' ); ?></span>
+				<?php else : ?>
+					<span class="rl-badge"><?php esc_html_e( 'Free', 'reviewloop' ); ?></span>
 				<?php endif; ?>
-				</p>
+				<?php if ( 'free' !== $plan && ! empty( $settings['license_expires'] ) ) : ?>
+					— <?php echo esc_html( sprintf( __( 'renews/expires: %s', 'reviewloop' ), $settings['license_expires'] ) ); ?>
+				<?php endif; ?>
+			</p>
 
+			<table class="widefat" style="max-width:640px;margin-bottom:16px;">
+				<thead>
+					<tr>
+						<th></th>
+						<th><?php esc_html_e( 'Free', 'reviewloop' ); ?></th>
+						<th><?php echo esc_html( sprintf( __( 'Starter (%s)', 'reviewloop' ), $starter_price ) ); ?></th>
+						<th><?php echo esc_html( sprintf( __( 'Pro (%s)', 'reviewloop' ), $pro_price ) ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr><td><?php esc_html_e( 'Message sequence + AI replies', 'reviewloop' ); ?></td><td>✓</td><td>✓</td><td>✓</td></tr>
+					<tr><td><?php esc_html_e( 'AI-reply approvals', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Up to 10 total', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Unlimited', 'reviewloop' ); ?></td><td><?php esc_html_e( 'Unlimited', 'reviewloop' ); ?></td></tr>
+					<tr><td><?php esc_html_e( 'CSV bulk import', 'reviewloop' ); ?></td><td>—</td><td>✓</td><td>✓</td></tr>
+					<tr><td><?php esc_html_e( 'WooCommerce auto-hook', 'reviewloop' ); ?></td><td>—</td><td>—</td><td>✓</td></tr>
+				</tbody>
+			</table>
+
+			<?php if ( 'pro' === $plan ) : ?>
 				<table class="form-table">
 					<tr>
 						<th><?php esc_html_e( 'WooCommerce auto-hook', 'reviewloop' ); ?></th>
@@ -107,14 +134,19 @@ class ReviewLoop_License_Settings {
 						</td>
 					</tr>
 				</table>
+			<?php elseif ( 'starter' === $plan ) : ?>
+				<div class="rl-upgrade-box">
+					<p><?php echo esc_html( sprintf( __( 'Upgrade to Pro (%s) to unlock the WooCommerce auto-hook.', 'reviewloop' ), $pro_price ) ); ?></p>
+				</div>
+			<?php endif; ?>
 
+			<?php if ( 'free' !== $plan ) : ?>
 				<form method="post">
 					<?php wp_nonce_field( 'reviewloop_license_action' ); ?>
 					<input type="hidden" name="reviewloop_action" value="deactivate_license">
-					<button type="submit" class="button rl-confirm" data-confirm="<?php esc_attr_e( 'Deactivate your ReviewLoop Pro license on this site?', 'reviewloop' ); ?>"><?php esc_html_e( 'Deactivate license', 'reviewloop' ); ?></button>
+					<button type="submit" class="button rl-confirm" data-confirm="<?php esc_attr_e( 'Deactivate your license on this site?', 'reviewloop' ); ?>"><?php esc_html_e( 'Deactivate license', 'reviewloop' ); ?></button>
 				</form>
 			<?php else : ?>
-				<p><?php echo esc_html( sprintf( __( 'Unlock CSV import and the WooCommerce auto-hook for %s.', 'reviewloop' ), $price ) ); ?></p>
 				<form method="post">
 					<?php wp_nonce_field( 'reviewloop_license_action' ); ?>
 					<input type="hidden" name="reviewloop_action" value="activate_license">

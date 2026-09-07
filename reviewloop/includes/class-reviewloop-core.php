@@ -14,6 +14,8 @@ class ReviewLoop_Core {
 	public function run() {
 		load_plugin_textdomain( 'reviewloop', false, dirname( plugin_basename( REVIEWLOOP_PLUGIN_FILE ) ) . '/languages' );
 
+		ReviewLoop_Activator::maybe_upgrade();
+
 		if ( is_admin() ) {
 			$admin_menu = new ReviewLoop_Admin_Menu();
 			$admin_menu->init();
@@ -48,6 +50,6 @@ class ReviewLoop_Core {
 
 	private function is_woocommerce_hook_enabled() {
 		$settings = get_option( 'reviewloop_settings', array() );
-		return ! empty( $settings['woocommerce_auto_hook'] ) && ReviewLoop_License::is_pro_active();
+		return ! empty( $settings['woocommerce_auto_hook'] ) && ReviewLoop_License::is_at_least( 'pro' );
 	}
 }

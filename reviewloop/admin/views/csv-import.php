@@ -1,14 +1,14 @@
 <?php
 /**
- * CSV bulk import screen — Pro only. Free-tier visitors see the upgrade
- * prompt instead of the upload form.
+ * CSV bulk import screen — Starter plan and above. Free-tier visitors see
+ * the upgrade prompt instead of the upload form.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$is_pro = ReviewLoop_License::is_pro_active();
+$has_access = ReviewLoop_License::is_at_least( 'starter' );
 $result = get_transient( 'reviewloop_csv_import_result_' . get_current_user_id() );
 if ( $result ) {
 	delete_transient( 'reviewloop_csv_import_result_' . get_current_user_id() );
@@ -23,7 +23,7 @@ if ( $result ) {
 	</div>
 
 	<?php if ( isset( $_GET['rl_msg'] ) && 'pro_required' === $_GET['rl_msg'] ) : ?>
-		<div class="notice notice-error"><p><?php esc_html_e( 'CSV import is a Pro feature.', 'reviewloop' ); ?></p></div>
+		<div class="notice notice-error"><p><?php esc_html_e( 'CSV import requires the Starter plan or above.', 'reviewloop' ); ?></p></div>
 	<?php endif; ?>
 
 	<?php if ( isset( $_GET['rl_msg'] ) && 'upload_error' === $_GET['rl_msg'] ) : ?>
@@ -43,11 +43,11 @@ if ( $result ) {
 		</div>
 	<?php endif; ?>
 
-	<?php if ( ! $is_pro ) : ?>
+	<?php if ( ! $has_access ) : ?>
 		<div class="reviewloop-panel">
 			<div class="rl-upgrade-box">
-				<p><?php echo esc_html( sprintf( __( 'Bulk CSV import is part of ReviewLoop Pro (%s).', 'reviewloop' ), defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$20/month' ) ); ?></p>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button"><?php esc_html_e( 'Upgrade to Pro', 'reviewloop' ); ?></a>
+				<p><?php echo esc_html( sprintf( __( 'Bulk CSV import is part of ReviewLoop Starter (%s) and above.', 'reviewloop' ), defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month' ) ); ?></p>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button"><?php esc_html_e( 'View plans', 'reviewloop' ); ?></a>
 			</div>
 		</div>
 	<?php else : ?>

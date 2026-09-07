@@ -5,7 +5,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class RLS_Activator {
 
+	const DB_VERSION = '1.1.0';
+
 	public static function activate() {
+		self::create_tables();
+
+		if ( false === get_option( 'rls_settings' ) ) {
+			add_option( 'rls_settings', RLS_Settings::defaults() );
+		}
+
+		update_option( 'rls_db_version', self::DB_VERSION );
+	}
+
+	/**
+	 * Runs dbDelta again on every version bump so an existing install
+	 * picks up new/changed columns (e.g. the 'plan' column added to
+	 * support two paid tiers) without needing to deactivate/reactivate.
+	 */
+	public static function maybe_upgrade() {
+		if ( get_option( 'rls_db_version' ) === self::DB_VERSION ) {
+			return;
+		}
+
+		self::create_tables();
+		update_option( 'rls_db_version', self::DB_VERSION );
+	}
+
+	private static function create_tables() {
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -22,6 +48,7 @@ class RLS_Activator {
 			payfast_token VARCHAR(64) NULL,
 			customer_name VARCHAR(191) NULL,
 			customer_email VARCHAR(191) NOT NULL,
+			plan VARCHAR(20) NOT NULL DEFAULT 'starter',
 			status VARCHAR(20) NOT NULL DEFAULT 'pending',
 			amount DECIMAL(10,2) NOT NULL,
 			currency VARCHAR(10) NOT NULL DEFAULT 'ZAR',
@@ -50,20 +77,6 @@ class RLS_Activator {
 
 		foreach ( $sql as $statement ) {
 			dbDelta( $statement );
-		}
-
-		$defaults = array(
-			'merchant_id'     => '',
-			'merchant_key'    => '',
-			'passphrase'      => '',
-			'sandbox_mode'    => true,
-			'price_amount'    => '380.00',
-			'currency'        => 'ZAR',
-			'item_name'       => 'ReviewLoop Pro (monthly)',
-		);
-
-		if ( false === get_option( 'rls_settings' ) ) {
-			add_option( 'rls_settings', $defaults );
 		}
 	}
 }

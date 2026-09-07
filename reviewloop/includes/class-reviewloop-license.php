@@ -1,19 +1,20 @@
 <?php
 /**
- * Pro license gating and activation against ReviewLoop's own license server
+ * License gating and activation against ReviewLoop's own license server
  * (a separate WordPress plugin — "reviewloop-license-server" — running on
  * ops.growthcraft.org.za, backed by PayFast for recurring billing). This
  * class is the client side, built against a small JSON REST API that
  * server exposes:
  *
- *   POST {server}/activate    { license_key, site_url }  -> { status: active|invalid|expired|site_limit_reached, expires_at }
+ *   POST {server}/activate    { license_key, site_url }  -> { status, plan, expires_at }
  *   POST {server}/deactivate  { license_key, site_url }  -> { status: ok }
- *   POST {server}/validate    { license_key, site_url }  -> { status: active|inactive|expired|invalid, expires_at }
+ *   POST {server}/validate    { license_key, site_url }  -> { status, plan, expires_at }
  *
- * "expires_at" is mostly informational — an active PayFast subscription
- * keeps renewing automatically, so `status` (not a fixed expiry date) is
- * what actually gates Pro features. Until the server is deployed and
- * REVIEWLOOP_LICENSE_SERVER_URL points at it, activation fails gracefully.
+ * "plan" is 'starter' or 'pro' — everything gates off get_plan(), not a
+ * single yes/no Pro flag, since there are now three tiers (free being the
+ * absence of an active license). "expires_at" is mostly informational — an
+ * active PayFast subscription keeps renewing automatically, so `status`
+ * (not a fixed expiry date) is what actually gates paid features.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,9 +23,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class ReviewLoop_License {
 
-	public static function is_pro_active() {
+	/**
+	 * Tiers in ascending order — used to answer "is this site at least on
+	 * plan X" without hardcoding pairwise comparisons everywhere.
+	 */
+	const TIER_ORDER = array( 'free', 'starter', 'pro' );
+
+	public static function get_plan() {
 		$settings = get_option( 'reviewloop_settings', array() );
-		return isset( $settings['license_status'] ) && 'active' === $settings['license_status'];
+
+		if ( empty( $settings['license_status'] ) || 'active' !== $settings['license_status'] ) {
+			return 'free';
+		}
+
+		$plan = isset( $settings['license_plan'] ) ? $settings['license_plan'] : '';
+		return in_array( $plan, array( 'starter', 'pro' ), true ) ? $plan : 'starter';
+	}
+
+	public static function is_at_least( $tier ) {
+		$current = array_search( self::get_plan(), self::TIER_ORDER, true );
+		$needed  = array_search( $tier, self::TIER_ORDER, true );
+
+		if ( false === $current || false === $needed ) {
+			return false;
+		}
+
+		return $current >= $needed;
+	}
+
+	/**
+	 * Kept for readability at call sites that just mean "any paid plan".
+	 */
+	public static function is_pro_active() {
+		return self::is_at_least( 'starter' );
 	}
 
 	private static function server_url() {
@@ -57,10 +88,10 @@ class ReviewLoop_License {
 
 	private static function error_for_status( $status ) {
 		$messages = array(
-			'invalid'             => __( 'That license key isn\'t valid.', 'reviewloop' ),
-			'expired'             => __( 'This license has expired or the subscription payment failed. Please check your billing.', 'reviewloop' ),
-			'cancelled'           => __( 'This subscription has been cancelled.', 'reviewloop' ),
-			'site_limit_reached'  => __( 'This license is already active on another site. Deactivate it there first.', 'reviewloop' ),
+			'invalid'            => __( 'That license key isn\'t valid.', 'reviewloop' ),
+			'expired'            => __( 'This license has expired or the subscription payment failed. Please check your billing.', 'reviewloop' ),
+			'cancelled'          => __( 'This subscription has been cancelled.', 'reviewloop' ),
+			'site_limit_reached' => __( 'This license is already active on another site. Deactivate it there first.', 'reviewloop' ),
 		);
 
 		return isset( $messages[ $status ] ) ? $messages[ $status ] : __( 'That license key isn\'t valid or active.', 'reviewloop' );
@@ -82,6 +113,7 @@ class ReviewLoop_License {
 			array(
 				'license_key'     => $license_key,
 				'license_status'  => 'active',
+				'license_plan'    => isset( $body['plan'] ) ? $body['plan'] : 'starter',
 				'license_expires' => isset( $body['expires_at'] ) ? $body['expires_at'] : '',
 			)
 		);
@@ -96,12 +128,13 @@ class ReviewLoop_License {
 			self::call( 'deactivate', $settings['license_key'] );
 		}
 
-		ReviewLoop_Settings::update( array( 'license_status' => 'inactive' ) );
+		ReviewLoop_Settings::update( array( 'license_status' => 'inactive', 'license_plan' => '' ) );
 	}
 
 	/**
 	 * Re-checks the stored license against the server. Called from the
-	 * daily cron tick so a lapsed subscription is caught within a day.
+	 * daily cron tick so a lapsed subscription — or a plan change — is
+	 * caught within a day.
 	 */
 	public static function revalidate() {
 		$settings = ReviewLoop_Settings::get_all();
@@ -121,8 +154,15 @@ class ReviewLoop_License {
 			return;
 		}
 
+		$update = array();
+		if ( isset( $body['plan'] ) ) {
+			$update['license_plan'] = $body['plan'];
+		}
 		if ( isset( $body['expires_at'] ) ) {
-			ReviewLoop_Settings::update( array( 'license_expires' => $body['expires_at'] ) );
+			$update['license_expires'] = $body['expires_at'];
+		}
+		if ( $update ) {
+			ReviewLoop_Settings::update( $update );
 		}
 	}
 }

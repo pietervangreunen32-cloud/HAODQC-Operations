@@ -53,12 +53,19 @@ $status_labels = array(
 		<?php if ( empty( $messages ) ) : ?>
 			<p class="description"><?php esc_html_e( 'No messages sent yet.', 'reviewloop' ); ?></p>
 		<?php else : ?>
+			<?php
+			$type_labels = array(
+				'check_in'   => __( 'Check-in', 'reviewloop' ),
+				'review_ask' => __( 'Review ask', 'reviewloop' ),
+				'reminder'   => __( 'Reminder', 'reviewloop' ),
+			);
+			?>
 			<table class="widefat striped">
-				<thead><tr><th><?php esc_html_e( 'Step', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Status', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Scheduled', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Sent', 'reviewloop' ); ?></th></tr></thead>
+				<thead><tr><th><?php esc_html_e( 'Message', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Status', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Scheduled', 'reviewloop' ); ?></th><th><?php esc_html_e( 'Sent', 'reviewloop' ); ?></th></tr></thead>
 				<tbody>
 				<?php foreach ( $messages as $msg ) : ?>
 					<tr>
-						<td><?php echo esc_html( $msg->sequence_step ); ?></td>
+						<td><?php echo esc_html( isset( $type_labels[ $msg->message_type ] ) ? $type_labels[ $msg->message_type ] : sprintf( __( 'Step %d', 'reviewloop' ), $msg->sequence_step ) ); ?></td>
 						<td><span class="rl-status rl-status-<?php echo esc_attr( $msg->status ); ?>"><?php echo esc_html( ucfirst( $msg->status ) ); ?></span></td>
 						<td><?php echo esc_html( $msg->scheduled_at ); ?></td>
 						<td><?php echo esc_html( $msg->sent_at ? $msg->sent_at : '—' ); ?></td>
