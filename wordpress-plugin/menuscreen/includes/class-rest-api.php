@@ -91,6 +91,12 @@ class MenuScreen_Rest_Api {
 					'price'       => (float) get_post_meta( $item->ID, '_menuscreen_price', true ),
 					'photoUrl'    => $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'medium' ) : null,
 					'soldOut'     => $sold_out,
+					'tag'         => get_post_meta( $item->ID, '_menuscreen_tag', true ),
+					'sauce'       => get_post_meta( $item->ID, '_menuscreen_sauce', true ),
+					'heat'        => (int) get_post_meta( $item->ID, '_menuscreen_heat', true ),
+					'pieces'      => max( 1, (int) get_post_meta( $item->ID, '_menuscreen_pieces', true ) ?: 1 ),
+					'diet'        => (array) get_post_meta( $item->ID, '_menuscreen_diet', true ),
+					'hero'        => (bool) get_post_meta( $item->ID, '_menuscreen_hero', true ),
 				);
 			}
 
@@ -103,6 +109,23 @@ class MenuScreen_Rest_Api {
 
 		$font_meta = MenuScreen_Settings::font_meta( $settings['custom_font'] );
 
+		$data_combos = array();
+		if ( ! empty( $settings['show_combos_on_display'] ) ) {
+			foreach ( MenuScreen_Combos::all( 'publish' ) as $combo ) {
+				if ( ! MenuScreen_Combos::is_active( $combo->ID ) ) {
+					continue;
+				}
+				$thumbnail_id  = get_post_thumbnail_id( $combo );
+				$data_combos[] = array(
+					'id'          => $combo->ID,
+					'name'        => get_the_title( $combo ),
+					'description' => wp_strip_all_tags( $combo->post_content ),
+					'price'       => (float) get_post_meta( $combo->ID, '_menuscreen_price', true ),
+					'photoUrl'    => $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'medium' ) : null,
+				);
+			}
+		}
+
 		return array(
 			'name'          => $settings['business_name'],
 			'theme'         => $settings['theme'],
@@ -113,6 +136,9 @@ class MenuScreen_Rest_Api {
 			'currency'      => $settings['currency'],
 			'updatedAt'     => current_time( 'timestamp' ), // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 			'categories'    => $data_categories,
+			'combos'        => $data_combos,
+			'tickerText'    => $settings['ticker_text'],
+			'autoHideControls' => (bool) $settings['auto_hide_controls'],
 			'custom'        => array(
 				'primaryColor'    => $settings['custom_primary_color'],
 				'backgroundColor' => $settings['custom_background_color'],

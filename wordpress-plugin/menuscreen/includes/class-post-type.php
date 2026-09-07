@@ -208,6 +208,8 @@ class MenuScreen_Post_Type {
 		return $value < 0 ? 0.0 : round( $value, 2 );
 	}
 
+	const DIET_TAGS = array( 'Vegetarian', 'Vegan', 'Dairy', 'Gluten', 'Egg', 'Meat', 'Sweet', 'Spicy' );
+
 	public static function add_meta_box() {
 		add_meta_box(
 			'menuscreen_item_details',
@@ -215,6 +217,15 @@ class MenuScreen_Post_Type {
 			array( __CLASS__, 'render_meta_box' ),
 			self::POST_TYPE,
 			'side',
+			'high'
+		);
+
+		add_meta_box(
+			'menuscreen_item_extras',
+			__( 'Upsell Details & Recipe', 'menuscreen' ),
+			array( __CLASS__, 'render_extras_meta_box' ),
+			self::POST_TYPE,
+			'normal',
 			'high'
 		);
 	}
@@ -249,6 +260,63 @@ class MenuScreen_Post_Type {
 		<?php
 	}
 
+	public static function render_extras_meta_box( $post ) {
+		$heat    = (int) get_post_meta( $post->ID, '_menuscreen_heat', true );
+		$tag     = get_post_meta( $post->ID, '_menuscreen_tag', true );
+		$diet    = (array) get_post_meta( $post->ID, '_menuscreen_diet', true );
+		$sauce   = get_post_meta( $post->ID, '_menuscreen_sauce', true );
+		$hero    = (bool) get_post_meta( $post->ID, '_menuscreen_hero', true );
+		$pieces  = get_post_meta( $post->ID, '_menuscreen_pieces', true );
+		$pieces  = '' === $pieces ? 1 : (int) $pieces;
+		?>
+		<div class="menuscreen-meta-grid">
+			<p>
+				<label for="menuscreen_tag"><strong><?php esc_html_e( 'Badge / tag', 'menuscreen' ); ?></strong></label><br>
+				<input type="text" id="menuscreen_tag" name="menuscreen_tag" value="<?php echo esc_attr( $tag ); ?>" class="widefat" placeholder="<?php esc_attr_e( 'e.g. Popular, Chef\'s Pick, SA', 'menuscreen' ); ?>" />
+			</p>
+			<p>
+				<label for="menuscreen_sauce"><strong><?php esc_html_e( 'Served with', 'menuscreen' ); ?></strong></label><br>
+				<input type="text" id="menuscreen_sauce" name="menuscreen_sauce" value="<?php echo esc_attr( $sauce ); ?>" class="widefat" placeholder="<?php esc_attr_e( 'e.g. Sweet Chilli Garlic Mayo', 'menuscreen' ); ?>" />
+			</p>
+			<p>
+				<label for="menuscreen_heat"><strong><?php esc_html_e( 'Heat level', 'menuscreen' ); ?></strong></label><br>
+				<select id="menuscreen_heat" name="menuscreen_heat">
+					<?php for ( $i = 0; $i <= 3; $i++ ) : ?>
+						<option value="<?php echo esc_attr( $i ); ?>" <?php selected( $heat, $i ); ?>><?php echo esc_html( $i > 0 ? str_repeat( '🔥', $i ) : __( 'None', 'menuscreen' ) ); ?></option>
+					<?php endfor; ?>
+				</select>
+			</p>
+			<p>
+				<label for="menuscreen_pieces"><strong><?php esc_html_e( 'Pieces per order', 'menuscreen' ); ?></strong></label><br>
+				<input type="number" min="1" id="menuscreen_pieces" name="menuscreen_pieces" value="<?php echo esc_attr( $pieces ); ?>" style="width:100px;" />
+			</p>
+			<p>
+				<label><strong><?php esc_html_e( 'Dietary tags', 'menuscreen' ); ?></strong></label><br>
+				<?php foreach ( self::DIET_TAGS as $option ) : ?>
+					<label style="margin-right:12px;display:inline-block;">
+						<input type="checkbox" name="menuscreen_diet[]" value="<?php echo esc_attr( $option ); ?>" <?php checked( in_array( $option, $diet, true ) ); ?> />
+						<?php echo esc_html( $option ); ?>
+					</label>
+				<?php endforeach; ?>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="menuscreen_hero" value="1" <?php checked( $hero ); ?> />
+					<strong><?php esc_html_e( 'Feature on TV spotlight rotation', 'menuscreen' ); ?></strong>
+				</label>
+				<p class="description"><?php esc_html_e( 'When at least one item is featured, the TV display\'s Feature mode spotlights only featured items instead of cycling through everything.', 'menuscreen' ); ?></p>
+			</p>
+		</div>
+
+		<hr />
+		<h4><?php esc_html_e( 'Recipe (for Costing Tool & Prep Planner)', 'menuscreen' ); ?></h4>
+		<?php MenuScreen_Recipes::render_recipe_editor( $post->ID ); ?>
+
+		<h4><?php esc_html_e( 'Method', 'menuscreen' ); ?></h4>
+		<?php MenuScreen_Recipes::render_method_editor( $post->ID ); ?>
+		<?php
+	}
+
 	public static function save_meta_box( $post_id ) {
 		if ( ! isset( $_POST['menuscreen_item_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['menuscreen_item_nonce'] ) ), 'menuscreen_save_item' )
@@ -267,5 +335,18 @@ class MenuScreen_Post_Type {
 		}
 
 		update_post_meta( $post_id, '_menuscreen_sold_out', ! empty( $_POST['menuscreen_sold_out'] ) );
+
+		update_post_meta( $post_id, '_menuscreen_tag', isset( $_POST['menuscreen_tag'] ) ? sanitize_text_field( wp_unslash( $_POST['menuscreen_tag'] ) ) : '' );
+		update_post_meta( $post_id, '_menuscreen_sauce', isset( $_POST['menuscreen_sauce'] ) ? sanitize_text_field( wp_unslash( $_POST['menuscreen_sauce'] ) ) : '' );
+		update_post_meta( $post_id, '_menuscreen_heat', isset( $_POST['menuscreen_heat'] ) ? max( 0, min( 3, absint( $_POST['menuscreen_heat'] ) ) ) : 0 );
+		update_post_meta( $post_id, '_menuscreen_pieces', isset( $_POST['menuscreen_pieces'] ) ? max( 1, absint( $_POST['menuscreen_pieces'] ) ) : 1 );
+		update_post_meta( $post_id, '_menuscreen_hero', ! empty( $_POST['menuscreen_hero'] ) );
+
+		$diet = isset( $_POST['menuscreen_diet'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['menuscreen_diet'] ) ) : array();
+		$diet = array_values( array_intersect( $diet, self::DIET_TAGS ) );
+		update_post_meta( $post_id, '_menuscreen_diet', $diet );
+
+		MenuScreen_Recipes::save_recipe_from_request( $post_id );
+		MenuScreen_Recipes::save_method_from_request( $post_id );
 	}
 }

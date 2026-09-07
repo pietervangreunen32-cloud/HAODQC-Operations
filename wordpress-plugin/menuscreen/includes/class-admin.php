@@ -25,6 +25,9 @@ class MenuScreen_Admin {
 		add_action( 'admin_post_menuscreen_save_plan', array( __CLASS__, 'handle_save_plan' ) );
 		add_action( 'admin_post_menuscreen_save_upgrade_urls', array( __CLASS__, 'handle_save_upgrade_urls' ) );
 		add_action( 'admin_post_menuscreen_save_woo_products', array( __CLASS__, 'handle_save_woo_products' ) );
+		add_action( 'admin_post_menuscreen_save_ingredient_costs', array( __CLASS__, 'handle_save_ingredient_costs' ) );
+		add_action( 'admin_post_menuscreen_save_bulk_prices', array( __CLASS__, 'handle_save_bulk_prices' ) );
+		add_action( 'admin_post_menuscreen_save_prep_orders', array( __CLASS__, 'handle_save_prep_orders' ) );
 		add_filter( 'plugin_action_links_' . MENUSCREEN_BASENAME, array( __CLASS__, 'add_settings_link' ) );
 		add_action( 'admin_footer-post-new.php', array( __CLASS__, 'maybe_preselect_category' ) );
 	}
@@ -56,6 +59,69 @@ class MenuScreen_Admin {
 			'edit_posts',
 			'menuscreen-menu',
 			array( __CLASS__, 'render_menu_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Combos', 'menuscreen' ),
+			__( 'Combos', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-combos',
+			array( __CLASS__, 'render_combos_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Recipe Book', 'menuscreen' ),
+			__( 'Recipes', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-recipes',
+			array( __CLASS__, 'render_recipes_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Sauce Recipes', 'menuscreen' ),
+			__( 'Sauces', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-sauces',
+			array( __CLASS__, 'render_sauces_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Costing Tool', 'menuscreen' ),
+			__( 'Costing Tool', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-costing',
+			array( __CLASS__, 'render_costing_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Prep Planner', 'menuscreen' ),
+			__( 'Prep Planner', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-prep',
+			array( __CLASS__, 'render_prep_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Profit Dashboard', 'menuscreen' ),
+			__( 'Profit Dashboard', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-profit',
+			array( __CLASS__, 'render_profit_page' )
+		);
+
+		add_submenu_page(
+			'menuscreen',
+			__( 'Image Slots', 'menuscreen' ),
+			__( 'Image Slots', 'menuscreen' ),
+			'edit_posts',
+			'menuscreen-images',
+			array( __CLASS__, 'render_images_page' )
 		);
 
 		add_submenu_page(
@@ -126,8 +192,24 @@ class MenuScreen_Admin {
 		return $links;
 	}
 
+	/**
+	 * Post types whose native edit screens (post.php, post-new.php) also
+	 * need our CSS/JS — the recipe editor's "+ Add ingredient" button
+	 * lives there, not just on our own custom admin pages.
+	 */
+	const RECIPE_POST_TYPES = array(
+		'menuscreen_item',
+		'menuscreen_combo',
+		'menuscreen_sauce',
+	);
+
 	public static function enqueue_assets( $hook ) {
-		if ( strpos( $hook, 'menuscreen' ) === false ) {
+		$on_own_page = false !== strpos( $hook, 'menuscreen' );
+
+		$screen              = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$on_our_post_screen = $screen && in_array( $screen->post_type, self::RECIPE_POST_TYPES, true );
+
+		if ( ! $on_own_page && ! $on_our_post_screen ) {
 			return;
 		}
 
@@ -228,6 +310,34 @@ class MenuScreen_Admin {
 		require MENUSCREEN_DIR . 'admin/views/plans-page.php';
 	}
 
+	public static function render_combos_page() {
+		require MENUSCREEN_DIR . 'admin/views/combos-page.php';
+	}
+
+	public static function render_recipes_page() {
+		require MENUSCREEN_DIR . 'admin/views/recipes-page.php';
+	}
+
+	public static function render_sauces_page() {
+		require MENUSCREEN_DIR . 'admin/views/sauces-page.php';
+	}
+
+	public static function render_costing_page() {
+		require MENUSCREEN_DIR . 'admin/views/costing-page.php';
+	}
+
+	public static function render_prep_page() {
+		require MENUSCREEN_DIR . 'admin/views/prep-page.php';
+	}
+
+	public static function render_profit_page() {
+		require MENUSCREEN_DIR . 'admin/views/profit-page.php';
+	}
+
+	public static function render_images_page() {
+		require MENUSCREEN_DIR . 'admin/views/images-page.php';
+	}
+
 	// ---------- Form handlers (admin-post.php) ----------
 
 	public static function handle_save_theme() {
@@ -299,11 +409,6 @@ class MenuScreen_Admin {
 		}
 		check_admin_referer( 'menuscreen_save_custom_branding' );
 
-		if ( ! MenuScreen_Plans::at_least( 'fleet' ) ) {
-			wp_safe_redirect( add_query_arg( 'menuscreen_error', rawurlencode( __( 'Custom branding requires the Fleet plan.', 'menuscreen' ) ), wp_get_referer() ) );
-			exit;
-		}
-
 		$primary    = isset( $_POST['primary_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['primary_color'] ) ) : '';
 		$background = isset( $_POST['background_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['background_color'] ) ) : '';
 		$text       = isset( $_POST['text_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['text_color'] ) ) : '';
@@ -340,6 +445,8 @@ class MenuScreen_Admin {
 		MenuScreen_Settings::update(
 			array(
 				'hide_sold_out_items' => ! empty( $_POST['hide_sold_out_items'] ),
+				'auto_hide_controls'  => ! empty( $_POST['auto_hide_controls'] ),
+				'ticker_text'         => isset( $_POST['ticker_text'] ) ? sanitize_text_field( wp_unslash( $_POST['ticker_text'] ) ) : '',
 			)
 		);
 
@@ -395,6 +502,96 @@ class MenuScreen_Admin {
 		);
 
 		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', admin_url( 'admin.php?page=menuscreen-plans' ) ) );
+		exit;
+	}
+
+	public static function handle_save_ingredient_costs() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_ingredient_costs' );
+
+		$names  = isset( $_POST['cost_name'] ) ? (array) wp_unslash( $_POST['cost_name'] ) : array();
+		$values = isset( $_POST['cost_value'] ) ? (array) wp_unslash( $_POST['cost_value'] ) : array();
+		foreach ( $names as $index => $name ) {
+			$name = sanitize_text_field( $name );
+			if ( '' === $name ) {
+				continue;
+			}
+			MenuScreen_Ingredient_Costs::set_cost( $name, isset( $values[ $index ] ) ? $values[ $index ] : 0 );
+		}
+
+		$return_query = isset( $_POST['return_query'] ) ? sanitize_text_field( wp_unslash( $_POST['return_query'] ) ) : 'page=menuscreen-costing';
+		wp_safe_redirect( admin_url( 'admin.php?' . $return_query . '&menuscreen_saved=1' ) );
+		exit;
+	}
+
+	/**
+	 * Applies a markup % + rounding increment to every published item and
+	 * combo's price in one confirmed action. No default rule is baked
+	 * in — the site owner chooses both numbers each time.
+	 */
+	public static function handle_save_bulk_prices() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_bulk_prices' );
+
+		$markup_percent = isset( $_POST['markup_percent'] ) ? (float) $_POST['markup_percent'] : 0;
+		$round_to       = isset( $_POST['round_to'] ) ? (float) $_POST['round_to'] : 0;
+		$apply_to       = isset( $_POST['apply_to'] ) ? sanitize_key( wp_unslash( $_POST['apply_to'] ) ) : 'items';
+
+		$post_types = array();
+		if ( in_array( $apply_to, array( 'items', 'both' ), true ) ) {
+			$post_types[] = MenuScreen_Post_Type::POST_TYPE;
+		}
+		if ( in_array( $apply_to, array( 'combos', 'both' ), true ) ) {
+			$post_types[] = MenuScreen_Combos::POST_TYPE;
+		}
+
+		$updated = 0;
+		foreach ( $post_types as $post_type ) {
+			$posts = get_posts(
+				array(
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			);
+			foreach ( $posts as $post_id ) {
+				$price = (float) get_post_meta( $post_id, '_menuscreen_price', true );
+				$new_price = $price * ( 1 + ( $markup_percent / 100 ) );
+				if ( $round_to > 0 ) {
+					$new_price = ceil( $new_price / $round_to ) * $round_to;
+				}
+				update_post_meta( $post_id, '_menuscreen_price', MenuScreen_Post_Type::sanitize_price( $new_price ) );
+				++$updated;
+			}
+		}
+
+		set_transient( 'menuscreen_bulk_price_result_' . get_current_user_id(), $updated, 30 );
+		wp_safe_redirect( admin_url( 'admin.php?page=menuscreen-menu&menuscreen_bulk_priced=1' ) );
+		exit;
+	}
+
+	public static function handle_save_prep_orders() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		check_admin_referer( 'menuscreen_save_prep_orders' );
+
+		$raw    = isset( $_POST['prep_orders'] ) ? (array) wp_unslash( $_POST['prep_orders'] ) : array();
+		$sanitized = array();
+		foreach ( $raw as $post_id => $orders ) {
+			$post_id = absint( $post_id );
+			if ( $post_id ) {
+				$sanitized[ $post_id ] = max( 0, absint( $orders ) );
+			}
+		}
+		update_option( 'menuscreen_prep_orders', $sanitized, false );
+
+		wp_safe_redirect( add_query_arg( 'menuscreen_saved', '1', admin_url( 'admin.php?page=menuscreen-prep' ) ) );
 		exit;
 	}
 }

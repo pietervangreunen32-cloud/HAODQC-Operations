@@ -31,7 +31,11 @@ class MenuScreen {
 	private function includes() {
 		require_once MENUSCREEN_DIR . 'includes/class-settings.php';
 		require_once MENUSCREEN_DIR . 'includes/class-plans.php';
+		require_once MENUSCREEN_DIR . 'includes/class-ingredient-costs.php';
+		require_once MENUSCREEN_DIR . 'includes/class-recipes.php';
 		require_once MENUSCREEN_DIR . 'includes/class-post-type.php';
+		require_once MENUSCREEN_DIR . 'includes/class-combos.php';
+		require_once MENUSCREEN_DIR . 'includes/class-sauces.php';
 		require_once MENUSCREEN_DIR . 'includes/class-display.php';
 		require_once MENUSCREEN_DIR . 'includes/class-rest-api.php';
 		require_once MENUSCREEN_DIR . 'includes/class-ajax.php';
@@ -48,6 +52,9 @@ class MenuScreen {
 		load_plugin_textdomain( 'menuscreen', false, dirname( MENUSCREEN_BASENAME ) . '/languages' );
 
 		MenuScreen_Post_Type::init();
+		MenuScreen_Combos::init();
+		MenuScreen_Sauces::init();
+		MenuScreen_Recipes::init();
 		MenuScreen_Display::init();
 		MenuScreen_Rest_Api::init();
 		MenuScreen_Ajax::init();

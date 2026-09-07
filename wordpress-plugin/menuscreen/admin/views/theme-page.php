@@ -38,7 +38,7 @@ $theme_meta  = array(
 	),
 );
 $logo_url     = $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'thumbnail' ) : '';
-$can_custom   = MenuScreen_Plans::at_least( 'fleet' );
+$can_custom   = true; // Custom branding is available on every plan.
 $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'caveat' );
 ?>
 <div class="wrap menuscreen-wrap">
@@ -102,10 +102,7 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 	</form>
 
 	<div class="menuscreen-card">
-		<h2>
-			<?php esc_html_e( 'Custom theme', 'menuscreen' ); ?>
-			<span class="menuscreen-plan-pill"><?php esc_html_e( 'Fleet plan', 'menuscreen' ); ?></span>
-		</h2>
+		<h2><?php esc_html_e( 'Custom theme', 'menuscreen' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Match your own brand colors and pick a display font instead of one of the built-in themes.', 'menuscreen' ); ?></p>
 
 		<?php if ( ! $can_custom ) : ?>
@@ -155,10 +152,23 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="menuscreen_save_functionality" />
 			<?php wp_nonce_field( 'menuscreen_save_functionality' ); ?>
-			<label>
-				<input type="checkbox" name="hide_sold_out_items" value="1" <?php checked( $settings['hide_sold_out_items'], true ); ?> />
-				<?php esc_html_e( 'Hide sold-out items entirely, instead of showing them crossed out', 'menuscreen' ); ?>
-			</label>
+			<p>
+				<label>
+					<input type="checkbox" name="hide_sold_out_items" value="1" <?php checked( $settings['hide_sold_out_items'], true ); ?> />
+					<?php esc_html_e( 'Hide sold-out items entirely, instead of showing them crossed out', 'menuscreen' ); ?>
+				</label>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="auto_hide_controls" value="1" <?php checked( $settings['auto_hide_controls'], true ); ?> />
+					<?php esc_html_e( 'Auto-hide the display\'s mode buttons after a few seconds of inactivity', 'menuscreen' ); ?>
+				</label>
+			</p>
+			<p>
+				<label for="menuscreen_ticker_text"><strong><?php esc_html_e( 'Scrolling ticker text (optional)', 'menuscreen' ); ?></strong></label><br>
+				<input type="text" id="menuscreen_ticker_text" name="ticker_text" value="<?php echo esc_attr( $settings['ticker_text'] ); ?>" class="widefat" placeholder="<?php esc_attr_e( 'e.g. 6-piece boxes • loaded fries • ask about today\'s special •', 'menuscreen' ); ?>" />
+				<span class="description"><?php esc_html_e( 'Leave blank to hide the ticker bar.', 'menuscreen' ); ?></span>
+			</p>
 			<?php submit_button( __( 'Save', 'menuscreen' ) ); ?>
 		</form>
 	</div>

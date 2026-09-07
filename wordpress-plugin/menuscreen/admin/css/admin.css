@@ -1,22 +1,95 @@
+/**
+ * MenuScreen admin styling — reskinned with the GrowthCraft brand
+ * palette (dark green, #00c66a accent, rounded cards, pill buttons).
+ * Scoped entirely to .menuscreen-wrap (our own custom admin pages) so it
+ * never touches WordPress's native chrome or other plugins' screens —
+ * the native post-edit screens for our post types keep default wp-admin
+ * styling, since those are WordPress's own UI, not ours to reskin.
+ */
+
 .menuscreen-wrap {
-	max-width: 900px;
+	--gc-green: #00c66a;
+	--gc-green-soft: #8fffc4;
+	--gc-soft-green: #e8fff3;
+	--gc-dark: #031f17;
+	--gc-dark-2: #06291f;
+	--gc-light: #f5f7f8;
+	--gc-text: #1f2933;
+	--gc-muted: #667085;
+	--gc-border: rgba(3, 31, 23, 0.1);
+	--gc-shadow: 0 10px 28px rgba(3, 31, 23, 0.06);
+	max-width: 1100px;
+}
+
+.menuscreen-wrap h1 {
+	color: var(--gc-dark);
+	font-weight: 800;
+	letter-spacing: -0.01em;
+}
+
+.menuscreen-wrap .description {
+	color: var(--gc-muted);
+}
+
+.menuscreen-wrap .button,
+.menuscreen-wrap .button-secondary {
+	background: #fff;
+	color: var(--gc-dark);
+	border: 1px solid var(--gc-border);
+	border-radius: 999px;
+	font-weight: 700;
+	box-shadow: none;
+	transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.menuscreen-wrap .button:hover,
+.menuscreen-wrap .button-secondary:hover {
+	background: var(--gc-soft-green);
+	border-color: var(--gc-green);
+	color: var(--gc-dark);
+	transform: translateY(-1px);
+}
+
+.menuscreen-wrap .button-primary {
+	background: var(--gc-green);
+	border-color: var(--gc-green);
+	color: var(--gc-dark);
+	border-radius: 999px;
+	font-weight: 800;
+	box-shadow: 0 8px 20px rgba(0, 198, 106, 0.28);
+	text-shadow: none;
+	transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.menuscreen-wrap .button-primary:hover {
+	background: var(--gc-green-soft);
+	border-color: var(--gc-green-soft);
+	color: var(--gc-dark);
+	transform: translateY(-1px);
+	box-shadow: 0 12px 26px rgba(0, 198, 106, 0.35);
+}
+
+.menuscreen-wrap .button-link-delete {
+	color: #b42318;
 }
 
 .menuscreen-card {
 	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 8px;
-	padding: 20px;
+	border: 1px solid var(--gc-border);
+	border-radius: 20px;
+	padding: 22px;
 	margin: 16px 0;
+	box-shadow: var(--gc-shadow);
 }
 
 .menuscreen-card--highlight {
-	background: #fff8f0;
-	border-color: #f0b849;
+	background: var(--gc-soft-green);
+	border-color: var(--gc-green);
 }
 
 .menuscreen-card h2 {
 	margin-top: 0;
+	color: var(--gc-dark);
 }
 
 .menuscreen-category-header {
@@ -32,7 +105,7 @@
 
 .menuscreen-drag-handle {
 	cursor: grab;
-	color: #8c8f94;
+	color: var(--gc-muted);
 	font-size: 18px;
 	user-select: none;
 }
@@ -47,11 +120,11 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 10px;
-	border: 1px solid #e2e4e7;
-	border-radius: 6px;
+	padding: 12px 14px;
+	border: 1px solid var(--gc-border);
+	border-radius: 16px;
 	margin-bottom: 8px;
-	background: #fafafa;
+	background: var(--gc-light);
 }
 
 .menuscreen-item.is-sold-out {
@@ -61,23 +134,25 @@
 .menuscreen-item-thumb {
 	width: 40px;
 	height: 40px;
-	border-radius: 4px;
+	border-radius: 10px;
 	object-fit: cover;
 	flex-shrink: 0;
 }
 
 .menuscreen-item-thumb--empty {
-	background: #e2e4e7;
+	background: var(--gc-border);
 	display: inline-block;
 }
 
 .menuscreen-item-name {
 	flex: 1;
-	font-weight: 600;
+	font-weight: 700;
+	color: var(--gc-text);
 }
 
 .menuscreen-item-price {
-	font-weight: 600;
+	font-weight: 700;
+	color: var(--gc-dark);
 	white-space: nowrap;
 }
 
@@ -87,18 +162,18 @@
 	color: #fff;
 	font-size: 11px;
 	font-weight: 700;
-	padding: 2px 6px;
-	border-radius: 3px;
+	padding: 2px 8px;
+	border-radius: 999px;
 	margin-left: 6px;
 	vertical-align: middle;
 }
 
 .menuscreen-badge--draft {
-	background: #8c8f94;
+	background: var(--gc-muted);
 }
 
 .menuscreen-empty {
-	color: #8c8f94;
+	color: var(--gc-muted);
 	font-style: italic;
 	padding: 8px 0;
 }
@@ -111,14 +186,19 @@
 
 .menuscreen-theme-option {
 	display: block;
-	border: 2px solid #dcdcde;
-	border-radius: 8px;
-	padding: 12px;
+	border: 2px solid var(--gc-border);
+	border-radius: 18px;
+	padding: 14px;
 	cursor: pointer;
+	transition: border-color .18s ease, transform .18s ease;
+}
+
+.menuscreen-theme-option:hover {
+	transform: translateY(-2px);
 }
 
 .menuscreen-theme-option.is-selected {
-	border-color: #d54e21;
+	border-color: var(--gc-green);
 }
 
 .menuscreen-theme-option input {
@@ -128,7 +208,7 @@
 .menuscreen-theme-swatch {
 	display: block;
 	height: 60px;
-	border-radius: 6px;
+	border-radius: 12px;
 	margin: 8px 0;
 }
 
@@ -142,6 +222,7 @@
 #menuscreen-qr svg {
 	width: 180px;
 	height: 180px;
+	border-radius: 16px;
 }
 
 .menuscreen-help-grid {
@@ -165,21 +246,21 @@
 .menuscreen-steps li {
 	flex: 1;
 	text-align: center;
-	background: #f0f0f1;
-	color: #8c8f94;
+	background: var(--gc-light);
+	color: var(--gc-muted);
 	padding: 10px;
-	border-radius: 6px;
-	font-weight: 600;
+	border-radius: 999px;
+	font-weight: 700;
 }
 
 .menuscreen-steps li.is-active {
-	background: #d54e21;
-	color: #fff;
+	background: var(--gc-green);
+	color: var(--gc-dark);
 }
 
 .menuscreen-steps li.is-done {
-	background: #f2dacd;
-	color: #8a3b17;
+	background: var(--gc-soft-green);
+	color: var(--gc-dark);
 }
 
 .menuscreen-wizard-nav {
@@ -189,11 +270,13 @@
 
 .menuscreen-plan-pill {
 	display: inline-block;
-	background: #fff3e0;
-	color: #9a5b13;
+	background: var(--gc-soft-green);
+	color: var(--gc-dark);
 	font-size: 11px;
-	font-weight: 700;
-	padding: 2px 8px;
+	font-weight: 800;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+	padding: 3px 10px;
 	border-radius: 999px;
 	margin-left: 6px;
 	vertical-align: middle;
@@ -208,20 +291,22 @@
 
 .menuscreen-stat {
 	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 8px;
-	padding: 16px;
+	border: 1px solid var(--gc-border);
+	border-radius: 18px;
+	padding: 18px;
 	text-align: center;
+	box-shadow: var(--gc-shadow);
 }
 
 .menuscreen-stat strong {
 	display: block;
 	font-size: 28px;
 	line-height: 1.2;
+	color: var(--gc-dark);
 }
 
 .menuscreen-stat span {
-	color: #646970;
+	color: var(--gc-muted);
 	font-size: 12px;
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
@@ -230,7 +315,7 @@
 .menuscreen-plan-usage-bar {
 	height: 8px;
 	border-radius: 999px;
-	background: #f0f0f1;
+	background: var(--gc-light);
 	overflow: hidden;
 	margin-top: 8px;
 }
@@ -238,7 +323,7 @@
 .menuscreen-plan-usage-bar > span {
 	display: block;
 	height: 100%;
-	background: #d54e21;
+	background: var(--gc-green);
 }
 
 .menuscreen-plans-grid {
@@ -249,23 +334,32 @@
 
 .menuscreen-plan-card {
 	background: #fff;
-	border: 2px solid #dcdcde;
-	border-radius: 10px;
-	padding: 20px;
+	border: 2px solid var(--gc-border);
+	border-radius: 22px;
+	padding: 22px;
+	box-shadow: var(--gc-shadow);
+	transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.menuscreen-plan-card:hover {
+	transform: translateY(-3px);
 }
 
 .menuscreen-plan-card.is-current {
-	border-color: #d54e21;
+	border-color: var(--gc-green);
+	background: linear-gradient(180deg, var(--gc-soft-green) 0%, #fff 40%);
 }
 
 .menuscreen-plan-card h3 {
 	margin: 0 0 4px;
+	color: var(--gc-dark);
 }
 
 .menuscreen-plan-price {
 	font-size: 26px;
 	font-weight: 800;
 	margin: 10px 0;
+	color: var(--gc-dark);
 }
 
 .menuscreen-plan-features {
@@ -276,15 +370,45 @@
 
 .menuscreen-plan-features li {
 	padding: 3px 0;
+	color: var(--gc-text);
 }
 
 .menuscreen-plan-features li:before {
 	content: "✓ ";
-	color: #1a7f37;
-	font-weight: 700;
+	color: var(--gc-green);
+	font-weight: 800;
 }
 
 .menuscreen-field-disabled {
 	opacity: 0.5;
 	pointer-events: none;
+}
+
+.menuscreen-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px 20px;
+	margin-bottom: 16px;
+}
+
+.menuscreen-recipe-table {
+	margin-bottom: 10px;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.menuscreen-recipe-table th {
+	text-align: left;
+}
+
+.menuscreen-hero-badge {
+	display: inline-block;
+	background: var(--gc-dark);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	padding: 2px 8px;
+	border-radius: 999px;
+	margin-left: 6px;
+	vertical-align: middle;
 }

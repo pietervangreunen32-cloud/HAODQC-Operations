@@ -40,9 +40,9 @@ menuscreen/
 * **Bulk CSV import** (Rush plan and up) — same columns as before
   (category, name, description, price, sold_out), with per-row error
   reporting and unknown categories created automatically.
-* **Custom theme** (Fleet plan) — your own brand colors and a Google
-  Fonts choice, alongside the four built-in themes, applied on the live
-  display via CSS custom properties.
+* **Custom theme** — your own brand colors and a Google Fonts choice,
+  alongside the four built-in themes, applied on the live display via CSS
+  custom properties. Available on every plan (see 1.2.0 below).
 * **A "hide sold-out items entirely" display option**, as a second
   functionality toggle alongside custom branding.
 * **Plans & Billing page** — manual plan switching (for payments handled
@@ -50,6 +50,58 @@ menuscreen/
   upgrades from a WooCommerce order completing if WooCommerce is active
   on the same site (no webhook needed — same install, so it's a direct
   `woocommerce_order_status_completed` hook).
+
+## What's new in 1.2.0 — combos, recipes, and business tooling
+
+Ported and expanded from a reference food-truck build (Dip 'n Crunch)
+the site owner shared, generalized into reusable plugin features rather
+than hardcoded to that one menu:
+
+* **Combos & Upsells** (Rush plan) — a lightweight post type of its own
+  (`menuscreen_combo`): name, description, price, active/hide toggle,
+  drag order, its own recipe. Gets its own admin page and a dedicated
+  "Combos" TV display mode; new combos publish as drafts on Sampler with
+  an upgrade notice, matching the existing item-limit pattern.
+* **Richer menu items** — heat level (0-3 flames), a free-text badge/tag
+  ("Popular", "SA", "Spicy"...), dietary tags (Vegetarian, Vegan, Dairy,
+  Gluten, Egg, Meat, Sweet, Spicy), a "served with" sauce line,
+  pieces-per-order, and a "feature on TV" flag. All shown on the live
+  display; the feature flag drives the new spotlight mode below.
+* **Recipe Book, Sauce Recipes, and printable prep sheets** (Rush plan) —
+  every item, combo, and a separate `menuscreen_sauce` post type can carry
+  an ingredient list (name/unit/qty-per-order) and method steps, shared
+  through one `MenuScreen_Recipes` helper. A one-click "Print Prep Sheet"
+  opens a bare, chrome-free page and triggers the browser print dialog.
+* **Costing Tool, Prep Planner, Profit Dashboard** (Fleet plan) — all
+  three read the same recipes against one shared, editable ingredient
+  cost list (`MenuScreen_Ingredient_Costs` — a single option, so pricing
+  "Cheddar, grated" once updates every recipe that uses it everywhere
+  it's costed). Costing Tool estimates one item/combo's batch cost and
+  profit; Prep Planner aggregates a shopping list across the whole menu
+  from "orders to prep" inputs; Profit Dashboard tables cost/profit/margin
+  for everything at once.
+* **Image Slots** (Rush plan) — a checklist of every item/combo, whether
+  it has a featured image set, with a direct link to fix it.
+* **Bulk price adjustment** — a markup % and a rounding increment, your
+  own numbers (nothing hardcoded), applied to every published item and/or
+  combo price in one confirmed action.
+* **TV display overhaul** — Feature (spotlight rotation through
+  hero-flagged items, or everything if none are flagged), Board (the
+  existing category grid, now with a Combos column), and Combos (a
+  dedicated slide) modes. Prev/next and mode buttons let the owner
+  manually pin a mode; an optional scrolling ticker (your own text, off
+  by default) and auto-hiding controls (toggleable) round it out.
+* **Plan changes** — custom branding is now free on every plan; Rush
+  moved to R999/mo (adds Combos, CSV import, Recipes/Sauces, Image
+  Slots, Feature/Combos display modes); Fleet moved to R2999/mo (adds
+  Costing/Prep/Profit). Centralized in `class-plans.php` — one line per
+  number to change if you want different pricing.
+* **Admin reskin** — the plugin's own admin pages (not wp-admin globally,
+  and not the native post-edit screens for items/combos/sauces) restyled
+  with a dark-green brand palette, rounded cards, and pill buttons,
+  drawn from a GrowthCraft-style CSS design system the site owner
+  provided. Scoped to `.menuscreen-wrap` so it can't affect other
+  plugins' screens.
 
 ## How it's organized (plain English)
 
@@ -98,6 +150,35 @@ would be:
   hook that backfills that field for any menuscreen_category term,
   however it was created, then re-verified via the live CSV import that
   originally exposed it.
+
+**For the 1.2.0 combos/recipes/business-tooling update:** deactivated and
+reactivated the plugin again on the new code (clean, no fatal errors),
+then on that same live instance:
+* Created a real item and a real combo through the actual save handlers
+  (`MenuScreen_Post_Type::save_meta_box()`, `MenuScreen_Combos::save_meta_box()`)
+  with a full recipe, method, heat level, tag, sauce, dietary tags, and
+  the "feature on TV" flag — confirmed every field persisted correctly
+  in the database.
+* Set real per-ingredient costs and confirmed `cost_per_order()` computed
+  the right number by hand (quantity × unit cost, summed).
+* Loaded every new admin page (Combos, Recipe Book, Sauces, Costing
+  Tool, Prep Planner, Profit Dashboard, Image Slots) over real HTTP,
+  twice — once on Sampler (every gated "upgrade to unlock" branch) and
+  once on Fleet (every real form/table/recipe-editor branch) — zero
+  fatal errors either way.
+* Confirmed the Costing Tool, Prep Planner, and Profit Dashboard pages
+  actually showed the real item/combo just created, with the right
+  numbers (including a deliberately underpriced test item correctly
+  showing a negative profit — the tool's job is to catch exactly that).
+* Confirmed the public REST payload (what the TV display actually reads)
+  carried every new field correctly, and that the combos array respects
+  both the "show combos on display" setting and each combo's own
+  active/hidden toggle.
+* Also ran two automated regression suites throughout — a stub-based
+  WordPress environment (no real database) exercising plan/recipe/cost
+  logic and every admin page's HTML render at both plan tiers, plus a
+  full boot test that requires and initializes the entire plugin — as a
+  fast check between changes, alongside the live-instance testing above.
 * Switched the plan to Fleet, saved a real custom theme (colors + a
   Google Font) through the real Theme & Look page, and confirmed the
   public display's REST payload and rendered HTML both carry the new

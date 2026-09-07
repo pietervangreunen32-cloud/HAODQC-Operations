@@ -48,6 +48,9 @@ if ( is_wp_error( $categories ) ) {
 				<span class="menuscreen-plan-pill"><?php esc_html_e( 'Rush plan', 'menuscreen' ); ?></span>
 			<?php endif; ?>
 		</button>
+		<button type="button" class="button" id="menuscreen-toggle-bulk-price">
+			<?php esc_html_e( 'Bulk price adjustment', 'menuscreen' ); ?>
+		</button>
 	</p>
 
 	<?php if ( isset( $_GET['menuscreen_saved'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
@@ -126,6 +129,55 @@ if ( is_wp_error( $categories ) ) {
 				</div>
 			<?php endif; ?>
 		<?php endif; ?>
+	</div>
+
+	<?php
+	$bulk_price_result = get_transient( 'menuscreen_bulk_price_result_' . get_current_user_id() );
+	if ( null !== $bulk_price_result ) {
+		delete_transient( 'menuscreen_bulk_price_result_' . get_current_user_id() );
+	}
+	?>
+	<div id="menuscreen-bulk-price" class="menuscreen-card" style="<?php echo ( isset( $_GET['menuscreen_bulk_priced'] ) ) ? '' : 'display:none;'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>">
+		<h2><?php esc_html_e( 'Bulk price adjustment', 'menuscreen' ); ?></h2>
+		<p class="description"><?php esc_html_e( 'Apply a markup and round every published item/combo price in one go. Set your own rule — nothing is applied automatically.', 'menuscreen' ); ?></p>
+
+		<?php if ( isset( $_GET['menuscreen_bulk_priced'] ) && null !== $bulk_price_result ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+			<div class="notice notice-success inline">
+				<p>
+					<?php
+					printf(
+						/* translators: %d: number of prices updated */
+						esc_html__( 'Updated %d price(s).', 'menuscreen' ),
+						(int) $bulk_price_result
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'This will change every published price. Continue?', 'menuscreen' ) ); ?>');">
+			<input type="hidden" name="action" value="menuscreen_save_bulk_prices" />
+			<?php wp_nonce_field( 'menuscreen_save_bulk_prices' ); ?>
+			<p>
+				<label><?php esc_html_e( 'Markup %', 'menuscreen' ); ?></label>
+				<input type="number" step="0.1" name="markup_percent" value="0" style="width:100px;" />
+			</p>
+			<p>
+				<label><?php esc_html_e( 'Round up to nearest', 'menuscreen' ); ?></label>
+				<input type="number" step="0.01" min="0" name="round_to" value="0" style="width:100px;" />
+				<span class="description"><?php esc_html_e( '(0 = no rounding)', 'menuscreen' ); ?></span>
+			</p>
+			<p>
+				<label><?php esc_html_e( 'Apply to', 'menuscreen' ); ?></label>
+				<select name="apply_to">
+					<option value="items"><?php esc_html_e( 'Menu items only', 'menuscreen' ); ?></option>
+					<option value="combos"><?php esc_html_e( 'Combos only', 'menuscreen' ); ?></option>
+					<option value="both"><?php esc_html_e( 'Both', 'menuscreen' ); ?></option>
+				</select>
+			</p>
+			<button type="submit" class="button button-primary"><?php esc_html_e( 'Apply', 'menuscreen' ); ?></button>
+			<button type="button" class="button" onclick="document.getElementById('menuscreen-bulk-price').style.display='none';"><?php esc_html_e( 'Close', 'menuscreen' ); ?></button>
+		</form>
 	</div>
 
 	<div class="menuscreen-card">

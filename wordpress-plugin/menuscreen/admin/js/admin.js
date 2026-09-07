@@ -145,9 +145,73 @@
 		} );
 	}
 
+	function initComboControls() {
+		$( document ).on( 'click', '.menuscreen-toggle-combo-active', function () {
+			var $button = $( this );
+			var comboId = $button.data( 'combo-id' );
+			var active = $button.data( 'active' ) === 1 || $button.data( 'active' ) === '1';
+			var nextState = ! active;
+
+			$button.prop( 'disabled', true );
+			ajaxPost( 'menuscreen_toggle_combo_active', { combo_id: comboId, active: nextState ? 1 : 0 } )
+				.done( function ( response ) {
+					if ( ! response || ! response.success ) {
+						return;
+					}
+					$button.data( 'active', nextState ? '1' : '0' );
+					$button.text( nextState ? 'Hide' : 'Show' );
+				} )
+				.always( function () {
+					$button.prop( 'disabled', false );
+				} );
+		} );
+
+		$( '#menuscreen-show-combos-toggle' ).on( 'change', function () {
+			ajaxPost( 'menuscreen_toggle_show_combos', { show: this.checked ? 1 : 0 } );
+		} );
+
+		var $comboList = $( '#menuscreen-combos' );
+		if ( $comboList.length ) {
+			$comboList.sortable( {
+				handle: false,
+				items: '> .menuscreen-item',
+				update: function () {
+					var comboIds = $comboList.children( '.menuscreen-item' )
+						.map( function () {
+							return $( this ).data( 'item-id' );
+						} )
+						.get();
+					ajaxPost( 'menuscreen_reorder_combos', { combo_ids: comboIds } );
+				},
+			} );
+		}
+	}
+
+	function initRecipeEditor() {
+		$( document ).on( 'click', '[data-add-recipe-row]', function () {
+			var $table = $( this ).prev( '[data-recipe-editor]' );
+			if ( ! $table.length ) {
+				$table = $( this ).closest( '.menuscreen-meta-grid, .menuscreen-card' ).find( '[data-recipe-editor]' );
+			}
+			var $row = $(
+				'<tr><td><input type="text" name="recipe_name[]" class="widefat" /></td>' +
+				'<td><input type="text" name="recipe_unit[]" class="widefat" /></td>' +
+				'<td><input type="number" step="0.01" min="0" name="recipe_qty[]" class="widefat" /></td>' +
+				'<td><button type="button" class="button-link-delete menuscreen-remove-row">&times;</button></td></tr>'
+			);
+			$table.find( 'tbody' ).append( $row );
+		} );
+		$( document ).on( 'click', '.menuscreen-remove-row', function () {
+			$( this ).closest( 'tr' ).remove();
+		} );
+	}
+
 	function initCsvToggle() {
 		$( '#menuscreen-toggle-csv' ).on( 'click', function () {
 			$( '#menuscreen-csv-import' ).toggle();
+		} );
+		$( '#menuscreen-toggle-bulk-price' ).on( 'click', function () {
+			$( '#menuscreen-bulk-price' ).toggle();
 		} );
 	}
 
@@ -171,6 +235,8 @@
 		initCopyLink();
 		initLogoUploader();
 		initCsvToggle();
+		initRecipeEditor();
+		initComboControls();
 		initQrCode();
 	} );
 } )( jQuery );

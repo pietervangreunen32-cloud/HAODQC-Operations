@@ -4,7 +4,7 @@ Tags: menu, digital signage, food truck, restaurant, display
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,14 @@ browser.
 * A Custom theme (Fleet plan) with your own brand colors and a choice of Google Fonts, alongside the four built-in themes.
 * A "hide sold-out items entirely" display option.
 * A Plans & Billing page — manual plan switching, configurable upgrade links, and automatic plan upgrades from WooCommerce order completion if WooCommerce is active on the same site.
+* Combos & Upsells (Rush plan) with their own list, active/hide toggle, and a "Combos" TV display mode.
+* Per-item heat level, badge/tag, dietary tags, "served with" sauce, pieces-per-order, and a "feature on TV" spotlight flag.
+* A Recipe Book, Sauce Recipes catalog, and printable one-click prep sheets (Rush plan).
+* A Costing Tool, Prep Planner, and Profit Dashboard using a shared, editable ingredient cost list (Fleet plan).
+* An Image Slots checklist for menu photos (Rush plan).
+* A configurable bulk price-adjustment tool (your own markup % and rounding, no forced default).
+* The TV display now has Feature / Board / Combos modes with prev/next, mode-lock, an optional scrolling ticker, and auto-hiding controls.
+* Admin pages restyled with a distinct dark-green brand palette.
 
 = Where the display page lives =
 
@@ -73,6 +81,18 @@ categories it created; photos already in your Media Library are left
 alone.
 
 == Changelog ==
+
+= 1.2.0 =
+* Added Combos & Upsells (Rush plan): its own admin page, active/hide toggle, reordering, and a dedicated TV display mode.
+* Added per-item heat level, badge/tag, dietary tags, "served with" sauce, pieces-per-order, and a "feature on TV" flag.
+* Added a Recipe Book, Sauce Recipes catalog, and one-click printable prep sheets (Rush plan).
+* Added a Costing Tool, Prep Planner, and Profit Dashboard, sharing one editable ingredient cost list (Fleet plan).
+* Added an Image Slots checklist for tracking which items still need a photo (Rush plan).
+* Added a configurable bulk price-adjustment tool (your own markup % and rounding increment — nothing applied automatically).
+* Overhauled the TV display: Feature (spotlight rotation), Board, and Combos modes with prev/next and manual mode-lock, an optional scrolling ticker, and auto-hiding controls after inactivity.
+* Custom branding (colors/fonts) is now available on every plan, not just Fleet.
+* Repriced Rush to R999/mo and Fleet to R2999/mo to reflect the added business tooling.
+* Restyled the plugin's own admin pages with a distinct brand palette (dark green, rounded cards, pill buttons) — scoped to MenuScreen's pages only.
 
 = 1.1.0 =
 * Added an owner Dashboard (stats + plan usage at a glance).

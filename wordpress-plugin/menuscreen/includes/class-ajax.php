@@ -20,6 +20,9 @@ class MenuScreen_Ajax {
 		add_action( 'wp_ajax_menuscreen_reorder_items', array( __CLASS__, 'reorder_items' ) );
 		add_action( 'wp_ajax_menuscreen_reorder_categories', array( __CLASS__, 'reorder_categories' ) );
 		add_action( 'wp_ajax_menuscreen_add_category', array( __CLASS__, 'add_category' ) );
+		add_action( 'wp_ajax_menuscreen_toggle_combo_active', array( __CLASS__, 'toggle_combo_active' ) );
+		add_action( 'wp_ajax_menuscreen_reorder_combos', array( __CLASS__, 'reorder_combos' ) );
+		add_action( 'wp_ajax_menuscreen_toggle_show_combos', array( __CLASS__, 'toggle_show_combos' ) );
 	}
 
 	private static function verify_request( $capability = 'edit_posts' ) {
@@ -79,6 +82,51 @@ class MenuScreen_Ajax {
 		}
 
 		wp_send_json_success();
+	}
+
+	public static function toggle_combo_active() {
+		self::verify_request();
+
+		$combo_id = isset( $_POST['combo_id'] ) ? absint( $_POST['combo_id'] ) : 0;
+		$active   = ! empty( $_POST['active'] );
+
+		if ( ! $combo_id || get_post_type( $combo_id ) !== MenuScreen_Combos::POST_TYPE ) {
+			wp_send_json_error( array( 'message' => __( 'Combo not found.', 'menuscreen' ) ), 404 );
+		}
+		if ( ! current_user_can( 'edit_post', $combo_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'You do not have permission to do that.', 'menuscreen' ) ), 403 );
+		}
+
+		update_post_meta( $combo_id, '_menuscreen_combo_active', $active );
+		wp_send_json_success( array( 'active' => $active ) );
+	}
+
+	public static function reorder_combos() {
+		self::verify_request();
+
+		$combo_ids = isset( $_POST['combo_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['combo_ids'] ) ) : array();
+
+		foreach ( $combo_ids as $index => $combo_id ) {
+			if ( get_post_type( $combo_id ) !== MenuScreen_Combos::POST_TYPE || ! current_user_can( 'edit_post', $combo_id ) ) {
+				continue;
+			}
+			wp_update_post(
+				array(
+					'ID'         => $combo_id,
+					'menu_order' => $index,
+				)
+			);
+		}
+
+		wp_send_json_success();
+	}
+
+	public static function toggle_show_combos() {
+		self::verify_request( 'manage_options' );
+
+		$show = ! empty( $_POST['show'] );
+		MenuScreen_Settings::update( array( 'show_combos_on_display' => $show ) );
+		wp_send_json_success( array( 'show' => $show ) );
 	}
 
 	public static function add_category() {
