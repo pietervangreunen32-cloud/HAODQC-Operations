@@ -81,7 +81,7 @@ if ( ! defined( 'REVIEWLOOP_LICENSE_SERVER_URL' ) ) {
  * Left blank, that section of the guide simply doesn't render.
  */
 if ( ! defined( 'REVIEWLOOP_SUPPORT_EMAIL' ) ) {
-	define( 'REVIEWLOOP_SUPPORT_EMAIL', '' );
+	define( 'REVIEWLOOP_SUPPORT_EMAIL', 'support@growthcraft.org.za' );
 }
 
 /**
