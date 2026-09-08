@@ -156,11 +156,19 @@ class ReviewLoop_Google_Api {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			return false;
+			return false; // Network blip — leave the connection alone, try again next poll.
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
 		if ( empty( $body['access_token'] ) ) {
+			// Google explicitly rejected the refresh token (commonly invalid_grant — revoked
+			// by the user, or expired because the OAuth app is still in "Testing" mode, where
+			// Google expires refresh tokens after 7 days). Reflect that honestly instead of
+			// leaving the Reviews screen claiming "Connected" while nothing ever arrives again.
+			if ( ! empty( $body['error'] ) ) {
+				$this->disconnect();
+			}
 			return false;
 		}
 

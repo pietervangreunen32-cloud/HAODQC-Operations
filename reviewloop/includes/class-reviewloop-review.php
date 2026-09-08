@@ -71,6 +71,12 @@ class ReviewLoop_Review {
 		return $wpdb->get_results( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
+	public static function count_all() {
+		global $wpdb;
+		$table = ReviewLoop_DB::reviews_table();
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
 	public static function count_pending_approval() {
 		global $wpdb;
 		$table = ReviewLoop_DB::reviews_table();

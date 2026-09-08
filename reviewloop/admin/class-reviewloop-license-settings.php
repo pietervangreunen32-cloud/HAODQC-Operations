@@ -70,7 +70,7 @@ class ReviewLoop_License_Settings {
 
 	public function render_panel( $settings ) {
 		$plan      = ReviewLoop_License::get_plan();
-		$pro_price = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
+		$pro_price = ReviewLoop_License::price_label( 'pro' );
 		?>
 		<div class="reviewloop-panel">
 			<h2><?php esc_html_e( 'Plan & License', 'reviewloop' ); ?></h2>

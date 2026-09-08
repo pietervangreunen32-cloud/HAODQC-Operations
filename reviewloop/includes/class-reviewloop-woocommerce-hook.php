@@ -32,7 +32,7 @@ class ReviewLoop_Woocommerce_Hook {
 			return;
 		}
 
-		if ( $this->already_has_pending_or_active_customer( $email ) ) {
+		if ( $this->has_customer_already_in_progress( $email ) ) {
 			return;
 		}
 
@@ -56,7 +56,14 @@ class ReviewLoop_Woocommerce_Hook {
 		}
 	}
 
-	private function already_has_pending_or_active_customer( $email ) {
+	/**
+	 * Only blocks re-adding a customer while they have a sequence still
+	 * running — a repeat customer whose previous purchase's sequence
+	 * already finished (completed/reviewed/negative_flagged) or who
+	 * opted out gets a fresh entry for their new order, same as any
+	 * other intake path would for a returning customer.
+	 */
+	private function has_customer_already_in_progress( $email ) {
 		if ( empty( $email ) ) {
 			return false;
 		}
@@ -65,7 +72,10 @@ class ReviewLoop_Woocommerce_Hook {
 		$table = ReviewLoop_DB::customers_table();
 
 		$existing = $wpdb->get_var(
-			$wpdb->prepare( "SELECT id FROM {$table} WHERE email = %s AND opt_out = 0 ORDER BY created_at DESC LIMIT 1", $email ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+				"SELECT id FROM {$table} WHERE email = %s AND opt_out = 0 AND sequence_status IN ('pending','active','awaiting_review') ORDER BY created_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$email
+			)
 		);
 
 		return ! empty( $existing );

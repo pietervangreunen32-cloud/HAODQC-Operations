@@ -19,9 +19,6 @@ $has_access = ReviewLoop_License::is_at_least( 'starter' );
 		</div>
 	</div>
 
-	<?php if ( class_exists( 'ReviewLoop_Admin_Menu' ) && get_transient( 'reviewloop_admin_error_' . get_current_user_id() ) ) : ?>
-	<?php endif; ?>
-
 	<div class="reviewloop-panel" style="max-width:560px;">
 		<h2><?php esc_html_e( 'Customer details', 'reviewloop' ); ?></h2>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-add-customer' ) ); ?>">

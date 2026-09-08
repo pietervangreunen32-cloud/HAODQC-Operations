@@ -46,7 +46,7 @@ if ( $result ) {
 	<?php if ( ! $has_access ) : ?>
 		<div class="reviewloop-panel">
 			<div class="rl-upgrade-box">
-				<p><?php echo esc_html( sprintf( __( 'Bulk CSV import is part of ReviewLoop Starter (%s) and above.', 'reviewloop' ), defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month' ) ); ?></p>
+				<p><?php echo esc_html( sprintf( __( 'Bulk CSV import is part of ReviewLoop Starter (%s) and above.', 'reviewloop' ), ReviewLoop_License::price_label( 'starter' ) ) ); ?></p>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button"><?php esc_html_e( 'View plans', 'reviewloop' ); ?></a>
 			</div>
 		</div>

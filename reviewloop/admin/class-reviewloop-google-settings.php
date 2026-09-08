@@ -97,6 +97,10 @@ class ReviewLoop_Google_Settings {
 				</form>
 			<?php else : ?>
 				<p class="description"><?php esc_html_e( 'Requires a Google Cloud project with the Business Profile API enabled. Create OAuth 2.0 credentials and add the redirect URI below.', 'reviewloop' ); ?></p>
+				<p class="description">
+					<strong><?php esc_html_e( 'Important:', 'reviewloop' ); ?></strong>
+					<?php esc_html_e( 'while your Google Cloud OAuth consent screen is in "Testing" status, Google expires the connection after 7 days and you\'ll need to reconnect. Publish it to "In production" in Google Cloud Console (OAuth consent screen settings) for a connection that stays active.', 'reviewloop' ); ?>
+				</p>
 
 				<table class="form-table">
 					<tr>

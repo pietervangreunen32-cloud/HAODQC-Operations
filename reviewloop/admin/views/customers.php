@@ -9,11 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$page   = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
-$search = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+$per_page = 20;
+$page     = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+$search   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 
-$customers = ReviewLoop_Customer::get_list( array( 'per_page' => 20, 'page' => $page, 'search' => $search ) );
-$total     = ReviewLoop_Customer::count_all();
+$customers  = ReviewLoop_Customer::get_list( array( 'per_page' => $per_page, 'page' => $page, 'search' => $search ) );
+$total      = ReviewLoop_Customer::count_all();
+$total_pages = (int) ceil( $total / $per_page );
 
 $viewing_id = isset( $_GET['customer_id'] ) ? absint( $_GET['customer_id'] ) : 0;
 $viewing    = $viewing_id ? ReviewLoop_Customer::get( $viewing_id ) : null;
@@ -161,6 +163,28 @@ $status_labels = array(
 				<?php endforeach; ?>
 				</tbody>
 			</table>
+
+			<?php if ( $total_pages > 1 ) : ?>
+				<div class="tablenav">
+					<div class="tablenav-pages">
+						<span class="displaying-num"><?php echo esc_html( sprintf( _n( '%d item', '%d items', $total, 'reviewloop' ), $total ) ); ?></span>
+						<?php
+						echo wp_kses_post(
+							paginate_links(
+								array(
+									'base'      => add_query_arg( 'paged', '%#%' ),
+									'format'    => '',
+									'current'   => $page,
+									'total'     => $total_pages,
+									'prev_text' => __( '&laquo;', 'reviewloop' ),
+									'next_text' => __( '&raquo;', 'reviewloop' ),
+								)
+							)
+						);
+						?>
+					</div>
+				</div>
+			<?php endif; ?>
 		<?php endif; ?>
 	</div>
 </div>

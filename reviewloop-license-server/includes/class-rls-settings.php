@@ -22,8 +22,10 @@ class RLS_Settings {
 			'sandbox_mode'      => true,
 			'currency'          => 'ZAR',
 			'starter_price'     => '380.00',
+			'starter_price_usd' => '20',
 			'starter_item_name' => 'ReviewLoop Starter (monthly)',
 			'pro_price'         => '930.00',
+			'pro_price_usd'     => '49',
 			'pro_item_name'     => 'ReviewLoop Pro (monthly)',
 		);
 	}
@@ -32,10 +34,63 @@ class RLS_Settings {
 		$settings = self::get_all();
 
 		if ( 'pro' === $plan ) {
-			return array( 'price' => $settings['pro_price'], 'item_name' => $settings['pro_item_name'] );
+			return array( 'price' => $settings['pro_price'], 'price_usd' => $settings['pro_price_usd'], 'item_name' => $settings['pro_item_name'] );
 		}
 
-		return array( 'price' => $settings['starter_price'], 'item_name' => $settings['starter_item_name'] );
+		return array( 'price' => $settings['starter_price'], 'price_usd' => $settings['starter_price_usd'], 'item_name' => $settings['starter_item_name'] );
+	}
+
+	/**
+	 * Best-effort visitor country, purely for deciding which currency
+	 * *label* to show on the checkout button — the amount actually
+	 * charged is always the ZAR figure above, since PayFast doesn't
+	 * support billing in USD. Unlike the ReviewLoop plugin's own version
+	 * of this check, unknown here falls back to ZAR (not USD), since this
+	 * page is the actual checkout and ZAR is what will really be charged.
+	 */
+	public static function detect_country_code() {
+		static $country = null;
+
+		if ( null !== $country ) {
+			return $country;
+		}
+
+		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
+			$country = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) );
+			return $country;
+		}
+
+		if ( class_exists( 'WC_Geolocation' ) ) {
+			$located = WC_Geolocation::geolocate_ip();
+			if ( ! empty( $located['country'] ) ) {
+				$country = $located['country'];
+				return $country;
+			}
+		}
+
+		$country = '';
+		return $country;
+	}
+
+	public static function is_south_african_visitor() {
+		$country = self::detect_country_code();
+		return '' === $country || 'ZA' === $country;
+	}
+
+	/**
+	 * "R380/month" for South Africa (or when the country can't be
+	 * determined), "≈ $20/month" for a detected non-SA visitor. The "≈" is
+	 * intentional — it's a converted label, not the amount PayFast will
+	 * actually charge.
+	 */
+	public static function price_label( $plan ) {
+		$config = self::plan_config( $plan );
+
+		if ( self::is_south_african_visitor() ) {
+			return sprintf( 'R%s/month', number_format( (float) $config['price'], 0 ) );
+		}
+
+		return sprintf( '≈ $%s/month', number_format( (float) $config['price_usd'], 0 ) );
 	}
 
 	public static function update( $partial ) {
@@ -53,8 +108,10 @@ class RLS_Settings {
 		$current['sandbox_mode']      = ! empty( $post['sandbox_mode'] );
 		$current['currency']          = isset( $post['currency'] ) ? sanitize_text_field( wp_unslash( $post['currency'] ) ) : $current['currency'];
 		$current['starter_price']     = isset( $post['starter_price'] ) ? number_format( (float) $post['starter_price'], 2, '.', '' ) : $current['starter_price'];
+		$current['starter_price_usd'] = isset( $post['starter_price_usd'] ) ? number_format( (float) $post['starter_price_usd'], 0, '.', '' ) : $current['starter_price_usd'];
 		$current['starter_item_name'] = isset( $post['starter_item_name'] ) ? sanitize_text_field( wp_unslash( $post['starter_item_name'] ) ) : $current['starter_item_name'];
 		$current['pro_price']         = isset( $post['pro_price'] ) ? number_format( (float) $post['pro_price'], 2, '.', '' ) : $current['pro_price'];
+		$current['pro_price_usd']     = isset( $post['pro_price_usd'] ) ? number_format( (float) $post['pro_price_usd'], 0, '.', '' ) : $current['pro_price_usd'];
 		$current['pro_item_name']     = isset( $post['pro_item_name'] ) ? sanitize_text_field( wp_unslash( $post['pro_item_name'] ) ) : $current['pro_item_name'];
 
 		update_option( 'rls_settings', $current );

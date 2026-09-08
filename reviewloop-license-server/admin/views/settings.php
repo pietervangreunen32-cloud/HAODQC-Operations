@@ -44,8 +44,15 @@ $settings = RLS_Settings::get_all();
 		<h2><?php esc_html_e( 'Starter plan', 'reviewloop-license-server' ); ?></h2>
 		<table class="form-table">
 			<tr>
-				<th><label for="starter_price"><?php esc_html_e( 'Monthly price', 'reviewloop-license-server' ); ?></label></th>
+				<th><label for="starter_price"><?php esc_html_e( 'Monthly price (ZAR — what PayFast actually charges)', 'reviewloop-license-server' ); ?></label></th>
 				<td><input type="text" id="starter_price" name="starter_price" class="small-text" value="<?php echo esc_attr( $settings['starter_price'] ); ?>"></td>
+			</tr>
+			<tr>
+				<th><label for="starter_price_usd"><?php esc_html_e( 'Displayed USD equivalent', 'reviewloop-license-server' ); ?></label></th>
+				<td>
+					<input type="text" id="starter_price_usd" name="starter_price_usd" class="small-text" value="<?php echo esc_attr( $settings['starter_price_usd'] ); ?>">
+					<p class="description"><?php esc_html_e( 'Shown to visitors outside South Africa as a label only — they are still billed the ZAR amount above via PayFast. Update this if exchange rates shift significantly.', 'reviewloop-license-server' ); ?></p>
+				</td>
 			</tr>
 			<tr>
 				<th><label for="starter_item_name"><?php esc_html_e( 'Item name (shown on PayFast)', 'reviewloop-license-server' ); ?></label></th>
@@ -56,8 +63,15 @@ $settings = RLS_Settings::get_all();
 		<h2><?php esc_html_e( 'Pro plan', 'reviewloop-license-server' ); ?></h2>
 		<table class="form-table">
 			<tr>
-				<th><label for="pro_price"><?php esc_html_e( 'Monthly price', 'reviewloop-license-server' ); ?></label></th>
+				<th><label for="pro_price"><?php esc_html_e( 'Monthly price (ZAR — what PayFast actually charges)', 'reviewloop-license-server' ); ?></label></th>
 				<td><input type="text" id="pro_price" name="pro_price" class="small-text" value="<?php echo esc_attr( $settings['pro_price'] ); ?>"></td>
+			</tr>
+			<tr>
+				<th><label for="pro_price_usd"><?php esc_html_e( 'Displayed USD equivalent', 'reviewloop-license-server' ); ?></label></th>
+				<td>
+					<input type="text" id="pro_price_usd" name="pro_price_usd" class="small-text" value="<?php echo esc_attr( $settings['pro_price_usd'] ); ?>">
+					<p class="description"><?php esc_html_e( 'Shown to visitors outside South Africa as a label only — they are still billed the ZAR amount above via PayFast.', 'reviewloop-license-server' ); ?></p>
+				</td>
 			</tr>
 			<tr>
 				<th><label for="pro_item_name"><?php esc_html_e( 'Item name (shown on PayFast)', 'reviewloop-license-server' ); ?></label></th>

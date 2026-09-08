@@ -20,10 +20,10 @@ class RLS_Checkout {
 	}
 
 	public function render_shortcode( $atts ) {
-		$atts   = shortcode_atts( array( 'plan' => 'starter' ), $atts, 'reviewloop_checkout' );
-		$plan   = in_array( $atts['plan'], array( 'starter', 'pro' ), true ) ? $atts['plan'] : 'starter';
-		$config = RLS_Settings::plan_config( $plan );
-		$currency = RLS_Settings::get( 'currency' );
+		$atts        = shortcode_atts( array( 'plan' => 'starter' ), $atts, 'reviewloop_checkout' );
+		$plan        = in_array( $atts['plan'], array( 'starter', 'pro' ), true ) ? $atts['plan'] : 'starter';
+		$config      = RLS_Settings::plan_config( $plan );
+		$price_label = RLS_Settings::price_label( $plan );
 
 		ob_start();
 		?>
@@ -40,7 +40,7 @@ class RLS_Checkout {
 				<input type="email" name="email" required style="width:100%;">
 			</p>
 			<p>
-				<button type="submit"><?php echo esc_html( sprintf( __( 'Subscribe to %1$s — %2$s %3$s/month', 'reviewloop-license-server' ), $config['item_name'], $currency, $config['price'] ) ); ?></button>
+				<button type="submit"><?php echo esc_html( sprintf( __( 'Subscribe to %1$s — %2$s', 'reviewloop-license-server' ), $config['item_name'], $price_label ) ); ?></button>
 			</p>
 		</form>
 		<?php

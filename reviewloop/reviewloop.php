@@ -3,7 +3,7 @@
  * Plugin Name:       ReviewLoop
  * Plugin URI:        https://reviewloop.app
  * Description:       Automatically request Google reviews from customers without spamming them, and get AI-drafted replies to post once reviews come in. Built for small businesses.
- * Version:           1.5.2
+ * Version:           1.6.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            ReviewLoop
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'REVIEWLOOP_VERSION', '1.5.2' );
+define( 'REVIEWLOOP_VERSION', '1.6.0' );
 define( 'REVIEWLOOP_PLUGIN_FILE', __FILE__ );
 define( 'REVIEWLOOP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'REVIEWLOOP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -37,14 +37,23 @@ if ( ! defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ) {
 
 /**
  * Starting prices shown in upgrade prompts — config values, not logic, so
- * they can change without touching code. Actual billing/enforcement
- * happens on the license server, not in this plugin.
+ * they can change without touching code. Actual billing always happens in
+ * ZAR via the license server's PayFast integration (PayFast doesn't
+ * support billing in USD); the *_USD constants are only used to label the
+ * price for visitors outside South Africa — see
+ * ReviewLoop_License::price_label().
  */
-if ( ! defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ) {
-	define( 'REVIEWLOOP_STARTER_PRICE_DISPLAY', '$20/month' );
+if ( ! defined( 'REVIEWLOOP_STARTER_PRICE_ZAR' ) ) {
+	define( 'REVIEWLOOP_STARTER_PRICE_ZAR', 380 );
 }
-if ( ! defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ) {
-	define( 'REVIEWLOOP_PRO_PRICE_DISPLAY', '$49/month' );
+if ( ! defined( 'REVIEWLOOP_PRO_PRICE_ZAR' ) ) {
+	define( 'REVIEWLOOP_PRO_PRICE_ZAR', 930 );
+}
+if ( ! defined( 'REVIEWLOOP_STARTER_PRICE_USD' ) ) {
+	define( 'REVIEWLOOP_STARTER_PRICE_USD', 20 );
+}
+if ( ! defined( 'REVIEWLOOP_PRO_PRICE_USD' ) ) {
+	define( 'REVIEWLOOP_PRO_PRICE_USD', 49 );
 }
 
 /**

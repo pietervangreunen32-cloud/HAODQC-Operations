@@ -167,14 +167,72 @@ class ReviewLoop_License {
 	}
 
 	/**
+	 * Best-effort visitor country, used only to decide which currency to
+	 * *display* — actual billing is always ZAR via PayFast regardless of
+	 * what's shown here (PayFast doesn't support charging in USD). Tries
+	 * Cloudflare's country header first (free, needs no setup on a
+	 * Cloudflare-proxied site), then WooCommerce's bundled geolocation if
+	 * that plugin happens to be active, then gives up.
+	 */
+	public static function detect_country_code() {
+		static $country = null;
+
+		if ( null !== $country ) {
+			return $country;
+		}
+
+		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
+			$country = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) );
+			return $country;
+		}
+
+		if ( class_exists( 'WC_Geolocation' ) ) {
+			$located = WC_Geolocation::geolocate_ip();
+			if ( ! empty( $located['country'] ) ) {
+				$country = $located['country'];
+				return $country;
+			}
+		}
+
+		$country = '';
+		return $country;
+	}
+
+	public static function is_south_african_visitor() {
+		return 'ZA' === self::detect_country_code();
+	}
+
+	/**
+	 * "R380/month" for a South African visitor, "$20/month" (a converted
+	 * label only, not a real charge amount) for everyone else, or for
+	 * anyone when the visitor's country can't be determined at all —
+	 * defaulting to USD there since ReviewLoop is sold internationally.
+	 */
+	public static function price_label( $plan ) {
+		if ( self::is_south_african_visitor() ) {
+			$zar = 'pro' === $plan
+				? ( defined( 'REVIEWLOOP_PRO_PRICE_ZAR' ) ? REVIEWLOOP_PRO_PRICE_ZAR : 930 )
+				: ( defined( 'REVIEWLOOP_STARTER_PRICE_ZAR' ) ? REVIEWLOOP_STARTER_PRICE_ZAR : 380 );
+			/* translators: %s: price in South African Rand */
+			return sprintf( __( 'R%s/month', 'reviewloop' ), number_format_i18n( $zar ) );
+		}
+
+		$usd = 'pro' === $plan
+			? ( defined( 'REVIEWLOOP_PRO_PRICE_USD' ) ? REVIEWLOOP_PRO_PRICE_USD : 49 )
+			: ( defined( 'REVIEWLOOP_STARTER_PRICE_USD' ) ? REVIEWLOOP_STARTER_PRICE_USD : 20 );
+		/* translators: %s: price in US Dollars */
+		return sprintf( __( '$%s/month', 'reviewloop' ), number_format_i18n( $usd ) );
+	}
+
+	/**
 	 * The 3-card plan comparison shown on both the Dashboard and the
 	 * Settings screen — kept in one place so the two never drift apart.
 	 * Returns HTML (already escaped internally); echo it directly.
 	 */
 	public static function render_plan_cards() {
 		$current       = self::get_plan();
-		$starter_price = defined( 'REVIEWLOOP_STARTER_PRICE_DISPLAY' ) ? REVIEWLOOP_STARTER_PRICE_DISPLAY : '$20/month';
-		$pro_price     = defined( 'REVIEWLOOP_PRO_PRICE_DISPLAY' ) ? REVIEWLOOP_PRO_PRICE_DISPLAY : '$49/month';
+		$starter_price = self::price_label( 'starter' );
+		$pro_price     = self::price_label( 'pro' );
 		$pricing_url   = defined( 'REVIEWLOOP_PRICING_URL' ) ? REVIEWLOOP_PRICING_URL : '#';
 		$free_limit    = defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ? REVIEWLOOP_FREE_REPLY_LIMIT : 10;
 
@@ -182,7 +240,7 @@ class ReviewLoop_License {
 			'free'    => array(
 				'badge'       => __( 'Free', 'reviewloop' ),
 				'name'        => __( 'Free', 'reviewloop' ),
-				'price'       => __( '$0/month', 'reviewloop' ),
+				'price'       => self::is_south_african_visitor() ? __( 'R0/month', 'reviewloop' ) : __( '$0/month', 'reviewloop' ),
 				'features'    => array(
 					__( 'Manual customer entry', 'reviewloop' ),
 					__( 'Full message sequence (check-in, review ask, reminder)', 'reviewloop' ),

@@ -8,10 +8,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$connected     = class_exists( 'ReviewLoop_Google_Api' ) && ( new ReviewLoop_Google_Api() )->is_connected();
-$reviews       = $connected && class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::get_list() : array();
-$viewing_id    = isset( $_GET['review_id'] ) ? absint( $_GET['review_id'] ) : 0;
-$viewing       = $viewing_id ? ReviewLoop_Review::get( $viewing_id ) : null;
+$connected   = class_exists( 'ReviewLoop_Google_Api' ) && ( new ReviewLoop_Google_Api() )->is_connected();
+$per_page    = 20;
+$page        = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+$reviews     = $connected && class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::get_list( array( 'per_page' => $per_page, 'page' => $page ) ) : array();
+$total       = $connected && class_exists( 'ReviewLoop_Review' ) ? ReviewLoop_Review::count_all() : 0;
+$total_pages = (int) ceil( $total / $per_page );
+$viewing_id  = isset( $_GET['review_id'] ) ? absint( $_GET['review_id'] ) : 0;
+$viewing     = $viewing_id ? ReviewLoop_Review::get( $viewing_id ) : null;
 ?>
 <div class="wrap reviewloop-wrap">
 	<div class="reviewloop-header">
@@ -89,6 +93,28 @@ $viewing       = $viewing_id ? ReviewLoop_Review::get( $viewing_id ) : null;
 				<?php endforeach; ?>
 				</tbody>
 			</table>
+
+			<?php if ( $total_pages > 1 ) : ?>
+				<div class="tablenav">
+					<div class="tablenav-pages">
+						<span class="displaying-num"><?php echo esc_html( sprintf( _n( '%d item', '%d items', $total, 'reviewloop' ), $total ) ); ?></span>
+						<?php
+						echo wp_kses_post(
+							paginate_links(
+								array(
+									'base'      => add_query_arg( 'paged', '%#%' ),
+									'format'    => '',
+									'current'   => $page,
+									'total'     => $total_pages,
+									'prev_text' => __( '&laquo;', 'reviewloop' ),
+									'next_text' => __( '&raquo;', 'reviewloop' ),
+								)
+							)
+						);
+						?>
+					</div>
+				</div>
+			<?php endif; ?>
 		</div>
 	<?php endif; ?>
 </div>

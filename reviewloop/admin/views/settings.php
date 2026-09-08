@@ -59,6 +59,10 @@ $settings = ReviewLoop_Settings::get_all();
 							<option value="3" <?php selected( (int) $settings['sequence_length'], 3 ); ?>><?php esc_html_e( '3 — check-in, review ask, and one reminder (recommended)', 'reviewloop' ); ?></option>
 						</select>
 						<p class="description"><?php esc_html_e( 'Whatever you choose, this is always the maximum — the sequence hard-stops after the last message, and stops immediately at any point if the customer opts out, reviews, or flags a problem.', 'reviewloop' ); ?></p>
+						<p class="description" style="color:#9a6700;">
+							<strong><?php esc_html_e( 'Heads up:', 'reviewloop' ); ?></strong>
+							<?php esc_html_e( 'the check-in step is what gives an unhappy customer a chance to say so before being asked for a review. Choosing "1" skips that check entirely and asks for a review immediately — only use it if you\'re confident that\'s right for your customers.', 'reviewloop' ); ?>
+						</p>
 					</td>
 				</tr>
 				<tr>

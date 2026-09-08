@@ -42,11 +42,20 @@ class ReviewLoop_Public_Actions {
 
 		switch ( $type ) {
 			case 'unsubscribe':
-				ReviewLoop_Customer::opt_out( $customer->id, 'Clicked unsubscribe link' );
-				$this->render_message(
-					__( 'You\'ve been unsubscribed', 'reviewloop' ),
-					__( 'You will not receive any further messages. Thank you for letting us know.', 'reviewloop' )
-				);
+				// A plain GET that immediately unsubscribes is a well-known false-positive
+				// trap: corporate email scanners (Outlook Safe Links, Proofpoint, etc.)
+				// pre-fetch every link in an email — including this one — before a human
+				// ever opens it, which would silently opt people out who never asked to be.
+				// Require an actual click-through confirmation (a POST) before acting.
+				if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+					ReviewLoop_Customer::opt_out( $customer->id, 'Confirmed unsubscribe' );
+					$this->render_message(
+						__( 'You\'ve been unsubscribed', 'reviewloop' ),
+						__( 'You will not receive any further messages. Thank you for letting us know.', 'reviewloop' )
+					);
+				} else {
+					$this->render_unsubscribe_confirm( $type, $token );
+				}
 				break;
 
 			case 'feedback_positive':
@@ -90,6 +99,36 @@ class ReviewLoop_Public_Actions {
 		}
 
 		exit;
+	}
+
+	private function render_unsubscribe_confirm( $type, $token ) {
+		$settings = ReviewLoop_Settings::get_all();
+		$action_url = self::url( $type, $token );
+		?>
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="utf-8">
+			<title><?php esc_html_e( 'Confirm unsubscribe', 'reviewloop' ); ?></title>
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<style>
+				body { font-family: Arial, Helvetica, sans-serif; background: #f6f7f7; color: #1d2327; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+				.box { background: #fff; border-radius: 10px; padding: 40px; max-width: 420px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+				h1 { font-size: 20px; color: #0f9d8c; }
+				button { background: #0f9d8c; color: #fff; border: 0; padding: 12px 24px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+			</style>
+		</head>
+		<body>
+			<div class="box">
+				<h1><?php esc_html_e( 'Unsubscribe from these messages?', 'reviewloop' ); ?></h1>
+				<p><?php echo esc_html( sprintf( /* translators: %s: business name */ __( 'Click below to stop receiving emails from %s about this.', 'reviewloop' ), $settings['business_name'] ) ); ?></p>
+				<form method="post" action="<?php echo esc_url( $action_url ); ?>">
+					<button type="submit"><?php esc_html_e( 'Yes, unsubscribe me', 'reviewloop' ); ?></button>
+				</form>
+			</div>
+		</body>
+		</html>
+		<?php
 	}
 
 	private function render_message( $title, $body ) {
