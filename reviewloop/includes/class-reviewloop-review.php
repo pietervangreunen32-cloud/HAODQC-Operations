@@ -77,6 +77,32 @@ class ReviewLoop_Review {
 		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
+	/**
+	 * Reviews for public display (the [reviewloop_reviews] shortcode) —
+	 * newest first, optionally floored at a minimum star rating so an
+	 * owner can choose to only showcase, say, 4-5 star reviews on their
+	 * site. This only affects what's *displayed* publicly; it never
+	 * affects which customers get *asked* for a review, which is what
+	 * Google's policies actually govern.
+	 */
+	public static function get_public_list( $args = array() ) {
+		global $wpdb;
+		$table = ReviewLoop_DB::reviews_table();
+
+		$defaults = array( 'count' => 6, 'min_rating' => 1 );
+		$args     = wp_parse_args( $args, $defaults );
+
+		$sql = "SELECT * FROM {$table} WHERE rating >= %d ORDER BY review_time DESC LIMIT %d";
+
+		return $wpdb->get_results( $wpdb->prepare( $sql, (int) $args['min_rating'], (int) $args['count'] ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	public static function get_average_rating() {
+		global $wpdb;
+		$table = ReviewLoop_DB::reviews_table();
+		return (float) $wpdb->get_var( "SELECT AVG(rating) FROM {$table} WHERE rating IS NOT NULL" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
 	public static function count_pending_approval() {
 		global $wpdb;
 		$table = ReviewLoop_DB::reviews_table();

@@ -4,7 +4,7 @@ Tags: google reviews, review requests, customer feedback, reputation management,
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,10 @@ Add a customer after you've done the work for them, and ReviewLoop takes care of
 If a customer tells you something went wrong, ReviewLoop never asks them for a review — it flags it for you instead so you can follow up personally.
 
 When new Google reviews come in, ReviewLoop can draft a reply in your voice using your choice of AI (Claude, ChatGPT, or Gemini) — thankful and warm for positive reviews, calm and solution-focused for anything negative — and queue it for your approval before anything is posted publicly. Prefer to write your own replies? Turn AI off entirely and do it yourself from the same screen. You can also switch on auto-approval for reviews above a star rating you choose.
+
+**Show your reviews off, too**
+
+Drop `[reviewloop_reviews]` on any page to display the reviews ReviewLoop has collected — star rating, review text, and (optionally) your posted reply — styled to fit your site. `[reviewloop_reviews count="4" min_rating="4"]` shows only your best four, for example. This only controls what you *showcase* publicly; it never affects which customers get *asked* for a review in the first place.
 
 **Built for real small businesses**
 
@@ -103,14 +107,37 @@ By default, nothing is deleted when you deactivate or delete the plugin — your
 
 Email is the only channel today, sent through your site's own WordPress mail setup. SMS/WhatsApp support is planned for a future release.
 
+= How do I show my reviews on my website? =
+
+Add the `[reviewloop_reviews]` shortcode to any page, post, or widget area. By default it shows your 6 most recent reviews with an average-rating summary. Attributes let you adjust it: `count` (how many to show), `min_rating` (e.g. `min_rating="4"` to only showcase 4-5 star reviews), `layout` (`grid` or `list`), `show_reply` (`yes`/`no`, whether to include your posted reply), and `show_summary` (`yes`/`no`, the average-rating line at the top). For example: `[reviewloop_reviews count="4" min_rating="4" layout="list"]`.
+
 == Screenshots ==
 
 1. Dashboard — pipeline overview, plan usage, and why reviews matter.
 2. Add Customer — the manual intake form with the consent checkbox.
 3. Reviews — AI-drafted reply approval screen.
 4. Settings — message sequence, AI provider, Google connection, and privacy controls.
+5. The `[reviewloop_reviews]` shortcode displaying reviews on the front end of a site.
 
 == Changelog ==
+
+= 1.6.1 =
+* Added: `[reviewloop_reviews]` shortcode to publicly display collected
+  reviews on any page, with count/min_rating/layout/show_reply/show_summary
+  options.
+
+= 1.6.0 =
+* Added: pricing now displays in ZAR for South African visitors and USD
+  for everyone else (a display label only — billing is unaffected).
+* Fixed: unsubscribe was a plain link that acted immediately, which
+  corporate email link-scanners (Outlook Safe Links, Proofpoint, etc.)
+  could trigger by pre-fetching the link before a human ever opened the
+  email. Unsubscribe now requires a confirmation click-through.
+* Fixed: the WooCommerce auto-hook could permanently skip re-adding a
+  repeat customer once their first sequence had completed.
+* Fixed: an expired/revoked Google connection kept showing "Connected"
+  indefinitely instead of prompting a reconnect.
+* Added: pagination on the Customers and Reviews admin screens.
 
 = 1.5.0 =
 * Added: three-tier plans (Free / Starter / Pro) replacing the old Free/Pro split.

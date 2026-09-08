@@ -42,6 +42,9 @@ class ReviewLoop_Core {
 		$public_actions = new ReviewLoop_Public_Actions();
 		$public_actions->init();
 
+		$reviews_shortcode = new ReviewLoop_Reviews_Shortcode();
+		$reviews_shortcode->init();
+
 		if ( $this->is_woocommerce_hook_enabled() && class_exists( 'WooCommerce' ) ) {
 			$wc_hook = new ReviewLoop_Woocommerce_Hook();
 			$wc_hook->init();
