@@ -48,7 +48,12 @@ class MenuScreen_Post_Type {
 				'publicly_queryable'  => false,
 				'exclude_from_search' => true,
 				'show_ui'             => true,
-				'show_in_menu'        => 'menuscreen',
+				// Deliberately false, not 'menuscreen' — WordPress auto-adds
+				// its own "Menu Items" submenu for any value here, which
+				// would duplicate our own custom Menu page. The post type
+				// stays fully editable via post-new.php/post.php either way;
+				// this only controls whether it gets its own nav entry.
+				'show_in_menu'        => false,
 				'show_in_rest'        => false,
 				'menu_position'       => 20,
 				'supports'            => array( 'title', 'editor', 'thumbnail', 'page-attributes' ),
@@ -71,7 +76,10 @@ class MenuScreen_Post_Type {
 				),
 				'public'            => false,
 				'show_ui'           => true,
-				'show_in_menu'      => true,
+				// Categories are managed from the Menu page's own "Add
+				// category" / "Rename / Delete" links, not a separate nav
+				// entry — this only controls the (unused) native nav link.
+				'show_in_menu'      => false,
 				'show_admin_column' => true,
 				'hierarchical'      => true,
 				'query_var'         => false,

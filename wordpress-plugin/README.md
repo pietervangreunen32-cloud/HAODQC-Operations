@@ -120,6 +120,75 @@ than hardcoded to that one menu:
   needs and always links to the one that works) and polls a small REST
   endpoint every 20 seconds for changes, with no login required.
 
+## Setting up WooCommerce billing (Rush / Fleet auto-upgrade)
+
+This lets a customer's WooCommerce purchase switch this site's MenuScreen
+plan automatically — no webhook or third-party payment gateway config
+needed, because the check runs inside the same WordPress install that
+placed the order. If you'd rather handle payment somewhere else (EFT,
+in person, a different gateway), skip straight to "Everything else"
+below and use the manual plan switch instead.
+
+1. **Install and activate WooCommerce** (Plugins → Add New → search
+   "WooCommerce") if it isn't already active on this site. The Plans &
+   Billing page only shows the WooCommerce section once it detects
+   WooCommerce is active.
+
+2. **Create two simple products**, one per paid plan — Products → Add
+   New:
+   * **Rush** — set the price to R999 (or whatever you're actually
+     charging; the plugin doesn't read the price, only whether the
+     order completed). Recommended: set it to **Virtual** (Product
+     data → General → check "Virtual") since there's nothing to ship,
+     and set **Sold individually** (Product data → Inventory) so a
+     customer can't accidentally order 3 of them.
+   * **Fleet** — same as above, priced for Fleet (R2999 or your own
+     price).
+   * A subscription/recurring billing plugin (e.g. WooCommerce
+     Subscriptions) is optional — a plain one-time product works fine;
+     you'd just need to re-run the purchase yourself each billing
+     period, or add a subscriptions plugin later without changing
+     anything here.
+
+3. **Find each product's ID.** Go to Products → All Products, hover
+   over the product's title, and read the number in the "id=123" part
+   of the Edit link that appears at the bottom — or open the product
+   for editing and read the ID from the browser's address bar
+   (`post.php?post=123&action=edit`). Note the Rush product's ID and
+   the Fleet product's ID.
+
+4. **Enter both IDs on the Plans & Billing page** (MenuScreen → Plans &
+   Billing → "WooCommerce auto-upgrade" card) — Rush product ID in one
+   field, Fleet product ID in the other — and save.
+
+5. **Test it**: place a test order for the Rush product and mark it
+   **Completed** (Orders → open the order → Order status → Completed →
+   Update). Refresh the Plans & Billing page — the site's plan should
+   now show Rush as current. The switch fires on the
+   `woocommerce_order_status_completed` hook, so it happens the moment
+   an order's status becomes Completed, whether that's automatic (a
+   card payment gateway marking it Completed itself) or you doing it
+   manually for an EFT/cash order.
+
+   If a single order somehow contains both products, Fleet wins (a
+   customer ends up on the higher tier, never silently downgraded).
+
+**Everything else** (upgrade links, and switching plans without
+WooCommerce at all):
+
+* **Upgrade links** (same page, "Upgrade links" card) are the URLs the
+  "Upgrade to Rush/Fleet" buttons on the plan cards actually open —
+  point these at your WooCommerce product's "Add to cart" checkout
+  link (`https://yoursite.com/?add-to-cart=123`, using the product ID
+  from step 3) or anywhere else a customer can pay. Leave a field
+  blank to hide that plan's Upgrade button instead of linking
+  somewhere broken.
+* **Manual plan switch** (bottom card, visible to users who can
+  `manage_options`) sets the plan directly — use this for a payment
+  handled outside WooCommerce entirely (EFT, cash, a different
+  gateway) instead of, or alongside, the WooCommerce integration
+  above.
+
 ## How this was tested
 
 Since this container has no real WordPress hosting, I built a real,

@@ -82,7 +82,12 @@ class MenuScreen_Combos {
 				'publicly_queryable'   => false,
 				'exclude_from_search'  => true,
 				'show_ui'              => true,
-				'show_in_menu'         => 'menuscreen',
+				// Deliberately false, not 'menuscreen' — WordPress auto-adds
+				// its own "Combos" submenu for any value here, which would
+				// duplicate our own custom Combos page. The post type stays
+				// fully editable via post-new.php/post.php either way; this
+				// only controls whether it gets its own nav entry.
+				'show_in_menu'         => false,
 				'show_in_rest'         => false,
 				'menu_position'        => 21,
 				'supports'             => array( 'title', 'editor', 'thumbnail', 'page-attributes' ),
