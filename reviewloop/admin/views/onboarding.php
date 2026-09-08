@@ -37,12 +37,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<p><?php esc_html_e( 'Enter a name, email, and service date, and confirm you have their consent to be emailed. That\'s what starts the sequence.', 'reviewloop' ); ?></p>
 				</div>
 			</div>
+			<div class="rl-onboarding-step">
+				<div class="rl-step-number">4</div>
+				<div>
+					<h3><?php esc_html_e( 'Show your reviews on your website (optional)', 'reviewloop' ); ?></h3>
+					<p><?php esc_html_e( 'Drop the [reviewloop_reviews] shortcode onto any page to display the reviews you\'ve collected.', 'reviewloop' ); ?></p>
+				</div>
+			</div>
 		</div>
+
+		<p style="margin-bottom:20px;"><?php esc_html_e( 'Every detail for each step above — including screenshots of what the shortcode looks like — is in the full Setup Guide, always one click away in the menu on the left.', 'reviewloop' ); ?></p>
 
 		<form method="post">
 			<?php wp_nonce_field( 'reviewloop_onboarding' ); ?>
 			<input type="hidden" name="reviewloop_action" value="complete_onboarding">
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-settings' ) ); ?>" class="button button-primary" style="margin-right:8px;"><?php esc_html_e( 'Go to Settings', 'reviewloop' ); ?></a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=reviewloop-setup-guide' ) ); ?>" class="button button-primary" style="margin-right:8px;"><?php esc_html_e( 'View the full Setup Guide', 'reviewloop' ); ?></a>
 			<button type="submit" class="button"><?php esc_html_e( 'Skip for now, take me to the Dashboard', 'reviewloop' ); ?></button>
 		</form>
 	</div>

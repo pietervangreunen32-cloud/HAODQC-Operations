@@ -443,3 +443,95 @@
 	border-color: rgba(255, 255, 255, .3);
 	color: #fff !important;
 }
+
+/* Setup Guide screen */
+.rl-guide {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.rl-guide-step {
+	display: flex;
+	gap: 16px;
+	background: var(--rl-white);
+	border: 1px solid var(--rl-border);
+	border-radius: 8px;
+	padding: 22px 24px;
+}
+
+.rl-guide-step .rl-step-number {
+	flex: 0 0 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: var(--rl-primary);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 13px;
+}
+
+.rl-guide-body { flex: 1; min-width: 0; }
+
+.rl-guide-body h2 { margin: 0 0 10px; font-size: 17px; }
+
+.rl-guide-body h3 { font-size: 13px; margin: 18px 0 8px; }
+
+.rl-guide-body h4 { font-size: 13px; margin: 14px 0 4px; }
+
+.rl-guide-body ol { padding-left: 20px; }
+
+.rl-guide-body li { margin-bottom: 8px; }
+
+.rl-guide-tag {
+	display: inline-block;
+	font-size: 10.5px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: var(--rl-primary-light);
+	color: var(--rl-primary-dark);
+	margin-left: 6px;
+	vertical-align: middle;
+}
+
+.rl-guide-code {
+	background: var(--rl-bg);
+	border: 1px solid var(--rl-border);
+	border-radius: 6px;
+	padding: 10px 14px;
+	font-size: 13px;
+	overflow-x: auto;
+	margin: 8px 0 14px;
+}
+
+.rl-guide-callout {
+	background: #fffaf0;
+	border: 1px dashed #f0c36d;
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin-top: 14px;
+	font-size: 13px;
+	color: #6b4e00;
+}
+
+.rl-guide-preview {
+	border: 1px solid var(--rl-border);
+	border-radius: 8px;
+	padding: 20px 22px;
+	background: var(--rl-bg);
+	margin: 10px 0 18px;
+}
+
+.rl-public-summary { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.rl-public-stars { color: #f5a623; font-size: 16px; letter-spacing: 1px; }
+.rl-public-summary-text { color: var(--rl-muted); font-size: 13px; }
+.rl-public-reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.rl-public-review-card { background: var(--rl-white); border: 1px solid var(--rl-border); border-radius: 8px; padding: 15px 16px; }
+.rl-public-review-text { color: var(--rl-ink); font-size: 13.5px; line-height: 1.55; margin: 8px 0; }
+.rl-public-review-author { color: var(--rl-muted); font-size: 12px; font-weight: 600; margin: 0; }
+.rl-public-review-reply { margin-top: 10px; padding: 9px 11px; background: var(--rl-primary-light); border-radius: 6px; font-size: 12px; color: var(--rl-primary-dark); line-height: 1.5; }

@@ -20,6 +20,18 @@ class ReviewLoop_Admin_Menu {
 		add_action( 'admin_init', array( $this, 'maybe_redirect_to_onboarding' ) );
 		add_action( 'admin_init', array( $this, 'handle_actions' ) );
 		add_action( 'admin_notices', array( $this, 'render_notices' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( REVIEWLOOP_PLUGIN_FILE ), array( $this, 'add_setup_guide_action_link' ) );
+	}
+
+	/**
+	 * Puts "Setup Guide" right next to "Deactivate" on the Plugins list —
+	 * the exact screen a non-technical owner is already looking at the
+	 * moment they finish activating, so the instructions never depend on
+	 * them opening readme.txt or keeping track of a separate file.
+	 */
+	public function add_setup_guide_action_link( $links ) {
+		$links['reviewloop_setup_guide'] = '<a href="' . esc_url( admin_url( 'admin.php?page=reviewloop-setup-guide' ) ) . '">' . esc_html__( 'Setup Guide', 'reviewloop' ) . '</a>';
+		return $links;
 	}
 
 	public function register_menu() {
@@ -34,6 +46,7 @@ class ReviewLoop_Admin_Menu {
 		);
 
 		add_submenu_page( 'reviewloop', __( 'Dashboard', 'reviewloop' ), __( 'Dashboard', 'reviewloop' ), self::CAPABILITY, 'reviewloop', array( $this, 'render_dashboard' ) );
+		add_submenu_page( 'reviewloop', __( 'Setup Guide', 'reviewloop' ), __( 'Setup Guide', 'reviewloop' ), self::CAPABILITY, 'reviewloop-setup-guide', array( $this, 'render_setup_guide' ) );
 		add_submenu_page( 'reviewloop', __( 'Customers', 'reviewloop' ), __( 'Customers', 'reviewloop' ), self::CAPABILITY, 'reviewloop-customers', array( $this, 'render_customers' ) );
 		add_submenu_page( 'reviewloop', __( 'Add Customer', 'reviewloop' ), __( 'Add Customer', 'reviewloop' ), self::CAPABILITY, 'reviewloop-add-customer', array( $this, 'render_add_customer' ) );
 		add_submenu_page( 'reviewloop', __( 'Reviews', 'reviewloop' ), __( 'Reviews', 'reviewloop' ), self::CAPABILITY, 'reviewloop-reviews', array( $this, 'render_reviews' ) );
@@ -296,6 +309,10 @@ class ReviewLoop_Admin_Menu {
 
 	public function render_welcome() {
 		require REVIEWLOOP_PLUGIN_DIR . 'admin/views/onboarding.php';
+	}
+
+	public function render_setup_guide() {
+		require REVIEWLOOP_PLUGIN_DIR . 'admin/views/setup-guide.php';
 	}
 
 	public function render_import() {

@@ -3,7 +3,7 @@
  * Plugin Name:       ReviewLoop
  * Plugin URI:        https://reviewloop.app
  * Description:       Automatically request Google reviews from customers without spamming them, and get AI-drafted replies to post once reviews come in. Built for small businesses.
- * Version:           1.6.1
+ * Version:           1.7.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            ReviewLoop
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'REVIEWLOOP_VERSION', '1.6.1' );
+define( 'REVIEWLOOP_VERSION', '1.7.0' );
 define( 'REVIEWLOOP_PLUGIN_FILE', __FILE__ );
 define( 'REVIEWLOOP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'REVIEWLOOP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -72,6 +72,16 @@ if ( ! defined( 'REVIEWLOOP_PRICING_URL' ) ) {
  */
 if ( ! defined( 'REVIEWLOOP_LICENSE_SERVER_URL' ) ) {
 	define( 'REVIEWLOOP_LICENSE_SERVER_URL', 'https://ops.growthcraft.org.za/wp-json/reviewloop-license/v1' );
+}
+
+/**
+ * Shown at the bottom of the in-plugin Setup Guide (ReviewLoop → Setup
+ * Guide) so a client who gets stuck knows who to contact — set this to
+ * your own support email or phone number before distributing the plugin.
+ * Left blank, that section of the guide simply doesn't render.
+ */
+if ( ! defined( 'REVIEWLOOP_SUPPORT_EMAIL' ) ) {
+	define( 'REVIEWLOOP_SUPPORT_EMAIL', '' );
 }
 
 /**

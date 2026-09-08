@@ -4,7 +4,7 @@ Tags: google reviews, review requests, customer feedback, reputation management,
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,7 +67,8 @@ You don't need a website that "does" anything special. Add customers one at a ti
 1. Upload the `reviewloop` folder to `/wp-content/plugins/`, or install the zip file directly from Plugins → Add New → Upload Plugin.
 2. Activate ReviewLoop through the "Plugins" screen.
 3. You'll be taken to a short welcome screen — follow the steps to add your Google review link and your first customer.
-4. Visit ReviewLoop → Settings to fine-tune your message sequence, connect your Google Business Profile, and set up AI reply drafting.
+4. Visit ReviewLoop → Setup Guide at any time for the full walkthrough (it's also linked directly under ReviewLoop on the Plugins list) — Google connection, AI replies, and the `[reviewloop_reviews]` shortcode with an example of what it looks like.
+5. Visit ReviewLoop → Settings to fine-tune your message sequence, connect your Google Business Profile, and set up AI reply drafting.
 
 == Frequently Asked Questions ==
 
@@ -120,6 +121,13 @@ Add the `[reviewloop_reviews]` shortcode to any page, post, or widget area. By d
 5. The `[reviewloop_reviews]` shortcode displaying reviews on the front end of a site.
 
 == Changelog ==
+
+= 1.7.0 =
+* Added: a full Setup Guide screen (ReviewLoop → Setup Guide), linked
+  directly from the Plugins list and from the welcome screen, walking
+  through every setup step — including a live example of the
+  `[reviewloop_reviews]` shortcode's output — so the instructions travel
+  with the plugin itself instead of depending on anyone opening readme.txt.
 
 = 1.6.1 =
 * Added: `[reviewloop_reviews]` shortcode to publicly display collected
