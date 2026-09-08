@@ -69,6 +69,7 @@ $woo_active   = class_exists( 'WooCommerce' );
 		<?php endforeach; ?>
 	</div>
 
+	<?php if ( current_user_can( 'manage_options' ) ) : ?>
 	<div class="menuscreen-card">
 		<h2><?php esc_html_e( 'Upgrade links', 'menuscreen' ); ?></h2>
 		<p class="description">
@@ -113,7 +114,6 @@ $woo_active   = class_exists( 'WooCommerce' );
 		<?php endif; ?>
 	</div>
 
-	<?php if ( current_user_can( 'manage_options' ) ) : ?>
 		<div class="menuscreen-card">
 			<h2><?php esc_html_e( 'Manual plan switch', 'menuscreen' ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Set this site\'s plan directly — for when a payment is handled outside of WooCommerce (EFT, in person, etc.).', 'menuscreen' ); ?></p>

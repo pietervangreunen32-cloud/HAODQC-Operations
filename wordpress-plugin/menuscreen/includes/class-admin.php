@@ -358,12 +358,10 @@ class MenuScreen_Admin {
 		}
 
 		$values = array(
-			'theme'       => $theme,
-			'orientation' => $orientation,
+			'theme'         => $theme,
+			'orientation'   => $orientation,
+			'business_name' => '' !== $business_name ? $business_name : ( get_bloginfo( 'name' ) ? get_bloginfo( 'name' ) : __( 'My Business', 'menuscreen' ) ),
 		);
-		if ( '' !== $business_name ) {
-			$values['business_name'] = $business_name;
-		}
 		if ( isset( $_POST['logo_id'] ) ) {
 			$values['logo_id'] = absint( $_POST['logo_id'] );
 		}
@@ -442,11 +440,17 @@ class MenuScreen_Admin {
 		}
 		check_admin_referer( 'menuscreen_save_functionality' );
 
+		$currency = isset( $_POST['currency'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_POST['currency'] ) ) ) : 'USD';
+		if ( ! preg_match( '/^[A-Z]{3}$/', $currency ) ) {
+			$currency = 'USD';
+		}
+
 		MenuScreen_Settings::update(
 			array(
 				'hide_sold_out_items' => ! empty( $_POST['hide_sold_out_items'] ),
 				'auto_hide_controls'  => ! empty( $_POST['auto_hide_controls'] ),
 				'ticker_text'         => isset( $_POST['ticker_text'] ) ? sanitize_text_field( wp_unslash( $_POST['ticker_text'] ) ) : '',
+				'currency'            => $currency,
 			)
 		);
 
@@ -509,6 +513,9 @@ class MenuScreen_Admin {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
 		}
+		if ( ! MenuScreen_Plans::at_least( 'fleet' ) ) {
+			wp_die( esc_html__( 'The Costing Tool requires the Fleet plan.', 'menuscreen' ) );
+		}
 		check_admin_referer( 'menuscreen_save_ingredient_costs' );
 
 		$names  = isset( $_POST['cost_name'] ) ? (array) wp_unslash( $_POST['cost_name'] ) : array();
@@ -560,6 +567,9 @@ class MenuScreen_Admin {
 				)
 			);
 			foreach ( $posts as $post_id ) {
+				if ( ! current_user_can( 'edit_post', $post_id ) ) {
+					continue;
+				}
 				$price = (float) get_post_meta( $post_id, '_menuscreen_price', true );
 				$new_price = $price * ( 1 + ( $markup_percent / 100 ) );
 				if ( $round_to > 0 ) {
@@ -578,6 +588,9 @@ class MenuScreen_Admin {
 	public static function handle_save_prep_orders() {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
+		}
+		if ( ! MenuScreen_Plans::at_least( 'fleet' ) ) {
+			wp_die( esc_html__( 'The Prep Planner requires the Fleet plan.', 'menuscreen' ) );
 		}
 		check_admin_referer( 'menuscreen_save_prep_orders' );
 

@@ -31,13 +31,23 @@ $combos         = MenuScreen_Combos::all();
 
 	<div class="menuscreen-card">
 		<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-			<label>
-				<input type="checkbox" id="menuscreen-show-combos-toggle" data-show-combos <?php checked( $settings['show_combos_on_display'], true ); ?> />
-				<?php esc_html_e( 'Show combos on display', 'menuscreen' ); ?>
-			</label>
-			<a class="button button-primary <?php echo $can_use_combos ? '' : 'menuscreen-field-disabled'; ?>" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . MenuScreen_Combos::POST_TYPE ) ); ?>">
-				<?php esc_html_e( '+ Add combo', 'menuscreen' ); ?>
-			</a>
+			<?php if ( current_user_can( 'manage_options' ) ) : ?>
+				<label>
+					<input type="checkbox" id="menuscreen-show-combos-toggle" data-show-combos <?php checked( $settings['show_combos_on_display'], true ); ?> />
+					<?php esc_html_e( 'Show combos on display', 'menuscreen' ); ?>
+				</label>
+			<?php else : ?>
+				<span></span>
+			<?php endif; ?>
+			<?php if ( $can_use_combos ) : ?>
+				<a class="button button-primary" href="<?php echo esc_url( admin_url( 'post-new.php?post_type=' . MenuScreen_Combos::POST_TYPE ) ); ?>">
+					<?php esc_html_e( '+ Add combo', 'menuscreen' ); ?>
+				</a>
+			<?php else : ?>
+				<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-plans' ) ); ?>">
+					<?php esc_html_e( 'Upgrade to add a combo', 'menuscreen' ); ?>
+				</a>
+			<?php endif; ?>
 		</div>
 	</div>
 

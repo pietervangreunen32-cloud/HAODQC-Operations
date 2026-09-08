@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $can_use_costing = MenuScreen_Plans::at_least( 'fleet' );
+$currency_symbol = MenuScreen_Settings::currency_symbol();
 ?>
 <div class="wrap menuscreen-wrap">
 	<h1><?php esc_html_e( 'Costing Tool', 'menuscreen' ); ?></h1>
@@ -110,11 +111,11 @@ $can_use_costing = MenuScreen_Plans::at_least( 'fleet' );
 
 		<div class="menuscreen-stats-grid">
 			<div class="menuscreen-stat"><strong><?php echo esc_html( number_format_i18n( $selected['pieces'] * $orders, 2 ) ); ?></strong><span><?php esc_html_e( 'Total pieces', 'menuscreen' ); ?></span></div>
-			<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $total, 2 ) ); ?></strong><span><?php esc_html_e( 'Batch cost', 'menuscreen' ); ?></span></div>
-			<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $cost_per_order, 2 ) ); ?></strong><span><?php esc_html_e( 'Cost/order', 'menuscreen' ); ?></span></div>
-			<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $profit_per_order, 2 ) ); ?></strong><span><?php esc_html_e( 'Profit/order', 'menuscreen' ); ?></span></div>
-			<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( ( $sell * $orders ) - $total, 2 ) ); ?></strong><span><?php esc_html_e( 'Batch profit', 'menuscreen' ); ?></span></div>
-			<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $profit_per_order * $daily * $days, 2 ) ); ?></strong><span><?php esc_html_e( 'Month estimate', 'menuscreen' ); ?></span></div>
+			<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $total, 2 ) ); ?></strong><span><?php esc_html_e( 'Batch cost', 'menuscreen' ); ?></span></div>
+			<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $cost_per_order, 2 ) ); ?></strong><span><?php esc_html_e( 'Cost/order', 'menuscreen' ); ?></span></div>
+			<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $profit_per_order, 2 ) ); ?></strong><span><?php esc_html_e( 'Profit/order', 'menuscreen' ); ?></span></div>
+			<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( ( $sell * $orders ) - $total, 2 ) ); ?></strong><span><?php esc_html_e( 'Batch profit', 'menuscreen' ); ?></span></div>
+			<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $profit_per_order * $daily * $days, 2 ) ); ?></strong><span><?php esc_html_e( 'Month estimate', 'menuscreen' ); ?></span></div>
 		</div>
 	</div>
 
@@ -141,7 +142,7 @@ $can_use_costing = MenuScreen_Plans::at_least( 'fleet' );
 								<td><?php echo esc_html( number_format_i18n( $need, 2 ) ); ?></td>
 								<td><?php echo esc_html( $unit ); ?></td>
 								<td><input type="number" step="0.0001" min="0" name="cost_value[]" value="<?php echo esc_attr( $cost ); ?>" style="width:100px;" /></td>
-								<td>R<?php echo esc_html( number_format_i18n( $line, 2 ) ); ?></td>
+								<td><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $line, 2 ) ); ?></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>

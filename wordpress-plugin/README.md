@@ -28,6 +28,37 @@ menuscreen/
                                page: template, CSS (4 themes), polling JS
 ```
 
+## What's new in 1.2.1 — admin nav fix and a UI/UX audit pass
+
+* Fixed the admin menu showing duplicate "Combos"/"Sauces" entries (and a
+  duplicate native "Menu Items" link) with an unpredictable order — this
+  was caused by three custom post types and a taxonomy each getting both
+  a WordPress-auto-added nav entry and our own custom page. Dashboard now
+  correctly leads the menu as intended.
+* A full pass through every admin page and PHP class against WordPress
+  admin conventions and internal logic turned up and fixed:
+  * Sauce recipes weren't actually restricted to Rush+ server-side (only
+    hidden from the summary page) — now enforced the same way Combos
+    already was.
+  * The Costing Tool and Prep Planner save handlers didn't check for the
+    Fleet plan server-side, even though their pages do.
+  * The bulk price tool reprice every item/combo site-wide without
+    checking whether the current user could actually edit each one.
+  * The Plans & Billing page showed its Upgrade Links/WooCommerce forms
+    to users who couldn't save them, instead of only to admins.
+  * A new **Currency** setting (Theme & Look → Functionality) replaces a
+    hardcoded "R" symbol on the Costing Tool, Prep Planner, and Profit
+    Dashboard.
+  * The TV display now shows dietary tags on items and photos on combos
+    — both were already being saved in the editor but never rendered.
+  * Removed dead "Fleet plan" locking markup on the Theme & Look page
+    left over from before custom branding was made available on every
+    plan.
+  * Clearing the business name field now resets it to the site title
+    instead of silently keeping the old value.
+* Added a step-by-step WooCommerce product setup guide (see below) for
+  wiring the Rush/Fleet products into the Plans & Billing page.
+
 ## What's new since the initial release
 
 * **Owner Dashboard** — a landing page with stats (items, sold out,

@@ -4,7 +4,7 @@ Tags: menu, digital signage, food truck, restaurant, display
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,17 @@ categories it created; photos already in your Media Library are left
 alone.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed the admin menu showing duplicate "Combos"/"Sauces" entries and an unpredictable order — Dashboard now correctly leads the menu.
+* Sauce recipes are now actually restricted to the Rush plan and up server-side (they were only hidden from the summary page before, not enforced on save).
+* The Costing Tool and Prep Planner save handlers now correctly require the Fleet plan, matching what their pages already show.
+* The bulk price-adjustment tool now checks per-item edit permission instead of repricing every user's items and combos indiscriminately.
+* The Plans & Billing page's Upgrade Links and WooCommerce sections are now only shown to users who can actually save them.
+* Added a Currency setting (Theme & Look → Functionality) — the Costing Tool, Prep Planner, and Profit Dashboard now use it instead of a hardcoded "R".
+* The TV display now shows dietary tags on items and photos on combos, both of which were already being saved but never displayed.
+* Removed leftover "Fleet plan" locking UI on the Theme & Look page's custom branding section — custom branding has been available on every plan since 1.2.0.
+* Clearing the business name field now correctly resets it to the site title, instead of silently keeping the old value.
 
 = 1.2.0 =
 * Added Combos & Upsells (Rush plan): its own admin page, active/hide toggle, reordering, and a dedicated TV display mode.

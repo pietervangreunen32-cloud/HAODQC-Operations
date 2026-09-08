@@ -38,7 +38,6 @@ $theme_meta  = array(
 	),
 );
 $logo_url     = $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'thumbnail' ) : '';
-$can_custom   = true; // Custom branding is available on every plan.
 $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'caveat' );
 ?>
 <div class="wrap menuscreen-wrap">
@@ -65,16 +64,10 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 			<h2><?php esc_html_e( 'Display theme', 'menuscreen' ); ?></h2>
 			<div class="menuscreen-theme-grid">
 				<?php foreach ( $theme_meta as $key => $meta ) : ?>
-					<?php $is_locked = ( 'custom' === $key && ! $can_custom ); ?>
-					<label class="menuscreen-theme-option <?php echo $settings['theme'] === $key ? 'is-selected' : ''; ?><?php echo $is_locked ? ' menuscreen-field-disabled' : ''; ?>">
-						<input type="radio" name="theme" value="<?php echo esc_attr( $key ); ?>" <?php checked( $settings['theme'], $key ); ?> <?php disabled( $is_locked ); ?> />
+					<label class="menuscreen-theme-option <?php echo $settings['theme'] === $key ? 'is-selected' : ''; ?>">
+						<input type="radio" name="theme" value="<?php echo esc_attr( $key ); ?>" <?php checked( $settings['theme'], $key ); ?> />
 						<span class="menuscreen-theme-swatch" style="background:<?php echo esc_attr( $meta['swatch'] ); ?>"></span>
-						<strong>
-							<?php echo esc_html( $meta['label'] ); ?>
-							<?php if ( $is_locked ) : ?>
-								<span class="menuscreen-plan-pill"><?php esc_html_e( 'Fleet plan', 'menuscreen' ); ?></span>
-							<?php endif; ?>
-						</strong>
+						<strong><?php echo esc_html( $meta['label'] ); ?></strong>
 						<span class="description"><?php echo esc_html( $meta['blurb'] ); ?></span>
 					</label>
 				<?php endforeach; ?>
@@ -105,35 +98,25 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 		<h2><?php esc_html_e( 'Custom theme', 'menuscreen' ); ?></h2>
 		<p class="description"><?php esc_html_e( 'Match your own brand colors and pick a display font instead of one of the built-in themes.', 'menuscreen' ); ?></p>
 
-		<?php if ( ! $can_custom ) : ?>
-			<div class="notice notice-warning inline">
-				<p>
-					<?php esc_html_e( 'Custom branding requires the Fleet plan.', 'menuscreen' ); ?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-plans' ) ); ?>"><?php esc_html_e( 'Upgrade to Fleet', 'menuscreen' ); ?></a>
-					<?php esc_html_e( 'to unlock this.', 'menuscreen' ); ?>
-				</p>
-			</div>
-		<?php endif; ?>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="<?php echo $can_custom ? '' : 'menuscreen-field-disabled'; ?>">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="menuscreen_save_custom_branding" />
 			<?php wp_nonce_field( 'menuscreen_save_custom_branding' ); ?>
 
 			<p>
 				<label for="menuscreen-primary-color"><strong><?php esc_html_e( 'Accent color', 'menuscreen' ); ?></strong></label><br>
-				<input type="color" id="menuscreen-primary-color" name="primary_color" value="<?php echo esc_attr( $settings['custom_primary_color'] ); ?>" <?php disabled( ! $can_custom ); ?> />
+				<input type="color" id="menuscreen-primary-color" name="primary_color" value="<?php echo esc_attr( $settings['custom_primary_color'] ); ?>" />
 			</p>
 			<p>
 				<label for="menuscreen-background-color"><strong><?php esc_html_e( 'Background color', 'menuscreen' ); ?></strong></label><br>
-				<input type="color" id="menuscreen-background-color" name="background_color" value="<?php echo esc_attr( $settings['custom_background_color'] ); ?>" <?php disabled( ! $can_custom ); ?> />
+				<input type="color" id="menuscreen-background-color" name="background_color" value="<?php echo esc_attr( $settings['custom_background_color'] ); ?>" />
 			</p>
 			<p>
 				<label for="menuscreen-text-color"><strong><?php esc_html_e( 'Text color', 'menuscreen' ); ?></strong></label><br>
-				<input type="color" id="menuscreen-text-color" name="text_color" value="<?php echo esc_attr( $settings['custom_text_color'] ); ?>" <?php disabled( ! $can_custom ); ?> />
+				<input type="color" id="menuscreen-text-color" name="text_color" value="<?php echo esc_attr( $settings['custom_text_color'] ); ?>" />
 			</p>
 			<p>
 				<label for="menuscreen-font"><strong><?php esc_html_e( 'Font', 'menuscreen' ); ?></strong></label><br>
-				<select id="menuscreen-font" name="font" <?php disabled( ! $can_custom ); ?>>
+				<select id="menuscreen-font" name="font">
 					<?php foreach ( $font_options as $font_key ) : ?>
 						<?php $font_meta = MenuScreen_Settings::font_meta( $font_key ); ?>
 						<option value="<?php echo esc_attr( $font_key ); ?>" <?php selected( $settings['custom_font'], $font_key ); ?>>
@@ -143,7 +126,7 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 				</select>
 			</p>
 
-			<?php submit_button( __( 'Use this custom theme', 'menuscreen' ), 'secondary', 'submit', true, $can_custom ? array() : array( 'disabled' => 'disabled' ) ); ?>
+			<?php submit_button( __( 'Use this custom theme', 'menuscreen' ) ); ?>
 		</form>
 	</div>
 
@@ -163,6 +146,11 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 					<input type="checkbox" name="auto_hide_controls" value="1" <?php checked( $settings['auto_hide_controls'], true ); ?> />
 					<?php esc_html_e( 'Auto-hide the display\'s mode buttons after a few seconds of inactivity', 'menuscreen' ); ?>
 				</label>
+			</p>
+			<p>
+				<label for="menuscreen_currency"><strong><?php esc_html_e( 'Currency', 'menuscreen' ); ?></strong></label><br>
+				<input type="text" id="menuscreen_currency" name="currency" maxlength="3" style="width:5em;text-transform:uppercase;" value="<?php echo esc_attr( $settings['currency'] ); ?>" />
+				<span class="description"><?php esc_html_e( 'A 3-letter currency code (USD, ZAR, EUR, GBP, ...) — used to format prices on the display and the Costing/Prep/Profit tools.', 'menuscreen' ); ?></span>
 			</p>
 			<p>
 				<label for="menuscreen_ticker_text"><strong><?php esc_html_e( 'Scrolling ticker text (optional)', 'menuscreen' ); ?></strong></label><br>

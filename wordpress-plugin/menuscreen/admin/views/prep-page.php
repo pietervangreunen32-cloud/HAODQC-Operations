@@ -11,7 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$can_use_prep = MenuScreen_Plans::at_least( 'fleet' );
+$can_use_prep     = MenuScreen_Plans::at_least( 'fleet' );
+$currency_symbol  = MenuScreen_Settings::currency_symbol();
 ?>
 <div class="wrap menuscreen-wrap">
 	<h1><?php esc_html_e( 'Prep Planner', 'menuscreen' ); ?></h1>
@@ -91,8 +92,8 @@ $can_use_prep = MenuScreen_Plans::at_least( 'fleet' );
 	<div class="menuscreen-stats-grid">
 		<div class="menuscreen-stat"><strong><?php echo esc_html( $orders_total ); ?></strong><span><?php esc_html_e( 'Total orders', 'menuscreen' ); ?></span></div>
 		<div class="menuscreen-stat"><strong><?php echo esc_html( number_format_i18n( $pieces_total ) ); ?></strong><span><?php esc_html_e( 'Total pieces', 'menuscreen' ); ?></span></div>
-		<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $revenue, 2 ) ); ?></strong><span><?php esc_html_e( 'Revenue', 'menuscreen' ); ?></span></div>
-		<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $revenue - $cost, 2 ) ); ?></strong><span><?php esc_html_e( 'Est. profit', 'menuscreen' ); ?></span></div>
+		<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $revenue, 2 ) ); ?></strong><span><?php esc_html_e( 'Revenue', 'menuscreen' ); ?></span></div>
+		<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $revenue - $cost, 2 ) ); ?></strong><span><?php esc_html_e( 'Est. profit', 'menuscreen' ); ?></span></div>
 	</div>
 
 	<br />
@@ -104,7 +105,7 @@ $can_use_prep = MenuScreen_Plans::at_least( 'fleet' );
 			<?php foreach ( $entries as $entry ) : ?>
 				<div class="menuscreen-card">
 					<h3><?php echo esc_html( $entry['label'] ); ?></h3>
-					<p class="description"><?php echo esc_html( 'R' . number_format_i18n( $entry['price'], 2 ) . ' • ' . $entry['status'] ); ?></p>
+					<p class="description"><?php echo esc_html( $currency_symbol . number_format_i18n( $entry['price'], 2 ) . ' • ' . $entry['status'] ); ?></p>
 					<label><?php esc_html_e( 'Orders to prep', 'menuscreen' ); ?></label>
 					<input type="number" min="0" name="prep_orders[<?php echo esc_attr( $entry['id'] ); ?>]" value="<?php echo esc_attr( isset( $prep_orders[ $entry['id'] ] ) ? $prep_orders[ $entry['id'] ] : 0 ); ?>" class="widefat" />
 				</div>

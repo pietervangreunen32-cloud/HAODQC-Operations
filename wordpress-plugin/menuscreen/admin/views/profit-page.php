@@ -10,7 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$can_use_profit = MenuScreen_Plans::at_least( 'fleet' );
+$can_use_profit  = MenuScreen_Plans::at_least( 'fleet' );
+$currency_symbol = MenuScreen_Settings::currency_symbol();
 ?>
 <div class="wrap menuscreen-wrap">
 	<h1><?php esc_html_e( 'Profit Dashboard', 'menuscreen' ); ?></h1>
@@ -63,8 +64,8 @@ $can_use_profit = MenuScreen_Plans::at_least( 'fleet' );
 	<div class="menuscreen-stats-grid">
 		<div class="menuscreen-stat"><strong><?php echo esc_html( count( $entries ) ); ?></strong><span><?php esc_html_e( 'Menu items', 'menuscreen' ); ?></span></div>
 		<div class="menuscreen-stat"><strong><?php echo esc_html( $available_count ); ?></strong><span><?php esc_html_e( 'Available', 'menuscreen' ); ?></span></div>
-		<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $revenue_10, 2 ) ); ?></strong><span><?php esc_html_e( '10-order revenue', 'menuscreen' ); ?></span></div>
-		<div class="menuscreen-stat"><strong>R<?php echo esc_html( number_format_i18n( $profit_10, 2 ) ); ?></strong><span><?php esc_html_e( '10-order profit', 'menuscreen' ); ?></span></div>
+		<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $revenue_10, 2 ) ); ?></strong><span><?php esc_html_e( '10-order revenue', 'menuscreen' ); ?></span></div>
+		<div class="menuscreen-stat"><strong><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $profit_10, 2 ) ); ?></strong><span><?php esc_html_e( '10-order profit', 'menuscreen' ); ?></span></div>
 	</div>
 
 	<br />
@@ -95,9 +96,9 @@ $can_use_profit = MenuScreen_Plans::at_least( 'fleet' );
 							<?php endif; ?>
 						</td>
 						<td><?php echo esc_html( $entry['status'] ); ?></td>
-						<td>R<?php echo esc_html( number_format_i18n( $entry['price'], 2 ) ); ?></td>
-						<td>R<?php echo esc_html( number_format_i18n( $entry['cost'], 2 ) ); ?></td>
-						<td>R<?php echo esc_html( number_format_i18n( $profit, 2 ) ); ?></td>
+						<td><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $entry['price'], 2 ) ); ?></td>
+						<td><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $entry['cost'], 2 ) ); ?></td>
+						<td><?php echo esc_html( $currency_symbol ); ?><?php echo esc_html( number_format_i18n( $profit, 2 ) ); ?></td>
 						<td><?php echo esc_html( number_format_i18n( $margin, 1 ) ); ?>%</td>
 					</tr>
 				<?php endforeach; ?>

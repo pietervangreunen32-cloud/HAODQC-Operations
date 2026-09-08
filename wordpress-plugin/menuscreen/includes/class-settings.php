@@ -83,6 +83,30 @@ class MenuScreen_Settings {
 	}
 
 	/**
+	 * A plain currency symbol for the site's configured currency, used on
+	 * the admin-only costing/prep/profit pages (the customer-facing
+	 * display instead uses Intl.NumberFormat in JS for full locale
+	 * formatting). Falls back to the currency code itself for anything
+	 * not in this short list.
+	 */
+	public static function currency_symbol( $currency = null ) {
+		$currency = $currency ? $currency : self::get( 'currency' );
+		$symbols  = array(
+			'USD' => '$',
+			'ZAR' => 'R',
+			'EUR' => '€',
+			'GBP' => '£',
+			'AUD' => 'A$',
+			'CAD' => 'C$',
+			'NZD' => 'NZ$',
+			'INR' => '₹',
+			'NGN' => '₦',
+			'KES' => 'KSh',
+		);
+		return isset( $symbols[ $currency ] ) ? $symbols[ $currency ] : $currency . ' ';
+	}
+
+	/**
 	 * Label + Google Fonts family for each custom-theme font choice.
 	 */
 	public static function font_meta( $font ) {

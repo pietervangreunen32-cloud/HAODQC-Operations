@@ -159,6 +159,11 @@
 		if ( item.heat ) {
 			html += '<div class="menuscreen-feature-heat">' + heatIcons( item.heat ) + '</div>';
 		}
+		if ( item.diet && item.diet.length ) {
+			html += '<div class="menuscreen-feature-diet">' + item.diet.map( function ( tag ) {
+				return '<span class="menuscreen-badge menuscreen-diet-badge">' + escapeHtml( tag ) + '</span>';
+			} ).join( '' ) + '</div>';
+		}
 		html += '<div class="menuscreen-feature-price-row">';
 		html += '<div class="menuscreen-feature-sauce">';
 		if ( item.sauce ) {
@@ -197,6 +202,11 @@
 					if ( item.description ) {
 						html += '<p class="menuscreen-item-desc">' + escapeHtml( item.description ) + '</p>';
 					}
+					if ( item.diet && item.diet.length ) {
+						html += '<div class="menuscreen-item-diet">' + item.diet.map( function ( tag ) {
+							return '<span class="menuscreen-badge menuscreen-diet-badge">' + escapeHtml( tag ) + '</span>';
+						} ).join( '' ) + '</div>';
+					}
 					html += '</div>';
 					html += '<span class="menuscreen-item-price">' + escapeHtml( formatPrice( item.price, data.currency ) ) + '</span>';
 					html += '</div>';
@@ -210,6 +220,9 @@
 			html += '<h2 class="menuscreen-category-title">Combos</h2>';
 			data.combos.forEach( function ( combo ) {
 				html += '<div class="menuscreen-menu-item">';
+				if ( combo.photoUrl ) {
+					html += '<img class="menuscreen-item-photo" src="' + escapeHtml( combo.photoUrl ) + '" alt="" />';
+				}
 				html += '<div class="menuscreen-item-body">';
 				html += '<div class="menuscreen-item-name-row"><span class="menuscreen-item-name">' + escapeHtml( combo.name ) + '</span></div>';
 				if ( combo.description ) {
@@ -236,10 +249,15 @@
 		html += '<div class="menuscreen-combo-list">';
 		( data.combos || [] ).forEach( function ( combo ) {
 			html += '<div class="menuscreen-combo-item">';
+			html += '<div class="menuscreen-combo-item-info">';
+			if ( combo.photoUrl ) {
+				html += '<img class="menuscreen-item-photo" src="' + escapeHtml( combo.photoUrl ) + '" alt="" />';
+			}
 			html += '<div><strong>' + escapeHtml( combo.name ) + '</strong>';
 			if ( combo.description ) {
 				html += '<span>' + escapeHtml( combo.description ) + '</span>';
 			}
+			html += '</div>';
 			html += '</div>';
 			html += '<b>' + escapeHtml( formatPrice( combo.price, data.currency ) ) + '</b>';
 			html += '</div>';

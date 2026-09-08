@@ -20,6 +20,49 @@ class MenuScreen_Sauces {
 		add_action( 'init', array( __CLASS__, 'register' ) );
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 		add_action( 'save_post_' . self::POST_TYPE, array( __CLASS__, 'save_meta_box' ) );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'enforce_plan_gate' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'plan_gate_notice' ) );
+	}
+
+	/**
+	 * Sauce recipes require Rush+. A downgraded account keeps whatever
+	 * sauces it already published (removing them isn't this filter's job),
+	 * but a brand-new sauce being published on Sampler saves as a draft
+	 * instead.
+	 */
+	public static function enforce_plan_gate( $data, $postarr ) {
+		if ( self::POST_TYPE !== $data['post_type'] || 'publish' !== $data['post_status'] ) {
+			return $data;
+		}
+		if ( MenuScreen_Plans::at_least( 'rush' ) ) {
+			return $data;
+		}
+
+		$post_id       = isset( $postarr['ID'] ) ? (int) $postarr['ID'] : 0;
+		$was_published = $post_id && 'publish' === get_post_status( $post_id );
+		if ( $was_published ) {
+			return $data;
+		}
+
+		$data['post_status'] = 'draft';
+		set_transient( 'menuscreen_sauce_gate_notice_' . get_current_user_id(), true, 30 );
+		return $data;
+	}
+
+	public static function plan_gate_notice() {
+		$key = 'menuscreen_sauce_gate_notice_' . get_current_user_id();
+		if ( ! get_transient( $key ) ) {
+			return;
+		}
+		delete_transient( $key );
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p>
+				<?php esc_html_e( 'Sauce recipes require the Rush plan or higher, so this sauce was saved as a draft instead of published.', 'menuscreen' ); ?>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=menuscreen-plans' ) ); ?>"><?php esc_html_e( 'View plans', 'menuscreen' ); ?></a>
+			</p>
+		</div>
+		<?php
 	}
 
 	public static function register() {

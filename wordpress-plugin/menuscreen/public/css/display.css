@@ -305,10 +305,40 @@ html, body {
 	min-width: 0;
 }
 
+.menuscreen-badge {
+	display: inline-block;
+	background: rgba(128,128,128,.25);
+	padding: 4px 12px;
+	border-radius: 999px;
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .04em;
+}
+
 .menuscreen-feature-badge {
 	display: inline-flex;
 	align-self: flex-start;
 	margin-bottom: 12px;
+}
+
+.menuscreen-feature-diet,
+.menuscreen-item-diet {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.menuscreen-feature-diet {
+	margin-bottom: 16px;
+}
+
+.menuscreen-item-diet {
+	margin-top: 6px;
+}
+
+.menuscreen-diet-badge {
+	background: rgba(34,197,94,.2);
 }
 
 .menuscreen-feature-name {
@@ -391,6 +421,13 @@ html, body {
 	background: rgba(128,128,128,.12);
 	border-radius: 18px;
 	padding: 16px 20px;
+}
+
+.menuscreen-combo-item-info {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-width: 0;
 }
 
 .menuscreen-combo-item span {
