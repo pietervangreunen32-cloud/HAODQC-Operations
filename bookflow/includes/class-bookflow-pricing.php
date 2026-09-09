@@ -1,10 +1,14 @@
 <?php
 /**
- * The single source of truth for BookFlow's plans: booking caps, USD
- * prices, and which features each tier unlocks. Kept as plain config data
- * (not hardcoded scattered through the plugin) so prices/caps/features can
- * be tuned — per the brief, these are starting points to test and adjust,
- * not fixed — without touching gating logic elsewhere.
+ * The single source of truth for BookFlow's plans: booking caps and which
+ * features each tier unlocks permanently once purchased (BookFlow is sold
+ * once-off — see class-bookflow-license.php). Kept as plain config data
+ * (not hardcoded scattered through the plugin) so caps/features can be
+ * tuned — per the brief, these are starting points to test and adjust,
+ * not fixed — without touching gating logic elsewhere. Actual prices live
+ * on the license server (BFLS_Settings) since that's what really charges
+ * the customer; price_label() below only mirrors them for display via the
+ * BOOKFLOW_*_PRICE_ZAR/USD constants in bookflow.php.
  *
  * One deliberate exception to "gated by tier": 'inventory_aware' is listed
  * on every tier below and BookFlow_License::tier_includes() is never
@@ -34,39 +38,29 @@ class BookFlow_Pricing {
 	public static function get_tiers() {
 		$tiers = array(
 			'trial' => array(
-				'label'          => __( 'Free Trial', 'bookflow' ),
-				'price_usd'      => 0,
-				'billing_period' => null,
-				'booking_cap'    => null, // Unlimited for the trial window's duration.
-				'features'       => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits', 'woocommerce_sync', 'wedding_countdown', 'multi_location', 'sms_reminders', 'reviewloop' ),
+				'label'       => __( 'Free Trial', 'bookflow' ),
+				'booking_cap' => null, // Unlimited for the trial window's duration.
+				'features'    => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits', 'woocommerce_sync', 'wedding_countdown', 'multi_location', 'sms_reminders', 'reviewloop' ),
 			),
 			'free' => array(
-				'label'          => __( 'Free', 'bookflow' ),
-				'price_usd'      => 0,
-				'billing_period' => null,
-				'booking_cap'    => 10,
-				'features'       => array( 'inventory_aware' ),
+				'label'       => __( 'Free', 'bookflow' ),
+				'booking_cap' => 10,
+				'features'    => array( 'inventory_aware' ),
 			),
 			'starter' => array(
-				'label'          => __( 'Starter', 'bookflow' ),
-				'price_usd'      => 19,
-				'billing_period' => 'month',
-				'booking_cap'    => 25,
-				'features'       => array( 'inventory_aware' ),
+				'label'       => __( 'Starter', 'bookflow' ),
+				'booking_cap' => 25,
+				'features'    => array( 'inventory_aware' ),
 			),
 			'growth' => array(
-				'label'          => __( 'Growth', 'bookflow' ),
-				'price_usd'      => 39,
-				'billing_period' => 'month',
-				'booking_cap'    => 60,
-				'features'       => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits' ),
+				'label'       => __( 'Growth', 'bookflow' ),
+				'booking_cap' => 60,
+				'features'    => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits' ),
 			),
 			'pro' => array(
-				'label'          => __( 'Pro', 'bookflow' ),
-				'price_usd'      => 69,
-				'billing_period' => 'month',
-				'booking_cap'    => null, // Unlimited.
-				'features'       => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits', 'woocommerce_sync', 'wedding_countdown', 'multi_location', 'sms_reminders', 'reviewloop' ),
+				'label'       => __( 'Pro', 'bookflow' ),
+				'booking_cap' => null, // Unlimited.
+				'features'    => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits', 'woocommerce_sync', 'wedding_countdown', 'multi_location', 'sms_reminders', 'reviewloop' ),
 			),
 		);
 
@@ -91,5 +85,59 @@ class BookFlow_Pricing {
 		$tiers = self::get_tiers();
 		unset( $tiers['trial'], $tiers['free'] );
 		return $tiers;
+	}
+
+	/**
+	 * Best-effort visitor country, used only to decide which currency to
+	 * *display* — actual billing is always ZAR via the license server's
+	 * PayFast integration regardless of what's shown here. Same pattern as
+	 * ReviewLoop_License::detect_country_code().
+	 */
+	public static function detect_country_code() {
+		static $country = null;
+
+		if ( null !== $country ) {
+			return $country;
+		}
+
+		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
+			$country = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) );
+			return $country;
+		}
+
+		if ( class_exists( 'WC_Geolocation' ) ) {
+			$located = WC_Geolocation::geolocate_ip();
+			if ( ! empty( $located['country'] ) ) {
+				$country = $located['country'];
+				return $country;
+			}
+		}
+
+		$country = '';
+		return $country;
+	}
+
+	public static function is_south_african_visitor() {
+		return 'ZA' === self::detect_country_code();
+	}
+
+	/**
+	 * "R4,200 once-off" for a South African visitor, "$230 once-off" (a
+	 * converted label only, not a real charge amount) for everyone else,
+	 * including when the visitor's country can't be determined at all.
+	 */
+	public static function price_label( $tier_key ) {
+		$zar_const = 'BOOKFLOW_' . strtoupper( $tier_key ) . '_PRICE_ZAR';
+		$usd_const = 'BOOKFLOW_' . strtoupper( $tier_key ) . '_PRICE_USD';
+
+		if ( self::is_south_african_visitor() ) {
+			$zar = defined( $zar_const ) ? constant( $zar_const ) : 0;
+			/* translators: %s: price in South African Rand */
+			return sprintf( __( 'R%s once-off', 'bookflow' ), number_format_i18n( $zar ) );
+		}
+
+		$usd = defined( $usd_const ) ? constant( $usd_const ) : 0;
+		/* translators: %s: price in US Dollars */
+		return sprintf( __( '$%s once-off', 'bookflow' ), number_format_i18n( $usd ) );
 	}
 }

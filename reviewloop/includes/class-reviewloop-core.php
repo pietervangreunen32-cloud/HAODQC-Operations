@@ -36,6 +36,9 @@ class ReviewLoop_Core {
 		$updater = new ReviewLoop_Updater();
 		$updater->init();
 
+		$bookflow_bridge = new ReviewLoop_Bookflow_Bridge();
+		$bookflow_bridge->init();
+
 		$ai_reply = new ReviewLoop_Ai_Reply();
 		$ai_reply->init();
 

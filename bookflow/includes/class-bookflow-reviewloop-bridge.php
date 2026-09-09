@@ -16,15 +16,11 @@
  *         // add $customer_name / $customer_email into your own sequence
  *     }, 10, 4 );
  *
- * FLAGGED ASSUMPTION: this build hasn't seen ReviewLoop's actual source
- * (it's described as "your other plugin" in the brief, built separately),
- * so alongside the action above — the reliable mechanism — this class
- * also makes one best-effort convenience call to a guessed function name,
- * `reviewloop_add_customer( $email, $name, $context )`, if it happens to
- * exist. That guessed name is very likely wrong and should be corrected
- * to match ReviewLoop's real "add customer" function/hook once that
- * plugin's code is available — search for "reviewloop_add_customer" in
- * this file when wiring the two plugins together for real.
+ * ReviewLoop_Bookflow_Bridge (in the reviewloop plugin) is the real
+ * listener on the other end of this action — it queues the customer with
+ * consent left pending, the same safeguard the WooCommerce auto-hook uses,
+ * since a completed fitting isn't itself consent to be emailed about a
+ * review.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -51,7 +47,7 @@ class BookFlow_ReviewLoop_Bridge {
 	 * plugin we've never seen the code for).
 	 */
 	public static function is_reviewloop_active() {
-		return class_exists( 'ReviewLoop' ) || defined( 'REVIEWLOOP_VERSION' ) || function_exists( 'reviewloop_add_customer' );
+		return defined( 'REVIEWLOOP_VERSION' );
 	}
 
 	/**
@@ -84,15 +80,10 @@ class BookFlow_ReviewLoop_Bridge {
 		);
 
 		/**
-		 * The real integration contract. ReviewLoop (or any other plugin)
-		 * should listen for this to add a customer into its own sequence.
+		 * The integration contract. ReviewLoop_Bookflow_Bridge (in the
+		 * reviewloop plugin) listens for this to add the customer into its
+		 * own sequence; any other plugin can listen for it too.
 		 */
 		do_action( 'bookflow_appointment_completed', $appointment->id, $appointment->customer_name, $appointment->customer_email, $meta );
-
-		// Best-effort convenience call — see the FLAGGED ASSUMPTION in
-		// this file's docblock about the guessed function name.
-		if ( function_exists( 'reviewloop_add_customer' ) ) {
-			reviewloop_add_customer( $appointment->customer_email, $appointment->customer_name, $meta );
-		}
 	}
 }

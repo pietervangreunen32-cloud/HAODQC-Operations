@@ -4,7 +4,7 @@ Tags: google reviews, review requests, customer feedback, reputation management,
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,13 @@ Add the `[reviewloop_reviews]` shortcode to any page, post, or widget area. By d
 5. The `[reviewloop_reviews]` shortcode displaying reviews on the front end of a site.
 
 == Changelog ==
+
+= 1.9.0 =
+* Added: automatic hand-off from BookFlow (booking/catalog plugin for
+  bridal & formalwear rental shops) — a completed fitting appointment
+  queues the customer into ReviewLoop's sequence with consent left
+  pending, no manual re-entry needed. Optional; does nothing if BookFlow
+  isn't installed.
 
 = 1.8.0 =
 * Changed: Starter and Pro are now a one-time purchase per site instead of

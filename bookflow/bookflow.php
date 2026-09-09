@@ -3,7 +3,7 @@
  * Plugin Name:       BookFlow
  * Plugin URI:        https://bookflow.app
  * Description:       Booking calendar, catalog, and in-store welcome screen display built for bridal & formalwear rental shops. Prevents double-booking, tracks inventory, and greets customers by name when they walk in.
- * Version:           1.6.0
+ * Version:           1.7.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            BookFlow
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'BOOKFLOW_VERSION', '1.6.0' );
+define( 'BOOKFLOW_VERSION', '1.7.0' );
 define( 'BOOKFLOW_PLUGIN_FILE', __FILE__ );
 define( 'BOOKFLOW_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BOOKFLOW_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -33,6 +33,63 @@ define( 'BOOKFLOW_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
  * definition changes so bookflow_maybe_upgrade_db() re-runs dbDelta().
  */
 define( 'BOOKFLOW_DB_VERSION', '1.0.0' );
+
+/**
+ * Where the self-hosted license server (the "bookflow-license-server"
+ * plugin, running alongside reviewloop-license-server on
+ * ops.growthcraft.org.za) exposes its REST API.
+ */
+if ( ! defined( 'BOOKFLOW_LICENSE_SERVER_URL' ) ) {
+	define( 'BOOKFLOW_LICENSE_SERVER_URL', 'https://ops.growthcraft.org.za/wp-json/bookflow-license/v1' );
+}
+
+/**
+ * Where the "Buy"/"Renew" links on the License screen send the owner —
+ * the checkout pages on the license server site (hosting
+ * [bookflow_checkout plan="..."] and [bookflow_renew]).
+ */
+if ( ! defined( 'BOOKFLOW_PRICING_URL' ) ) {
+	define( 'BOOKFLOW_PRICING_URL', 'https://ops.growthcraft.org.za/bookflow-pricing/' );
+}
+if ( ! defined( 'BOOKFLOW_RENEWAL_URL' ) ) {
+	define( 'BOOKFLOW_RENEWAL_URL', 'https://ops.growthcraft.org.za/bookflow-renew/' );
+}
+
+/**
+ * Once-off purchase prices shown in the License screen's plan cards —
+ * display only; must match what's actually configured on the license
+ * server (BFLS_Settings), which is the source of truth for what PayFast
+ * really charges. See ReviewLoop's equivalent constants for the same
+ * pattern.
+ */
+if ( ! defined( 'BOOKFLOW_STARTER_PRICE_ZAR' ) ) {
+	define( 'BOOKFLOW_STARTER_PRICE_ZAR', 4200 );
+}
+if ( ! defined( 'BOOKFLOW_STARTER_PRICE_USD' ) ) {
+	define( 'BOOKFLOW_STARTER_PRICE_USD', 230 );
+}
+if ( ! defined( 'BOOKFLOW_GROWTH_PRICE_ZAR' ) ) {
+	define( 'BOOKFLOW_GROWTH_PRICE_ZAR', 8900 );
+}
+if ( ! defined( 'BOOKFLOW_GROWTH_PRICE_USD' ) ) {
+	define( 'BOOKFLOW_GROWTH_PRICE_USD', 470 );
+}
+if ( ! defined( 'BOOKFLOW_PRO_PRICE_ZAR' ) ) {
+	define( 'BOOKFLOW_PRO_PRICE_ZAR', 15500 );
+}
+if ( ! defined( 'BOOKFLOW_PRO_PRICE_USD' ) ) {
+	define( 'BOOKFLOW_PRO_PRICE_USD', 830 );
+}
+
+/**
+ * Shown at the bottom of the in-plugin Setup Guide (BookFlow → Setup
+ * Guide) so a shop that gets stuck knows who to contact — set this to
+ * your own support email before distributing the plugin. Left blank, that
+ * section of the guide simply doesn't render.
+ */
+if ( ! defined( 'BOOKFLOW_SUPPORT_EMAIL' ) ) {
+	define( 'BOOKFLOW_SUPPORT_EMAIL', 'support@growthcraft.org.za' );
+}
 
 require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-activator.php';
 require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-deactivator.php';

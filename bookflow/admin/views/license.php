@@ -14,14 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$checkout_base = apply_filters( 'bookflow_checkout_url', 'https://bookflow.app/checkout' );
-
-$status_labels = array(
-	'trial'  => __( 'Free trial', 'bookflow' ),
-	'active' => __( 'Active', 'bookflow' ),
-	'grace'  => __( 'Reconnecting…', 'bookflow' ),
-	'free'   => __( 'Free (limited)', 'bookflow' ),
-);
+$pricing_url = defined( 'BOOKFLOW_PRICING_URL' ) ? BOOKFLOW_PRICING_URL : 'https://ops.growthcraft.org.za/bookflow-pricing/';
+$renewal_url = defined( 'BOOKFLOW_RENEWAL_URL' ) ? BOOKFLOW_RENEWAL_URL : 'https://ops.growthcraft.org.za/bookflow-renew/';
 ?>
 <div class="wrap bookflow-wrap">
 	<h1><?php esc_html_e( 'License & Plan', 'bookflow' ); ?></h1>
@@ -67,11 +61,7 @@ $status_labels = array(
 		<?php endif; ?>
 
 		<?php if ( 'free' === $current_tier && ! $is_trial ) : ?>
-			<p class="description"><?php esc_html_e( 'Your free trial has ended. You\'re now on the ongoing free plan (up to 10 bookings/month, core booking calendar only). Enter a license key below, or upgrade, to unlock more.', 'bookflow' ); ?></p>
-		<?php endif; ?>
-
-		<?php if ( 'grace' === $license_data['status'] ) : ?>
-			<p class="description"><?php esc_html_e( 'BookFlow couldn\'t reach the license server on its last check. Your plan is still active for a few more days while it retries.', 'bookflow' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Your free trial has ended. You\'re now on the ongoing free plan (up to 10 bookings/month, core booking calendar only). Enter a license key below, or purchase a plan, to unlock more.', 'bookflow' ); ?></p>
 		<?php endif; ?>
 	</div>
 
@@ -81,9 +71,21 @@ $status_labels = array(
 		<p>
 			<?php esc_html_e( 'Active key:', 'bookflow' ); ?>
 			<code><?php echo esc_html( substr( $license_data['key'], 0, 4 ) . str_repeat( '•', max( 0, strlen( $license_data['key'] ) - 4 ) ) ); ?></code>
-			<?php if ( ! empty( $license_data['expires_at'] ) ) : ?>
-				— <?php echo esc_html( sprintf( /* translators: %s: expiry date. */ __( 'renews/expires %s', 'bookflow' ), $license_data['expires_at'] ) ); ?>
+			— <?php esc_html_e( 'a one-time purchase, yours to keep permanently.', 'bookflow' ); ?>
+		</p>
+		<p class="description">
+			<?php $updates_expire = BookFlow_License::updates_expire_label(); ?>
+			<?php if ( $updates_expire ) : ?>
+				<?php if ( BookFlow_License::updates_lapsed() ) : ?>
+					<strong style="color:#d63638;"><?php echo esc_html( sprintf( /* translators: %s: expiry date. */ __( 'Your update window lapsed on %s.', 'bookflow' ), $updates_expire ) ); ?></strong>
+					<?php esc_html_e( 'BookFlow keeps working exactly as installed — renew to start receiving new versions again.', 'bookflow' ); ?>
+				<?php else : ?>
+					<?php echo esc_html( sprintf( /* translators: %s: expiry date. */ __( 'Free updates and support until %s.', 'bookflow' ), $updates_expire ) ); ?>
+				<?php endif; ?>
+			<?php else : ?>
+				<?php esc_html_e( 'Your update window will show here once this site\'s next daily license check runs.', 'bookflow' ); ?>
 			<?php endif; ?>
+			— <a href="<?php echo esc_url( $renewal_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Renew', 'bookflow' ); ?></a>
 		</p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'bookflow_deactivate_license' ); ?>
@@ -103,7 +105,7 @@ $status_labels = array(
 
 	<h2><?php esc_html_e( 'Plans', 'bookflow' ); ?></h2>
 	<p class="description">
-		<?php esc_html_e( 'Prices shown in USD. At checkout, Stripe automatically shows and charges in your local currency.', 'bookflow' ); ?>
+		<?php esc_html_e( 'One-time purchase per plan — not a subscription. Prices shown in your local currency where possible; the checkout page always shows exactly what will be charged.', 'bookflow' ); ?>
 	</p>
 
 	<div class="bookflow-plans-grid">
@@ -111,7 +113,7 @@ $status_labels = array(
 			<div class="bookflow-plan-card<?php echo ( $tier_key === $current_tier ) ? ' is-current' : ''; ?>">
 				<h3><?php echo esc_html( $tier['label'] ); ?></h3>
 				<p class="bookflow-plan-price">
-					$<?php echo esc_html( $tier['price_usd'] ); ?><span>/<?php esc_html_e( 'mo', 'bookflow' ); ?></span>
+					<?php echo esc_html( BookFlow_Pricing::price_label( $tier_key ) ); ?>
 				</p>
 				<p>
 					<?php
@@ -134,8 +136,8 @@ $status_labels = array(
 				<?php if ( $tier_key === $current_tier ) : ?>
 					<span class="button disabled"><?php esc_html_e( 'Current plan', 'bookflow' ); ?></span>
 				<?php else : ?>
-					<a class="button button-primary" href="<?php echo esc_url( add_query_arg( array( 'plan' => $tier_key, 'site' => rawurlencode( home_url() ) ), $checkout_base ) ); ?>" target="_blank" rel="noopener noreferrer">
-						<?php esc_html_e( 'Upgrade', 'bookflow' ); ?>
+					<a class="button button-primary" href="<?php echo esc_url( $pricing_url ); ?>" target="_blank" rel="noopener noreferrer">
+						<?php esc_html_e( 'Buy', 'bookflow' ); ?>
 					</a>
 				<?php endif; ?>
 			</div>
