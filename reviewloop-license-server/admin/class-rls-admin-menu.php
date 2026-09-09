@@ -17,6 +17,7 @@ class RLS_Admin_Menu {
 		add_menu_page( __( 'ReviewLoop Licenses', 'reviewloop-license-server' ), __( 'RL Licenses', 'reviewloop-license-server' ), self::CAPABILITY, 'rls-licenses', array( $this, 'render_licenses' ), 'dashicons-admin-network', 80 );
 		add_submenu_page( 'rls-licenses', __( 'Licenses', 'reviewloop-license-server' ), __( 'Licenses', 'reviewloop-license-server' ), self::CAPABILITY, 'rls-licenses', array( $this, 'render_licenses' ) );
 		add_submenu_page( 'rls-licenses', __( 'Releases', 'reviewloop-license-server' ), __( 'Releases', 'reviewloop-license-server' ), self::CAPABILITY, 'rls-releases', array( $this, 'render_releases' ) );
+		add_submenu_page( 'rls-licenses', __( 'ITN Log', 'reviewloop-license-server' ), __( 'ITN Log', 'reviewloop-license-server' ), self::CAPABILITY, 'rls-itn-log', array( $this, 'render_itn_log' ) );
 		add_submenu_page( 'rls-licenses', __( 'Settings', 'reviewloop-license-server' ), __( 'Settings', 'reviewloop-license-server' ), self::CAPABILITY, 'rls-settings', array( $this, 'render_settings' ) );
 	}
 
@@ -126,5 +127,9 @@ class RLS_Admin_Menu {
 
 	public function render_releases() {
 		require RLS_PLUGIN_DIR . 'admin/views/releases.php';
+	}
+
+	public function render_itn_log() {
+		require RLS_PLUGIN_DIR . 'admin/views/itn-log.php';
 	}
 }

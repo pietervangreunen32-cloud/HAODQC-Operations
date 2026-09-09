@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       ReviewLoop License Server
  * Description:       Internal billing/licensing backend for ReviewLoop — once-off PayFast purchases, annual renewal payments, license key issuing, self-hosted plugin updates, and the REST API the ReviewLoop plugin checks against. Install this only on ops.growthcraft.org.za, never on a customer site.
- * Version:           1.3.0
+ * Version:           1.3.1
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            ReviewLoop

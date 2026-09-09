@@ -112,6 +112,17 @@ class RLS_Webhook {
 		}
 	}
 
+	/**
+	 * Feeds the "ITN Log" admin screen — the only place to see whether a
+	 * PayFast callback actually arrived and verified, short of a direct
+	 * database query. Newest first.
+	 */
+	public static function get_recent( $limit = 50 ) {
+		global $wpdb;
+		$table = RLS_DB::itn_log_table();
+		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT %d", $limit ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
 	private function process_renewal_itn( $m_payment_id, $amount_gross ) {
 		$license_id = (int) substr( $m_payment_id, strlen( 'RENEW-' ) );
 		if ( ! $license_id ) {
