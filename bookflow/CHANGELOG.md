@@ -1,5 +1,54 @@
 # BookFlow Changelog
 
+## 1.7.0 — Real licensing, once-off pricing, auto-updates, and a working ReviewLoop hand-off
+
+Brings BookFlow's licensing/updates/onboarding up to the same standard as
+ReviewLoop, its sibling product.
+
+**Licensing**
+
+- `class-bookflow-license.php` previously talked to a placeholder
+  `https://api.bookflow.app/v1/license/...` endpoint that was never built.
+  It now talks to a real self-hosted license server
+  ("bookflow-license-server", a new sibling plugin running alongside
+  reviewloop-license-server) over the same JSON REST contract ReviewLoop's
+  client uses.
+- Pricing model changed from monthly subscription to a one-time purchase
+  per plan (Starter/Growth/Pro). A purchased tier now stays unlocked
+  permanently — it's never re-locked over a missed renewal or an
+  unreachable license server. The optional annual renewal only controls
+  whether the site is offered future plugin updates.
+- Removed the now-unnecessary grace-period/expiry-cutoff logic that came
+  with the old subscription model.
+
+**Auto-updates**
+
+- New `BookFlow_Updater` class hooks WordPress's native update-checker
+  (`pre_set_site_transient_update_plugins` / `plugins_api`), so a licensed
+  site sees a normal "Update available" / "Update Now" on the Plugins
+  screen instead of a manual reinstall.
+
+**Onboarding**
+
+- New Setup Guide screen (BookFlow → Setup Guide) walking through the
+  full setup in order: shop hours, catalog, the booking/shortlist
+  shortcodes, deposits, the Welcome Screen URL, the ReviewLoop hand-off,
+  and license activation. Reachable from the sidebar, from a "Setup
+  Guide" link on the Plugins list, and shown automatically the first time
+  the plugin is activated (BookFlow had no first-activation redirect
+  before this).
+
+**ReviewLoop integration — actually fixed**
+
+- The 1.5.0 hand-off fired `do_action( 'bookflow_appointment_completed', ... )`
+  correctly, but also called a guessed `reviewloop_add_customer()`
+  function that never existed anywhere in ReviewLoop's real code — so the
+  advertised integration silently did nothing beyond the action call
+  itself. Added `ReviewLoop_Bookflow_Bridge` on ReviewLoop's side, which
+  listens for that action and actually queues the customer (consent left
+  pending, matching the same safeguard the WooCommerce auto-hook uses).
+  Removed the dead guessed-function branch from BookFlow's side.
+
 ## 1.6.0 — Admin menu order, UI/UX audit, and real bug fixes
 
 Everything here came out of an actual UI/UX and code audit, verified live

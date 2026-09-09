@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,24 +63,33 @@ review-request sequence — no manual data entry, no hard dependency.
 
 = A note on pricing =
 
-BookFlow is a paid, subscription-only plugin licensed per site, billed in
-your local currency. It is not distributed through the free WordPress.org
-plugin directory — download and license activation happen from the
-BookFlow website.
+BookFlow is a paid, license-key-activated plugin, sold per site as a
+**one-time purchase** — not a subscription. Buy a plan once and its
+features stay unlocked on that site permanently. An optional low-cost
+annual renewal keeps future plugin updates and support coming; letting it
+lapse never disables anything you've already paid for. It is not
+distributed through the free WordPress.org plugin directory — download
+and license activation happen from the BookFlow website.
 
 == Installation ==
 
 1. Upload the `bookflow` folder to `/wp-content/plugins/`, or upload the
    plugin zip via Plugins → Add New → Upload Plugin.
-2. Activate BookFlow through the "Plugins" screen.
-3. Go to BookFlow → Settings to set your shop hours and slot length.
-4. Go to BookFlow → Catalog to add your first dresses/suits (or enable
+2. Activate BookFlow through the "Plugins" screen — you'll be taken
+   straight to the Setup Guide.
+3. Go to BookFlow → Setup Guide at any time for the full walkthrough
+   (it's also linked directly under BookFlow on the Plugins list) — shop
+   hours, catalog, the booking and shortlist shortcodes, deposits, the
+   Welcome Screen, and license activation.
+4. Go to BookFlow → Settings to set your shop hours and slot length.
+5. Go to BookFlow → Catalog to add your first dresses/suits (or enable
    WooCommerce catalog sync, if you already sell products through
    WooCommerce).
-5. Add the `[bookflow_booking]` shortcode to a page — this is your
+6. Add the `[bookflow_booking]` shortcode to a page — this is your
    "Book a Fitting" page.
-6. Enter your license key under BookFlow → License to unlock your plan's
-   features.
+7. Enter your license key under BookFlow → License to unlock your plan's
+   features. Once activated, BookFlow checks for plugin updates the normal
+   WordPress way — no manual reinstalling.
 
 == Frequently Asked Questions ==
 
@@ -100,7 +109,38 @@ No. The welcome screen only ever shows first names and the items selected
 
 No. Catalog sync from WooCommerce is strictly read-only.
 
+= Is Starter/Growth/Pro a subscription? =
+
+No — it's a one-time purchase per site. There's an optional annual
+renewal, but it only covers future plugin updates and support; if you let
+it lapse, every feature you paid for keeps working exactly as it does
+today.
+
+= How do updates work on a licensed site? =
+
+Once activated with a valid license, BookFlow checks in with the license
+server and shows a normal "Update available" notice on your Plugins
+screen when a new version ships — click Update Now like any other plugin.
+Nothing is lost: your appointments, catalog, and settings live in the
+database, which an update never touches.
+
 == Changelog ==
+
+= 1.7.0 =
+* Changed: Starter, Growth, and Pro are now a one-time purchase per site
+  instead of a monthly subscription — every feature stays unlocked
+  permanently once bought. An optional low-cost annual renewal keeps
+  future updates and support coming; letting it lapse never disables
+  anything already paid for.
+* Added: licensed sites now get plugin updates the normal WordPress way —
+  an "Update available" notice and one-click Update Now on the Plugins
+  screen — instead of a manual reinstall.
+* Added: a full Setup Guide screen (BookFlow → Setup Guide), linked
+  directly from the Plugins list and shown automatically on first
+  activation.
+* Fixed: the ReviewLoop hand-off now actually adds the customer into
+  ReviewLoop's sequence (the previous build called a function that never
+  existed on ReviewLoop's side).
 
 = 1.6.0 =
 * UI/UX audit and real bug fixes, verified against a live install: fixed
