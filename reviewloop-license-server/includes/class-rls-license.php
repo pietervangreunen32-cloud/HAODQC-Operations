@@ -78,9 +78,12 @@ class RLS_License {
 	}
 
 	/**
-	 * First successful PayFast payment for a subscription: generates the
-	 * license key (once — safe to call again if PayFast retries the ITN)
-	 * and marks the license active.
+	 * First successful PayFast payment for a once-off purchase: generates
+	 * the license key (once — safe to call again if PayFast retries the
+	 * ITN), marks the license active for good, and starts the one-year
+	 * update-eligibility window. The license itself never expires from
+	 * here on — only future plugin updates depend on updates_expire_at,
+	 * and only that is what an annual renewal extends.
 	 */
 	public static function activate_from_first_payment( $m_payment_id, $payfast_token ) {
 		$license = self::get_by_payment_id( $m_payment_id );
@@ -94,29 +97,54 @@ class RLS_License {
 		$wpdb->update(
 			RLS_DB::licenses_table(),
 			array(
-				'license_key'     => $license_key,
-				'payfast_token'   => $payfast_token,
-				'status'          => 'active',
-				'last_payment_at' => current_time( 'mysql' ),
-				'updated_at'      => current_time( 'mysql' ),
+				'license_key'       => $license_key,
+				'payfast_token'     => $payfast_token,
+				'status'            => 'active',
+				'last_payment_at'   => current_time( 'mysql' ),
+				'updated_at'        => current_time( 'mysql' ),
+				'updates_expire_at' => gmdate( 'Y-m-d', strtotime( '+1 year' ) ),
 			),
 			array( 'id' => $license->id ),
-			array( '%s', '%s', '%s', '%s', '%s' ),
+			array( '%s', '%s', '%s', '%s', '%s', '%s' ),
 			array( '%d' )
 		);
 
 		return self::get_by_payment_id( $m_payment_id );
 	}
 
-	public static function record_recurring_payment( $payfast_token ) {
+	/**
+	 * An annual renewal payment: extends updates_expire_at by a year from
+	 * whichever is later — today, or the license's current expiry — so
+	 * renewing a few days early or a few months late never shortchanges the
+	 * client. Never touches `status` or `plan`; a lapsed renewal only stops
+	 * future plugin updates, it never locks out features already paid for.
+	 */
+	public static function process_renewal( $license_id ) {
 		global $wpdb;
+		$table   = RLS_DB::licenses_table();
+		$license = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $license_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( ! $license ) {
+			return null;
+		}
+
+		$today   = strtotime( gmdate( 'Y-m-d' ) );
+		$current = $license->updates_expire_at ? strtotime( $license->updates_expire_at ) : $today;
+		$base    = max( $today, $current );
+
 		$wpdb->update(
-			RLS_DB::licenses_table(),
-			array( 'status' => 'active', 'last_payment_at' => current_time( 'mysql' ), 'updated_at' => current_time( 'mysql' ) ),
-			array( 'payfast_token' => $payfast_token ),
+			$table,
+			array(
+				'updates_expire_at' => gmdate( 'Y-m-d', strtotime( '+1 year', $base ) ),
+				'last_payment_at'   => current_time( 'mysql' ),
+				'updated_at'        => current_time( 'mysql' ),
+			),
+			array( 'id' => $license_id ),
 			array( '%s', '%s', '%s' ),
-			array( '%s' )
+			array( '%d' )
 		);
+
+		return self::get_by_key( $license->license_key );
 	}
 
 	public static function mark_payment_failed( $payfast_token ) {
@@ -225,6 +253,45 @@ class RLS_License {
 			return array( 'status' => 'invalid' );
 		}
 
-		return array( 'status' => $license->status, 'plan' => $license->plan );
+		return array(
+			'status'             => $license->status,
+			'plan'               => $license->plan,
+			'updates_expire_at'  => $license->updates_expire_at,
+		);
+	}
+
+	/**
+	 * Answers the ReviewLoop plugin's self-hosted update checker. Feature
+	 * access (the plan itself) never expires here — only whether this site
+	 * is told about a newer release. A license that isn't found, is bound
+	 * to a different site, or whose annual renewal has lapsed simply gets
+	 * told "you're already on the latest version", so WordPress shows no
+	 * update rather than one it isn't entitled to install.
+	 */
+	public static function handle_update_check_request( $license_key, $site_url, $current_version ) {
+		$license = self::get_by_key( $license_key );
+
+		$not_entitled = ! $license
+			|| 'active' !== $license->status
+			|| ( ! empty( $license->site_url ) && $license->site_url !== $site_url )
+			|| ( $license->updates_expire_at && strtotime( $license->updates_expire_at ) < strtotime( gmdate( 'Y-m-d' ) ) );
+
+		if ( $not_entitled ) {
+			return array( 'version' => $current_version );
+		}
+
+		$release = RLS_Release::get_latest();
+
+		if ( ! $release || ! version_compare( $release->version, $current_version, '>' ) ) {
+			return array( 'version' => $current_version );
+		}
+
+		return array(
+			'version'      => $release->version,
+			'changelog'    => $release->changelog,
+			'requires'     => $release->min_wp,
+			'tested'       => $release->tested_wp,
+			'download_url' => RLS_Release::download_url( $release->id, $license_key ),
+		);
 	}
 }

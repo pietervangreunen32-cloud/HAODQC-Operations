@@ -1,10 +1,11 @@
 <?php
 /**
- * Public checkout flow: a shortcode with a simple name/email form, which
- * posts to a handler that creates a pending license record and then
- * redirects the browser to PayFast with a signed, recurring-subscription
- * payment request. Use [reviewloop_checkout plan="starter"] or
- * [reviewloop_checkout plan="pro"] — put both on your pricing page.
+ * Public checkout flow, both once-off: [reviewloop_checkout plan="starter"]
+ * / [reviewloop_checkout plan="pro"] for a first-time purchase (name/email
+ * form -> pending license record -> PayFast), and [reviewloop_renew] for an
+ * existing customer paying their annual update-and-support renewal
+ * (license key/email form -> PayFast, tagged so the webhook extends that
+ * license's update window instead of creating a new one).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,8 +16,11 @@ class RLS_Checkout {
 
 	public function init() {
 		add_shortcode( 'reviewloop_checkout', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'reviewloop_renew', array( $this, 'render_renew_shortcode' ) );
 		add_action( 'admin_post_nopriv_rls_start_checkout', array( $this, 'handle_start_checkout' ) );
 		add_action( 'admin_post_rls_start_checkout', array( $this, 'handle_start_checkout' ) );
+		add_action( 'admin_post_nopriv_rls_start_renewal', array( $this, 'handle_start_renewal' ) );
+		add_action( 'admin_post_rls_start_renewal', array( $this, 'handle_start_renewal' ) );
 	}
 
 	public function render_shortcode( $atts ) {
@@ -40,7 +44,29 @@ class RLS_Checkout {
 				<input type="email" name="email" required style="width:100%;">
 			</p>
 			<p>
-				<button type="submit"><?php echo esc_html( sprintf( __( 'Subscribe to %1$s — %2$s', 'reviewloop-license-server' ), $config['item_name'], $price_label ) ); ?></button>
+				<button type="submit"><?php echo esc_html( sprintf( __( 'Buy %1$s — %2$s', 'reviewloop-license-server' ), $config['item_name'], $price_label ) ); ?></button>
+			</p>
+		</form>
+		<?php
+		return ob_get_clean();
+	}
+
+	public function render_renew_shortcode() {
+		ob_start();
+		?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width:400px;">
+			<input type="hidden" name="action" value="rls_start_renewal">
+			<?php wp_nonce_field( 'rls_start_renewal' ); ?>
+			<p>
+				<label><?php esc_html_e( 'License key', 'reviewloop-license-server' ); ?></label><br>
+				<input type="text" name="license_key" required style="width:100%;" placeholder="RL-XXXX-XXXX-XXXX-XXXX">
+			</p>
+			<p>
+				<label><?php esc_html_e( 'Email address used to purchase', 'reviewloop-license-server' ); ?></label><br>
+				<input type="email" name="email" required style="width:100%;">
+			</p>
+			<p>
+				<button type="submit"><?php esc_html_e( 'Renew updates & support', 'reviewloop-license-server' ); ?></button>
 			</p>
 		</form>
 		<?php
@@ -64,7 +90,7 @@ class RLS_Checkout {
 
 		RLS_License::create_pending( $m_payment_id, $email, $name, $plan, $config['price'], $currency );
 
-		$fields = RLS_Payfast::build_subscription_fields(
+		$fields = RLS_Payfast::build_once_off_fields(
 			array(
 				'return_url'   => add_query_arg( 'rls_checkout', 'success', home_url( '/' ) ),
 				'cancel_url'   => add_query_arg( 'rls_checkout', 'cancelled', home_url( '/' ) ),
@@ -74,6 +100,38 @@ class RLS_Checkout {
 				'm_payment_id' => $m_payment_id,
 				'amount'       => $config['price'],
 				'item_name'    => $config['item_name'],
+			)
+		);
+
+		$this->render_auto_submit_form( RLS_Payfast::process_url(), $fields );
+		exit;
+	}
+
+	public function handle_start_renewal() {
+		check_admin_referer( 'rls_start_renewal' );
+
+		$license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
+		$email       = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+
+		$license = $license_key ? RLS_License::get_by_key( $license_key ) : null;
+
+		if ( ! $license || strcasecmp( $license->customer_email, $email ) !== 0 ) {
+			wp_die( esc_html__( 'We could not find a license matching that key and email address.', 'reviewloop-license-server' ) );
+		}
+
+		$config       = RLS_Settings::plan_config( $license->plan );
+		$m_payment_id = 'RENEW-' . $license->id . '-' . time();
+
+		$fields = RLS_Payfast::build_once_off_fields(
+			array(
+				'return_url'   => add_query_arg( 'rls_checkout', 'renewed', home_url( '/' ) ),
+				'cancel_url'   => add_query_arg( 'rls_checkout', 'cancelled', home_url( '/' ) ),
+				'notify_url'   => rest_url( 'reviewloop-license/v1/payfast-itn' ),
+				'name_first'   => $license->customer_name ? $license->customer_name : 'there',
+				'email'        => $license->customer_email,
+				'm_payment_id' => $m_payment_id,
+				'amount'       => $config['renewal_price'],
+				'item_name'    => $config['item_name'] . ' — annual renewal',
 			)
 		);
 

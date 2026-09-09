@@ -23,20 +23,32 @@ $licenses  = RLS_License::get_list( array( 'per_page' => 50, 'search' => $search
 				<th><?php esc_html_e( 'Status', 'reviewloop-license-server' ); ?></th>
 				<th><?php esc_html_e( 'Site', 'reviewloop-license-server' ); ?></th>
 				<th><?php esc_html_e( 'Last Payment', 'reviewloop-license-server' ); ?></th>
+				<th><?php esc_html_e( 'Updates Until', 'reviewloop-license-server' ); ?></th>
 				<th><?php esc_html_e( 'Actions', 'reviewloop-license-server' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
 		<?php if ( empty( $licenses ) ) : ?>
-			<tr><td colspan="6"><?php esc_html_e( 'No licenses yet.', 'reviewloop-license-server' ); ?></td></tr>
+			<tr><td colspan="7"><?php esc_html_e( 'No licenses yet.', 'reviewloop-license-server' ); ?></td></tr>
 		<?php else : ?>
 			<?php foreach ( $licenses as $license ) : ?>
+				<?php $updates_lapsed = $license->updates_expire_at && strtotime( $license->updates_expire_at ) < strtotime( gmdate( 'Y-m-d' ) ); ?>
 				<tr>
 					<td><code><?php echo esc_html( $license->license_key ); ?></code></td>
 					<td><?php echo esc_html( $license->customer_name . ' — ' . $license->customer_email ); ?></td>
 					<td><?php echo esc_html( ucfirst( $license->status ) ); ?></td>
 					<td><?php echo esc_html( $license->site_url ? $license->site_url : '—' ); ?></td>
 					<td><?php echo esc_html( $license->last_payment_at ? $license->last_payment_at : '—' ); ?></td>
+					<td>
+						<?php if ( $license->updates_expire_at ) : ?>
+							<span style="<?php echo $updates_lapsed ? 'color:#b32d2e;' : ''; ?>">
+								<?php echo esc_html( mysql2date( 'j M Y', $license->updates_expire_at ) ); ?>
+								<?php if ( $updates_lapsed ) : ?>(<?php esc_html_e( 'lapsed', 'reviewloop-license-server' ); ?>)<?php endif; ?>
+							</span>
+						<?php else : ?>
+							&mdash;
+						<?php endif; ?>
+					</td>
 					<td>
 						<form method="post" style="display:inline;">
 							<?php wp_nonce_field( 'rls_license_action' ); ?>

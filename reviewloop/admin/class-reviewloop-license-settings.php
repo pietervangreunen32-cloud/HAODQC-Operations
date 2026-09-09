@@ -84,10 +84,27 @@ class ReviewLoop_License_Settings {
 				<?php else : ?>
 					<span class="rl-badge"><?php esc_html_e( 'Free', 'reviewloop' ); ?></span>
 				<?php endif; ?>
-				<?php if ( 'free' !== $plan && ! empty( $settings['license_expires'] ) ) : ?>
-					— <?php echo esc_html( sprintf( __( 'renews/expires: %s', 'reviewloop' ), $settings['license_expires'] ) ); ?>
-				<?php endif; ?>
+				<?php esc_html_e( '— a one-time purchase, yours to keep permanently.', 'reviewloop' ); ?>
 			</p>
+
+			<?php if ( 'free' !== $plan ) : ?>
+				<?php $updates_expire = ReviewLoop_License::updates_expire_label(); ?>
+				<p class="description">
+					<?php if ( $updates_expire ) : ?>
+						<?php if ( ReviewLoop_License::updates_lapsed() ) : ?>
+							<strong style="color:#d63638;"><?php echo esc_html( sprintf( __( 'Your update window lapsed on %s.', 'reviewloop' ), $updates_expire ) ); ?></strong>
+							<?php esc_html_e( 'ReviewLoop keeps working exactly as installed — renew to start receiving new versions again.', 'reviewloop' ); ?>
+						<?php else : ?>
+							<?php echo esc_html( sprintf( __( 'Free updates and support until %s.', 'reviewloop' ), $updates_expire ) ); ?>
+						<?php endif; ?>
+					<?php else : ?>
+						<?php esc_html_e( 'Your update window will show here once this site\'s next daily license check runs.', 'reviewloop' ); ?>
+					<?php endif; ?>
+					<?php if ( defined( 'REVIEWLOOP_RENEWAL_URL' ) ) : ?>
+						— <a href="<?php echo esc_url( REVIEWLOOP_RENEWAL_URL ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Renew', 'reviewloop' ); ?></a>
+					<?php endif; ?>
+				</p>
+			<?php endif; ?>
 
 			<?php echo ReviewLoop_License::render_plan_cards(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 

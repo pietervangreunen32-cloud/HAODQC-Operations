@@ -79,41 +79,63 @@ class RLS_Webhook {
 	}
 
 	private function process_verified_itn( $post_data ) {
-		$status        = isset( $post_data['payment_status'] ) ? $post_data['payment_status'] : '';
-		$m_payment_id  = isset( $post_data['m_payment_id'] ) ? $post_data['m_payment_id'] : '';
-		$token         = isset( $post_data['token'] ) ? $post_data['token'] : '';
-		$amount_gross  = isset( $post_data['amount_gross'] ) ? (float) $post_data['amount_gross'] : 0.0;
+		$status       = isset( $post_data['payment_status'] ) ? $post_data['payment_status'] : '';
+		$m_payment_id = isset( $post_data['m_payment_id'] ) ? $post_data['m_payment_id'] : '';
+		$token        = isset( $post_data['token'] ) ? $post_data['token'] : '';
+		$amount_gross = isset( $post_data['amount_gross'] ) ? (float) $post_data['amount_gross'] : 0.0;
 
 		if ( 'COMPLETE' !== $status ) {
-			if ( $token ) {
-				$license = RLS_License::get_by_token( $token );
-				RLS_License::mark_payment_failed( $token );
-				if ( $license ) {
-					RLS_Mailer::send_payment_failed_notice( $license );
-				}
-			}
+			return; // Once-off payments have nothing recurring to mark failed — a failed/cancelled attempt just never activates anything.
+		}
+
+		// A renewal payment is tagged RENEW-{license_id}-... at checkout time (see RLS_Checkout::handle_start_renewal).
+		if ( $m_payment_id && 0 === strpos( $m_payment_id, 'RENEW-' ) ) {
+			$this->process_renewal_itn( $m_payment_id, $amount_gross );
 			return;
 		}
 
-		// First payment for a new subscription: matched by our own m_payment_id, license row still 'pending'.
+		// Otherwise this is a new purchase: matched by our own m_payment_id, license row still 'pending'.
 		$pending = $m_payment_id ? RLS_License::get_by_payment_id( $m_payment_id ) : null;
 
-		if ( $pending && 'pending' === $pending->status ) {
-			if ( abs( (float) $pending->amount - $amount_gross ) > 0.05 ) {
-				// Amount doesn't match what we quoted — don't activate automatically, leave pending for manual review.
-				return;
-			}
-
-			$license = RLS_License::activate_from_first_payment( $m_payment_id, $token );
-			if ( $license ) {
-				RLS_Mailer::send_license_key( $license );
-			}
+		if ( ! $pending || 'pending' !== $pending->status ) {
 			return;
 		}
 
-		// Otherwise this is a recurring payment on an already-active subscription, matched by its token.
-		if ( $token ) {
-			RLS_License::record_recurring_payment( $token );
+		if ( abs( (float) $pending->amount - $amount_gross ) > 0.05 ) {
+			// Amount doesn't match what we quoted — don't activate automatically, leave pending for manual review.
+			return;
+		}
+
+		$license = RLS_License::activate_from_first_payment( $m_payment_id, $token );
+		if ( $license ) {
+			RLS_Mailer::send_license_key( $license );
+		}
+	}
+
+	private function process_renewal_itn( $m_payment_id, $amount_gross ) {
+		$license_id = (int) substr( $m_payment_id, strlen( 'RENEW-' ) );
+		if ( ! $license_id ) {
+			return;
+		}
+
+		global $wpdb;
+		$license = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . RLS_DB::licenses_table() . ' WHERE id = %d', $license_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( ! $license ) {
+			return;
+		}
+
+		$config   = RLS_Settings::plan_config( $license->plan );
+		$expected = (float) $config['renewal_price'];
+
+		if ( abs( $expected - $amount_gross ) > 0.05 ) {
+			// Amount doesn't match the current renewal price — leave for manual review rather than guessing.
+			return;
+		}
+
+		$updated = RLS_License::process_renewal( $license_id );
+		if ( $updated ) {
+			RLS_Mailer::send_renewal_confirmed( $updated );
 		}
 	}
 }

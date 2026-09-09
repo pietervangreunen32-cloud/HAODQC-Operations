@@ -14,4 +14,9 @@ class RLS_DB {
 		global $wpdb;
 		return $wpdb->prefix . 'rls_itn_log';
 	}
+
+	public static function releases_table() {
+		global $wpdb;
+		return $wpdb->prefix . 'rls_releases';
+	}
 }

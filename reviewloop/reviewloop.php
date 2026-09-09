@@ -3,7 +3,7 @@
  * Plugin Name:       ReviewLoop
  * Plugin URI:        https://reviewloop.app
  * Description:       Automatically request Google reviews from customers without spamming them, and get AI-drafted replies to post once reviews come in. Built for small businesses.
- * Version:           1.7.0
+ * Version:           1.8.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            ReviewLoop
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'REVIEWLOOP_VERSION', '1.7.0' );
+define( 'REVIEWLOOP_VERSION', '1.8.0' );
 define( 'REVIEWLOOP_PLUGIN_FILE', __FILE__ );
 define( 'REVIEWLOOP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'REVIEWLOOP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -36,33 +36,48 @@ if ( ! defined( 'REVIEWLOOP_FREE_REPLY_LIMIT' ) ) {
 }
 
 /**
- * Starting prices shown in upgrade prompts — config values, not logic, so
- * they can change without touching code. Actual billing always happens in
- * ZAR via the license server's PayFast integration (PayFast doesn't
- * support billing in USD); the *_USD constants are only used to label the
- * price for visitors outside South Africa — see
- * ReviewLoop_License::price_label().
+ * Once-off purchase prices shown in upgrade prompts — config values, not
+ * logic, so they can change without touching code. ReviewLoop is sold as a
+ * single once-off payment per site (no subscription); actual billing always
+ * happens in ZAR via the license server's PayFast integration (PayFast
+ * doesn't support billing in USD), and the *_USD constants are only used to
+ * label the price for visitors outside South Africa — see
+ * ReviewLoop_License::price_label(). These must match the prices configured
+ * on the license server (RLS_Settings) — they're duplicated here only for
+ * display before a purchase; the server is always the source of truth for
+ * what actually gets charged.
  */
 if ( ! defined( 'REVIEWLOOP_STARTER_PRICE_ZAR' ) ) {
-	define( 'REVIEWLOOP_STARTER_PRICE_ZAR', 380 );
+	define( 'REVIEWLOOP_STARTER_PRICE_ZAR', 4500 );
 }
 if ( ! defined( 'REVIEWLOOP_PRO_PRICE_ZAR' ) ) {
-	define( 'REVIEWLOOP_PRO_PRICE_ZAR', 930 );
+	define( 'REVIEWLOOP_PRO_PRICE_ZAR', 9500 );
 }
 if ( ! defined( 'REVIEWLOOP_STARTER_PRICE_USD' ) ) {
-	define( 'REVIEWLOOP_STARTER_PRICE_USD', 20 );
+	define( 'REVIEWLOOP_STARTER_PRICE_USD', 240 );
 }
 if ( ! defined( 'REVIEWLOOP_PRO_PRICE_USD' ) ) {
-	define( 'REVIEWLOOP_PRO_PRICE_USD', 49 );
+	define( 'REVIEWLOOP_PRO_PRICE_USD', 500 );
 }
 
 /**
- * Where the "Upgrade" buttons on the plan cards send the owner to actually
- * subscribe — the checkout page on the license server site. Update this
- * once that page exists; until then it just points at the site root.
+ * Where the "Buy" buttons on the plan cards send the owner to actually
+ * purchase — the checkout page on the license server site (hosting
+ * [reviewloop_checkout plan="starter"] and [reviewloop_checkout
+ * plan="pro"]). Update this once that page exists; until then it just
+ * points at the site root.
  */
 if ( ! defined( 'REVIEWLOOP_PRICING_URL' ) ) {
 	define( 'REVIEWLOOP_PRICING_URL', 'https://ops.growthcraft.org.za/pricing/' );
+}
+
+/**
+ * Where the "Renew" link on the License panel sends an existing customer —
+ * the annual-renewal page on the license server site (hosting
+ * [reviewloop_renew]).
+ */
+if ( ! defined( 'REVIEWLOOP_RENEWAL_URL' ) ) {
+	define( 'REVIEWLOOP_RENEWAL_URL', 'https://ops.growthcraft.org.za/renew/' );
 }
 
 /**

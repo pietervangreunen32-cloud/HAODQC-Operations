@@ -34,7 +34,7 @@ class ReviewLoop_Settings {
 			'license_key'               => '',
 			'license_status'            => 'inactive',
 			'license_plan'              => '',
-			'license_expires'           => '',
+			'license_updates_expire'    => '',
 			'woocommerce_consent_attested' => false,
 			'onboarding_complete'       => false,
 			'delete_data_on_uninstall'  => false,

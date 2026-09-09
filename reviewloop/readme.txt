@@ -4,7 +4,7 @@ Tags: google reviews, review requests, customer feedback, reputation management,
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,17 +43,19 @@ You don't need a website that "does" anything special. Add customers one at a ti
 * AI-drafted replies (your choice of provider) with manual approval — up to 10 review replies total
 * Consent tracking and data-deletion tools
 
-**Starter (from $20/month)**
+**Starter ($240 once-off)**
 
 * Everything in Free, plus:
 * Unlimited AI-drafted (or self-written) review replies
 * Bulk CSV import (QuickBooks, Sage, or any CSV export)
 
-**Pro (from $49/month)**
+**Pro ($500 once-off)**
 
 * Everything in Starter, plus:
 * Automatic WooCommerce order → pipeline hook
 * Priority support
+
+Starter and Pro are one-time purchases, not subscriptions — pay once and keep every feature permanently. An optional low-cost annual renewal keeps future plugin updates and support coming; skipping it never disables anything you've already paid for, it just means you'll eventually be updating manually instead of with a single click.
 
 = Compliance, by design =
 
@@ -100,6 +102,14 @@ No — and it never will. Filtering who gets asked for a review based on how hap
 
 Free includes 10 review replies in total (not per month). Once you've used them, new reviews will simply wait for you to write a reply yourself, or you can upgrade to Starter or Pro for unlimited replies. Nothing else about the plugin stops working.
 
+= Is Starter/Pro a subscription? =
+
+No — it's a one-time purchase per site. There's an optional annual renewal, but it only covers future plugin updates and support; if you let it lapse, every feature you paid for keeps working exactly as it does today.
+
+= How do updates work on a licensed site? =
+
+Once activated with a valid license, ReviewLoop checks in with the license server and shows a normal "Update available" notice on your Plugins screen when a new version ships — click Update Now like any other plugin. Nothing is lost: your customers, settings, and history live in the database, which an update never touches.
+
 = What happens to a customer's data if I uninstall the plugin? =
 
 By default, nothing is deleted when you deactivate or delete the plugin — your data is safe if you're just troubleshooting. There's an explicit opt-in checkbox in Settings ("delete all data on uninstall") for when you actually want a clean removal.
@@ -121,6 +131,16 @@ Add the `[reviewloop_reviews]` shortcode to any page, post, or widget area. By d
 5. The `[reviewloop_reviews]` shortcode displaying reviews on the front end of a site.
 
 == Changelog ==
+
+= 1.8.0 =
+* Changed: Starter and Pro are now a one-time purchase per site instead of
+  a monthly subscription — every feature stays unlocked permanently once
+  bought. An optional low-cost annual renewal keeps future updates and
+  support coming; letting it lapse never disables anything already paid
+  for.
+* Added: licensed sites now get plugin updates the normal WordPress way —
+  an "Update available" notice and one-click Update Now on the Plugins
+  screen — instead of a manual reinstall.
 
 = 1.7.0 =
 * Added: a full Setup Guide screen (ReviewLoop → Setup Guide), linked

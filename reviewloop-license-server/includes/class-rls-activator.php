@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class RLS_Activator {
 
-	const DB_VERSION = '1.1.0';
+	const DB_VERSION = '1.2.0';
 
 	public static function activate() {
 		self::create_tables();
@@ -38,6 +38,7 @@ class RLS_Activator {
 		$charset_collate = $wpdb->get_charset_collate();
 		$licenses        = RLS_DB::licenses_table();
 		$itn_log         = RLS_DB::itn_log_table();
+		$releases        = RLS_DB::releases_table();
 
 		$sql = array();
 
@@ -57,6 +58,7 @@ class RLS_Activator {
 			created_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
 			last_payment_at DATETIME NULL,
+			updates_expire_at DATE NULL,
 			PRIMARY KEY  (id),
 			UNIQUE KEY m_payment_id (m_payment_id),
 			UNIQUE KEY license_key (license_key),
@@ -73,6 +75,18 @@ class RLS_Activator {
 			created_at DATETIME NOT NULL,
 			PRIMARY KEY  (id),
 			UNIQUE KEY pf_payment_id (pf_payment_id)
+		) {$charset_collate};";
+
+		$sql[] = "CREATE TABLE {$releases} (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			version VARCHAR(20) NOT NULL,
+			changelog LONGTEXT NULL,
+			file_path VARCHAR(255) NOT NULL,
+			min_wp VARCHAR(10) NULL,
+			tested_wp VARCHAR(10) NULL,
+			created_at DATETIME NOT NULL,
+			PRIMARY KEY  (id),
+			UNIQUE KEY version (version)
 		) {$charset_collate};";
 
 		foreach ( $sql as $statement ) {

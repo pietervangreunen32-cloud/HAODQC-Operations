@@ -1,7 +1,8 @@
 <?php
 /**
- * PayFast integration helpers: building a signed recurring-subscription
- * payment form, and verifying an incoming ITN (Instant Transaction
+ * PayFast integration helpers: building a signed once-off payment form (used
+ * both for the initial purchase and for an annual renewal — see
+ * RLS_Checkout), and verifying an incoming ITN (Instant Transaction
  * Notification) the way PayFast's own documentation requires — signature,
  * source host, and a server-to-server "validate" callback. All three
  * checks must pass before an ITN is trusted; this is real money, so no
@@ -37,28 +38,27 @@ class RLS_Payfast {
 	}
 
 	/**
-	 * Builds the full, signed field list for a recurring subscription
-	 * payment. Field order matters for the signature and must match the
-	 * order they're rendered as hidden form inputs.
+	 * Builds the full, signed field list for a plain once-off payment — used
+	 * for both the initial plugin purchase and an annual renewal payment.
+	 * No subscription/recurring fields at all: once-off means once-off, and
+	 * a renewal is just another once-off payment a year later, not an
+	 * auto-billing subscription. Field order matters for the signature and
+	 * must match the order they're rendered as hidden form inputs.
 	 */
-	public static function build_subscription_fields( $args ) {
+	public static function build_once_off_fields( $args ) {
 		$settings = RLS_Settings::get_all();
 
 		$fields = array(
-			'merchant_id'      => $settings['merchant_id'],
-			'merchant_key'     => $settings['merchant_key'],
-			'return_url'       => $args['return_url'],
-			'cancel_url'       => $args['cancel_url'],
-			'notify_url'       => $args['notify_url'],
-			'name_first'       => $args['name_first'],
-			'email_address'    => $args['email'],
-			'm_payment_id'     => $args['m_payment_id'],
-			'amount'           => $args['amount'],
-			'item_name'        => $args['item_name'],
-			'subscription_type' => '1',
-			'recurring_amount' => $args['amount'],
-			'frequency'        => '3', // Monthly.
-			'cycles'           => '0', // Until cancelled.
+			'merchant_id'   => $settings['merchant_id'],
+			'merchant_key'  => $settings['merchant_key'],
+			'return_url'    => $args['return_url'],
+			'cancel_url'    => $args['cancel_url'],
+			'notify_url'    => $args['notify_url'],
+			'name_first'    => $args['name_first'],
+			'email_address' => $args['email'],
+			'm_payment_id'  => $args['m_payment_id'],
+			'amount'        => $args['amount'],
+			'item_name'     => $args['item_name'],
 		);
 
 		$fields['signature'] = self::generate_signature( $fields, $settings['passphrase'] );

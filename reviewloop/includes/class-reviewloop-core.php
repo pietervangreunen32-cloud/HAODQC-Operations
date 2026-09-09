@@ -33,6 +33,9 @@ class ReviewLoop_Core {
 		$google_api = new ReviewLoop_Google_Api();
 		$google_api->init();
 
+		$updater = new ReviewLoop_Updater();
+		$updater->init();
+
 		$ai_reply = new ReviewLoop_Ai_Reply();
 		$ai_reply->init();
 

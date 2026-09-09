@@ -16,17 +16,24 @@ class RLS_Settings {
 
 	public static function defaults() {
 		return array(
-			'merchant_id'       => '',
-			'merchant_key'      => '',
-			'passphrase'        => '',
-			'sandbox_mode'      => true,
-			'currency'          => 'ZAR',
-			'starter_price'     => '380.00',
-			'starter_price_usd' => '20',
-			'starter_item_name' => 'ReviewLoop Starter (monthly)',
-			'pro_price'         => '930.00',
-			'pro_price_usd'     => '49',
-			'pro_item_name'     => 'ReviewLoop Pro (monthly)',
+			'merchant_id'               => '',
+			'merchant_key'              => '',
+			'passphrase'                => '',
+			'sandbox_mode'              => true,
+			'currency'                  => 'ZAR',
+			// Once-off purchase price — covers the plugin, permanently.
+			'starter_price'             => '4500.00',
+			'starter_price_usd'         => '240',
+			'starter_item_name'         => 'ReviewLoop Starter (once-off)',
+			'pro_price'                 => '9500.00',
+			'pro_price_usd'             => '500',
+			'pro_item_name'             => 'ReviewLoop Pro (once-off)',
+			// Annual renewal — optional; only gates future plugin updates,
+			// never the features the once-off purchase already unlocked.
+			'starter_renewal_price'     => '900.00',
+			'starter_renewal_price_usd' => '48',
+			'pro_renewal_price'         => '1900.00',
+			'pro_renewal_price_usd'     => '100',
 		);
 	}
 
@@ -34,10 +41,22 @@ class RLS_Settings {
 		$settings = self::get_all();
 
 		if ( 'pro' === $plan ) {
-			return array( 'price' => $settings['pro_price'], 'price_usd' => $settings['pro_price_usd'], 'item_name' => $settings['pro_item_name'] );
+			return array(
+				'price'         => $settings['pro_price'],
+				'price_usd'     => $settings['pro_price_usd'],
+				'item_name'     => $settings['pro_item_name'],
+				'renewal_price' => $settings['pro_renewal_price'],
+				'renewal_price_usd' => $settings['pro_renewal_price_usd'],
+			);
 		}
 
-		return array( 'price' => $settings['starter_price'], 'price_usd' => $settings['starter_price_usd'], 'item_name' => $settings['starter_item_name'] );
+		return array(
+			'price'         => $settings['starter_price'],
+			'price_usd'     => $settings['starter_price_usd'],
+			'item_name'     => $settings['starter_item_name'],
+			'renewal_price' => $settings['starter_renewal_price'],
+			'renewal_price_usd' => $settings['starter_renewal_price_usd'],
+		);
 	}
 
 	/**
@@ -78,19 +97,34 @@ class RLS_Settings {
 	}
 
 	/**
-	 * "R380/month" for South Africa (or when the country can't be
-	 * determined), "≈ $20/month" for a detected non-SA visitor. The "≈" is
-	 * intentional — it's a converted label, not the amount PayFast will
+	 * "R4,500 once-off" for South Africa (or when the country can't be
+	 * determined), "≈ $240 once-off" for a detected non-SA visitor. The "≈"
+	 * is intentional — it's a converted label, not the amount PayFast will
 	 * actually charge.
 	 */
 	public static function price_label( $plan ) {
 		$config = self::plan_config( $plan );
 
 		if ( self::is_south_african_visitor() ) {
-			return sprintf( 'R%s/month', number_format( (float) $config['price'], 0 ) );
+			return sprintf( 'R%s once-off', number_format( (float) $config['price'], 0 ) );
 		}
 
-		return sprintf( '≈ $%s/month', number_format( (float) $config['price_usd'], 0 ) );
+		return sprintf( '≈ $%s once-off', number_format( (float) $config['price_usd'], 0 ) );
+	}
+
+	/**
+	 * "R900/year" (or the USD-equivalent label) — the optional annual
+	 * renewal that keeps a license eligible for future plugin updates. The
+	 * once-off purchase itself never expires; only update eligibility does.
+	 */
+	public static function renewal_price_label( $plan ) {
+		$config = self::plan_config( $plan );
+
+		if ( self::is_south_african_visitor() ) {
+			return sprintf( 'R%s/year', number_format( (float) $config['renewal_price'], 0 ) );
+		}
+
+		return sprintf( '≈ $%s/year', number_format( (float) $config['renewal_price_usd'], 0 ) );
 	}
 
 	public static function update( $partial ) {
@@ -113,6 +147,10 @@ class RLS_Settings {
 		$current['pro_price']         = isset( $post['pro_price'] ) ? number_format( (float) $post['pro_price'], 2, '.', '' ) : $current['pro_price'];
 		$current['pro_price_usd']     = isset( $post['pro_price_usd'] ) ? number_format( (float) $post['pro_price_usd'], 0, '.', '' ) : $current['pro_price_usd'];
 		$current['pro_item_name']     = isset( $post['pro_item_name'] ) ? sanitize_text_field( wp_unslash( $post['pro_item_name'] ) ) : $current['pro_item_name'];
+		$current['starter_renewal_price']     = isset( $post['starter_renewal_price'] ) ? number_format( (float) $post['starter_renewal_price'], 2, '.', '' ) : $current['starter_renewal_price'];
+		$current['starter_renewal_price_usd'] = isset( $post['starter_renewal_price_usd'] ) ? number_format( (float) $post['starter_renewal_price_usd'], 0, '.', '' ) : $current['starter_renewal_price_usd'];
+		$current['pro_renewal_price']         = isset( $post['pro_renewal_price'] ) ? number_format( (float) $post['pro_renewal_price'], 2, '.', '' ) : $current['pro_renewal_price'];
+		$current['pro_renewal_price_usd']     = isset( $post['pro_renewal_price_usd'] ) ? number_format( (float) $post['pro_renewal_price_usd'], 0, '.', '' ) : $current['pro_renewal_price_usd'];
 
 		update_option( 'rls_settings', $current );
 
