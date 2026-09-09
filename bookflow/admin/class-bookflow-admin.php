@@ -1,0 +1,328 @@
+<?php
+/**
+ * Everything shown inside WP Admin: the BookFlow menu, the appointments
+ * screen (list + manual entry), and the settings screen (hours/slots/
+ * blackouts). The catalog screen is WordPress's own post-type list/editor
+ * for "bookflow_item", registered in BookFlow_Catalog.
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+class BookFlow_Admin {
+
+	public function init_hooks() {
+		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_filter( 'parent_file', array( $this, 'fix_catalog_menu_highlight' ) );
+		add_filter( 'submenu_file', array( $this, 'fix_catalog_submenu_highlight' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
+		add_action( 'admin_post_bookflow_save_settings', array( $this, 'handle_save_settings' ) );
+		add_action( 'admin_post_bookflow_manual_booking', array( $this, 'handle_manual_booking' ) );
+		add_action( 'admin_post_bookflow_add_blackout', array( $this, 'handle_add_blackout' ) );
+		add_action( 'admin_post_bookflow_delete_blackout', array( $this, 'handle_delete_blackout' ) );
+		add_action( 'admin_post_bookflow_cancel_appointment', array( $this, 'handle_cancel_appointment' ) );
+		add_action( 'admin_post_bookflow_delete_waitlist_entry', array( $this, 'handle_delete_waitlist_entry' ) );
+		add_action( 'admin_post_bookflow_activate_license', array( $this, 'handle_activate_license' ) );
+		add_action( 'admin_post_bookflow_deactivate_license', array( $this, 'handle_deactivate_license' ) );
+	}
+
+	public function register_menu() {
+		add_menu_page(
+			__( 'BookFlow', 'bookflow' ),
+			__( 'BookFlow', 'bookflow' ),
+			'manage_options',
+			'bookflow',
+			array( $this, 'render_dashboard_page' ),
+			self::get_menu_icon(),
+			26
+		);
+
+		// Order here is deliberate and matches a shop's actual workflow:
+		// overview, then the two day-to-day operational screens, then the
+		// catalog they're booked against, then the secondary operational
+		// list (waitlist), then tools, then configuration/account screens
+		// last — the last two (Settings, License) are the ones a shop
+		// owner sets up once and rarely revisits, so WordPress convention
+		// (and this menu) puts them at the bottom.
+		add_submenu_page( 'bookflow', __( 'Dashboard', 'bookflow' ), __( 'Dashboard', 'bookflow' ), 'manage_options', 'bookflow', array( $this, 'render_dashboard_page' ) );
+		add_submenu_page( 'bookflow', __( 'Appointments', 'bookflow' ), __( 'Appointments', 'bookflow' ), 'manage_options', 'bookflow-appointments', array( $this, 'render_appointments_page' ) );
+		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
+		add_submenu_page( 'bookflow', __( 'Catalog', 'bookflow' ), __( 'Catalog', 'bookflow' ), 'manage_options', 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE );
+		add_submenu_page( 'bookflow', __( 'Waitlist', 'bookflow' ), __( 'Waitlist', 'bookflow' ), 'manage_options', 'bookflow-waitlist', array( $this, 'render_waitlist_page' ) );
+		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
+		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
+		add_submenu_page( 'bookflow', __( 'License', 'bookflow' ), __( 'License', 'bookflow' ), 'manage_options', 'bookflow-license', array( $this, 'render_license_page' ) );
+	}
+
+	/**
+	 * The catalog's post-new.php?post_type=bookflow_item screen ("Add New
+	 * Catalog Item") doesn't match any of BookFlow's own submenu URLs, so
+	 * without this WordPress leaves the whole admin menu unhighlighted
+	 * while you're on it — the standard fix for a post type whose
+	 * register_post_type() call intentionally sets show_in_menu to false
+	 * (done here so BookFlow_Admin::register_menu() controls exactly
+	 * where "Catalog" sits in the menu, rather than leaving it to
+	 * WordPress's own post-type menu insertion order).
+	 */
+	public function fix_catalog_menu_highlight( $parent_file ) {
+		global $current_screen;
+		if ( $current_screen && BookFlow_Catalog::POST_TYPE === $current_screen->post_type ) {
+			return 'bookflow';
+		}
+		return $parent_file;
+	}
+
+	public function fix_catalog_submenu_highlight( $submenu_file ) {
+		global $current_screen;
+		if ( $current_screen && BookFlow_Catalog::POST_TYPE === $current_screen->post_type ) {
+			return 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE;
+		}
+		return $submenu_file;
+	}
+
+	/**
+	 * WordPress recolors an SVG data-URI menu icon to match the active
+	 * admin color scheme automatically (it uses the shape as a mask), so
+	 * assets/icon-menu.svg is a plain black-on-transparent line icon —
+	 * see that file's own comment. Falls back to a stock Dashicon if the
+	 * file is ever missing, so a stray deploy issue never breaks the menu.
+	 */
+	private static function get_menu_icon() {
+		$path = BOOKFLOW_PLUGIN_DIR . 'assets/icon-menu.svg';
+		if ( ! file_exists( $path ) ) {
+			return 'dashicons-calendar-alt';
+		}
+		return 'data:image/svg+xml;base64,' . base64_encode( file_get_contents( $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	}
+
+	public function maybe_enqueue_assets( $hook ) {
+		if ( strpos( $hook, 'bookflow' ) === false ) {
+			return;
+		}
+		wp_enqueue_style( 'bookflow-admin', BOOKFLOW_PLUGIN_URL . 'admin/css/admin.css', array(), BOOKFLOW_VERSION );
+	}
+
+	// ---------------------------------------------------------------
+	// Screens
+	// ---------------------------------------------------------------
+
+	public function render_dashboard_page() {
+		$this->guard_capability();
+		$upcoming            = BookFlow_DB_Appointments::get_range( current_time( 'mysql' ), gmdate( 'Y-m-d H:i:s', strtotime( '+7 days' ) ), 'confirmed' );
+		$reviewloop_active   = BookFlow_ReviewLoop_Bridge::is_reviewloop_active();
+		$reviewloop_licensed = BookFlow_License::tier_includes( 'reviewloop' );
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/dashboard.php';
+	}
+
+	public function render_appointments_page() {
+		$this->guard_capability();
+		$from = isset( $_GET['from'] ) ? sanitize_text_field( wp_unslash( $_GET['from'] ) ) : gmdate( 'Y-m-d', strtotime( '-7 days' ) );
+		$to   = isset( $_GET['to'] ) ? sanitize_text_field( wp_unslash( $_GET['to'] ) ) : gmdate( 'Y-m-d', strtotime( '+30 days' ) );
+
+		$appointments = BookFlow_DB_Appointments::get_range( $from . ' 00:00:00', $to . ' 23:59:59' );
+
+		foreach ( $appointments as $appointment ) {
+			$appointment->companions   = BookFlow_DB_Companions::get_for_appointment( $appointment->id );
+			$appointment->reservations = BookFlow_DB_Reservations::get_for_appointment( $appointment->id );
+		}
+
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/appointments.php';
+	}
+
+	public function render_add_booking_page() {
+		$this->guard_capability();
+		$items = BookFlow_Catalog::get_bookable_items();
+		$error = get_transient( 'bookflow_manual_booking_error_' . get_current_user_id() );
+		delete_transient( 'bookflow_manual_booking_error_' . get_current_user_id() );
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/add-booking.php';
+	}
+
+	public function render_waitlist_page() {
+		$this->guard_capability();
+		$entries = BookFlow_DB_Waitlist::get_upcoming();
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/waitlist.php';
+	}
+
+	public function render_welcome_screen_page() {
+		$this->guard_capability();
+		// Pretty permalinks give a clean /bookflow-welcome-screen/ URL;
+		// sites still on the default "plain" structure need the query-var
+		// form instead, since our rewrite rule only applies when pretty
+		// permalinks are on.
+		$welcome_screen_url = get_option( 'permalink_structure' )
+			? home_url( '/bookflow-welcome-screen/' )
+			: home_url( '/?' . BookFlow_Welcome_Screen::QUERY_VAR . '=1' );
+		$preview_data = BookFlow_Welcome_Screen::get_display_data();
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/welcome-screen.php';
+	}
+
+	public function render_license_page() {
+		$this->guard_capability();
+
+		$license_data  = BookFlow_License::get_license_data();
+		$current_tier  = BookFlow_License::get_current_tier();
+		$tier_config   = BookFlow_Pricing::get_tier( $current_tier );
+		$purchasable   = BookFlow_Pricing::get_purchasable_tiers();
+		$is_trial      = BookFlow_License::is_trial_active();
+		$trial_days    = BookFlow_License::trial_days_remaining();
+		$bookings_used = BookFlow_DB_Appointments::count_for_month( (int) current_time( 'Y' ), (int) current_time( 'n' ) );
+		$license_error = get_transient( 'bookflow_license_error_' . get_current_user_id() );
+		delete_transient( 'bookflow_license_error_' . get_current_user_id() );
+
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/license.php';
+	}
+
+	public function render_settings_page() {
+		$this->guard_capability();
+		$settings           = BookFlow_Availability::get_settings();
+		$blackouts          = BookFlow_DB_Blackouts::get_range( gmdate( 'Y-m-d 00:00:00' ), gmdate( 'Y-m-d 00:00:00', strtotime( '+1 year' ) ) );
+		$woocommerce_active = BookFlow_Deposits::is_woocommerce_active();
+		$can_use_deposits   = BookFlow_License::tier_includes( 'deposits' );
+		$can_use_wc_sync    = BookFlow_License::tier_includes( 'woocommerce_sync' );
+		$last_synced        = get_option( 'bookflow_wc_catalog_last_synced' );
+		$sync_result        = get_transient( 'bookflow_sync_result_' . get_current_user_id() );
+		delete_transient( 'bookflow_sync_result_' . get_current_user_id() );
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/settings.php';
+	}
+
+	// ---------------------------------------------------------------
+	// Form handlers
+	// ---------------------------------------------------------------
+
+	public function handle_save_settings() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_save_settings' );
+
+		$settings = BookFlow_Availability::get_settings();
+
+		$settings['slot_length_minutes']     = max( 5, (int) ( $_POST['slot_length_minutes'] ?? 30 ) );
+		$settings['concurrent_fittings']     = max( 1, (int) ( $_POST['concurrent_fittings'] ?? 1 ) );
+		$settings['booking_lead_time_hours'] = max( 0, (int) ( $_POST['booking_lead_time_hours'] ?? 2 ) );
+		$settings['booking_horizon_days']    = max( 1, (int) ( $_POST['booking_horizon_days'] ?? 90 ) );
+
+		$settings['catalog_source']  = ( isset( $_POST['catalog_source'] ) && 'woocommerce' === $_POST['catalog_source'] ) ? 'woocommerce' : 'manual';
+		$settings['deposit_enabled'] = ! empty( $_POST['deposit_enabled'] );
+		$settings['deposit_amount']  = max( 0, (float) ( $_POST['deposit_amount'] ?? 0 ) );
+
+		$days = array( 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun' );
+		foreach ( $days as $day ) {
+			$settings['weekly_hours'][ $day ] = array(
+				'open'    => isset( $_POST[ "open_{$day}" ] ) ? sanitize_text_field( wp_unslash( $_POST[ "open_{$day}" ] ) ) : '09:00',
+				'close'   => isset( $_POST[ "close_{$day}" ] ) ? sanitize_text_field( wp_unslash( $_POST[ "close_{$day}" ] ) ) : '17:00',
+				'enabled' => ! empty( $_POST[ "enabled_{$day}" ] ),
+			);
+		}
+
+		update_option( 'bookflow_settings', $settings );
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'bookflow-settings', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	public function handle_manual_booking() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_manual_booking' );
+
+		$request = array(
+			'customer_name'  => sanitize_text_field( wp_unslash( $_POST['customer_name'] ?? '' ) ),
+			'customer_email' => sanitize_email( wp_unslash( $_POST['customer_email'] ?? '' ) ),
+			'customer_phone' => sanitize_text_field( wp_unslash( $_POST['customer_phone'] ?? '' ) ),
+			'event_date'     => ! empty( $_POST['event_date'] ) ? sanitize_text_field( wp_unslash( $_POST['event_date'] ) ) : null,
+			'date'           => sanitize_text_field( wp_unslash( $_POST['date'] ?? '' ) ),
+			'time'           => sanitize_text_field( wp_unslash( $_POST['time'] ?? '' ) ),
+			'item_ids'       => isset( $_POST['item_ids'] ) ? array_map( 'intval', (array) $_POST['item_ids'] ) : array(),
+			'notes'          => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+			'source'         => 'manual',
+		);
+
+		$result = BookFlow_Booking_Service::create_booking( $request );
+
+		if ( is_wp_error( $result ) ) {
+			set_transient( 'bookflow_manual_booking_error_' . get_current_user_id(), $result->get_error_message(), 60 );
+			wp_safe_redirect( admin_url( 'admin.php?page=bookflow-add-booking' ) );
+			exit;
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'bookflow-appointments', 'created' => '1' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	public function handle_add_blackout() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_add_blackout' );
+
+		$date  = sanitize_text_field( wp_unslash( $_POST['blackout_date'] ?? '' ) );
+		$start = sanitize_text_field( wp_unslash( $_POST['blackout_start'] ?? '00:00' ) );
+		$end   = sanitize_text_field( wp_unslash( $_POST['blackout_end'] ?? '23:59' ) );
+		$reason = sanitize_text_field( wp_unslash( $_POST['blackout_reason'] ?? '' ) );
+
+		if ( $date ) {
+			BookFlow_DB_Blackouts::insert( "{$date} {$start}:00", "{$date} {$end}:00", $reason );
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-settings' ) );
+		exit;
+	}
+
+	public function handle_delete_blackout() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_delete_blackout' );
+
+		BookFlow_DB_Blackouts::delete( (int) ( $_POST['blackout_id'] ?? 0 ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-settings' ) );
+		exit;
+	}
+
+	public function handle_cancel_appointment() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_cancel_appointment' );
+
+		BookFlow_Booking_Service::cancel_booking( (int) ( $_POST['appointment_id'] ?? 0 ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-appointments&cancelled=1' ) );
+		exit;
+	}
+
+	public function handle_delete_waitlist_entry() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_delete_waitlist_entry' );
+
+		BookFlow_DB_Waitlist::delete( (int) ( $_POST['waitlist_id'] ?? 0 ) );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-waitlist' ) );
+		exit;
+	}
+
+	public function handle_activate_license() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_activate_license' );
+
+		$key    = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
+		$result = BookFlow_License::activate_license( $key );
+
+		if ( is_wp_error( $result ) ) {
+			set_transient( 'bookflow_license_error_' . get_current_user_id(), $result->get_error_message(), 60 );
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-license' ) );
+		exit;
+	}
+
+	public function handle_deactivate_license() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_deactivate_license' );
+
+		BookFlow_License::deactivate_license();
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-license' ) );
+		exit;
+	}
+
+	private function guard_capability() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'bookflow' ) );
+		}
+	}
+}

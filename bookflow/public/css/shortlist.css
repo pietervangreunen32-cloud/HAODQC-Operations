@@ -1,0 +1,119 @@
+/* BookFlow shareable shortlist styles. Brand color: #3D4EDB. */
+
+.bookflow-shortlist-app {
+	--bookflow-primary: #3D4EDB;
+	--bookflow-primary-dark: #2E3BB0;
+	--bookflow-text: #1F2430;
+	--bookflow-muted: #6B7280;
+	--bookflow-border: #E2E4EC;
+	max-width: 900px;
+	margin: 0 auto;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	color: var(--bookflow-text);
+}
+
+.bookflow-sl-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 1rem;
+	margin: 1rem 0 1.5rem;
+}
+
+.bookflow-sl-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0.5rem;
+	background: #fff;
+	border: 1px solid var(--bookflow-border);
+	border-radius: 8px;
+	text-align: center;
+}
+
+.bookflow-sl-card img {
+	width: 100%;
+	aspect-ratio: 3 / 4;
+	object-fit: cover;
+	border-radius: 4px;
+	margin-bottom: 0.5rem;
+}
+
+.bookflow-sl-name {
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.bookflow-sl-size {
+	font-size: 0.75rem;
+	color: var(--bookflow-muted);
+}
+
+.bookflow-sl-heart {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: none;
+	background: rgba(255, 255, 255, 0.9);
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--bookflow-muted);
+}
+
+.bookflow-sl-heart.is-active {
+	color: #E0245E;
+}
+
+.bookflow-sl-sharebar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.bookflow-sl-link {
+	padding: 0.5rem;
+	border: 1px solid var(--bookflow-border);
+	border-radius: 6px;
+	min-width: 260px;
+}
+
+.bookflow-sl-status {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.bookflow-sl-error {
+	color: #B3261E;
+}
+
+.bookflow-btn {
+	display: inline-block;
+	padding: 0.65rem 1.4rem;
+	border-radius: 6px;
+	border: 1px solid var(--bookflow-border);
+	background: #fff;
+	color: var(--bookflow-text);
+	font-size: 0.95rem;
+	cursor: pointer;
+}
+
+.bookflow-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.bookflow-btn-primary {
+	background: var(--bookflow-primary);
+	border-color: var(--bookflow-primary);
+	color: #fff;
+}
+
+.bookflow-btn-primary:hover:not(:disabled) {
+	background: var(--bookflow-primary-dark);
+}
