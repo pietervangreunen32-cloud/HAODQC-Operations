@@ -17,6 +17,7 @@ class BookFlow_Activator {
 		self::create_tables();
 		self::seed_default_settings();
 		update_option( 'bookflow_db_version', BOOKFLOW_DB_VERSION );
+		set_transient( 'bookflow_activation_redirect', 1, 30 );
 
 		// Register the welcome-screen rewrite rule directly, rather than
 		// relying on its own 'init' hook — 'init' has already fired for

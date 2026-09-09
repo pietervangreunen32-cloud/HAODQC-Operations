@@ -163,3 +163,78 @@
 .bookflow-status-off {
 	background: #B0B4C1;
 }
+
+/* Setup Guide screen */
+.bookflow-guide {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 900px;
+}
+
+.bookflow-guide-step {
+	display: flex;
+	gap: 16px;
+	background: #fff;
+	border: 1px solid #E2E4EC;
+	border-radius: 8px;
+	padding: 22px 24px;
+}
+
+.bookflow-guide-step .bookflow-step-number {
+	flex: 0 0 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: #3D4EDB;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 13px;
+}
+
+.bookflow-guide-body { flex: 1; min-width: 0; }
+
+.bookflow-guide-body h2 { margin: 0 0 10px; font-size: 17px; }
+
+.bookflow-guide-body h4 { font-size: 13px; margin: 14px 0 4px; color: #6B7280; }
+
+.bookflow-guide-body ol,
+.bookflow-guide-body ul { padding-left: 20px; }
+
+.bookflow-guide-body li { margin-bottom: 8px; }
+
+.bookflow-guide-tag {
+	display: inline-block;
+	font-size: 10.5px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: rgba(61, 78, 219, .1);
+	color: #2E3BB0;
+	margin-left: 6px;
+	vertical-align: middle;
+}
+
+.bookflow-guide-code {
+	background: #F5F6FA;
+	border: 1px solid #E2E4EC;
+	border-radius: 6px;
+	padding: 10px 14px;
+	font-size: 13px;
+	overflow-x: auto;
+	margin: 8px 0 14px;
+}
+
+.bookflow-guide-callout {
+	background: #FFF8E6;
+	border: 1px dashed #E8C468;
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin-top: 14px;
+	font-size: 13px;
+	color: #7A5B00;
+}

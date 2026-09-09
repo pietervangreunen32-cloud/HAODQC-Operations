@@ -17,6 +17,8 @@ class BookFlow_Admin {
 		add_filter( 'parent_file', array( $this, 'fix_catalog_menu_highlight' ) );
 		add_filter( 'submenu_file', array( $this, 'fix_catalog_submenu_highlight' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
+		add_action( 'admin_init', array( $this, 'maybe_redirect_to_setup_guide' ) );
+		add_filter( 'plugin_action_links_' . BOOKFLOW_PLUGIN_BASENAME, array( $this, 'add_setup_guide_action_link' ) );
 		add_action( 'admin_post_bookflow_save_settings', array( $this, 'handle_save_settings' ) );
 		add_action( 'admin_post_bookflow_manual_booking', array( $this, 'handle_manual_booking' ) );
 		add_action( 'admin_post_bookflow_add_blackout', array( $this, 'handle_add_blackout' ) );
@@ -46,6 +48,7 @@ class BookFlow_Admin {
 		// owner sets up once and rarely revisits, so WordPress convention
 		// (and this menu) puts them at the bottom.
 		add_submenu_page( 'bookflow', __( 'Dashboard', 'bookflow' ), __( 'Dashboard', 'bookflow' ), 'manage_options', 'bookflow', array( $this, 'render_dashboard_page' ) );
+		add_submenu_page( 'bookflow', __( 'Setup Guide', 'bookflow' ), __( 'Setup Guide', 'bookflow' ), 'manage_options', 'bookflow-setup-guide', array( $this, 'render_setup_guide_page' ) );
 		add_submenu_page( 'bookflow', __( 'Appointments', 'bookflow' ), __( 'Appointments', 'bookflow' ), 'manage_options', 'bookflow-appointments', array( $this, 'render_appointments_page' ) );
 		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
 		add_submenu_page( 'bookflow', __( 'Catalog', 'bookflow' ), __( 'Catalog', 'bookflow' ), 'manage_options', 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE );
@@ -103,6 +106,38 @@ class BookFlow_Admin {
 		wp_enqueue_style( 'bookflow-admin', BOOKFLOW_PLUGIN_URL . 'admin/css/admin.css', array(), BOOKFLOW_VERSION );
 	}
 
+	/**
+	 * Sends a shop straight to the Setup Guide the first time they activate
+	 * BookFlow, the same way a real onboarding wizard would, without
+	 * needing a dedicated welcome-screen template (BookFlow already uses
+	 * "Welcome Screen" for the in-store TV display, so reusing that name
+	 * here would be confusing).
+	 */
+	public function maybe_redirect_to_setup_guide() {
+		if ( ! get_transient( 'bookflow_activation_redirect' ) ) {
+			return;
+		}
+		delete_transient( 'bookflow_activation_redirect' );
+
+		if ( wp_doing_ajax() || isset( $_GET['activate-multi'] ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-setup-guide' ) );
+		exit;
+	}
+
+	/**
+	 * Puts "Setup Guide" right next to "Deactivate" on the Plugins list —
+	 * the exact screen a shop owner is already looking at the moment they
+	 * finish activating, so the instructions never depend on them opening
+	 * readme.txt or keeping track of a separate file.
+	 */
+	public function add_setup_guide_action_link( $links ) {
+		$links['bookflow_setup_guide'] = '<a href="' . esc_url( admin_url( 'admin.php?page=bookflow-setup-guide' ) ) . '">' . esc_html__( 'Setup Guide', 'bookflow' ) . '</a>';
+		return $links;
+	}
+
 	// ---------------------------------------------------------------
 	// Screens
 	// ---------------------------------------------------------------
@@ -155,6 +190,14 @@ class BookFlow_Admin {
 			: home_url( '/?' . BookFlow_Welcome_Screen::QUERY_VAR . '=1' );
 		$preview_data = BookFlow_Welcome_Screen::get_display_data();
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/welcome-screen.php';
+	}
+
+	public function render_setup_guide_page() {
+		$this->guard_capability();
+		$welcome_screen_url = get_option( 'permalink_structure' )
+			? home_url( '/bookflow-welcome-screen/' )
+			: home_url( '/?' . BookFlow_Welcome_Screen::QUERY_VAR . '=1' );
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/setup-guide.php';
 	}
 
 	public function render_license_page() {
