@@ -1,5 +1,88 @@
 # BookFlow Changelog
 
+## 1.6.0 — Admin menu order, UI/UX audit, and real bug fixes
+
+Everything here came out of an actual UI/UX and code audit, verified live
+against a real WordPress + WooCommerce install (including scripted browser
+interaction, not just static review) rather than assumed correct.
+
+**Admin menu**
+
+- Fixed Catalog's position in the BookFlow admin menu. It was being
+  auto-inserted by WordPress's own post-type registration at a position
+  determined by internal hook timing, not by the deliberate order the rest
+  of the menu was written in — landing it second, right after Dashboard,
+  regardless of what the code around it said. Catalog is now registered
+  explicitly in its intended spot (Dashboard → Appointments → Add Booking →
+  Catalog → Waitlist → Welcome Screen → Settings → License), and a
+  `parent_file`/`submenu_file` fix keeps "Add New Catalog Item" correctly
+  highlighting the menu too (a separate, narrower WordPress quirk the
+  reordering surfaced).
+
+**Booking wizard — real bugs, not polish**
+
+- Fixed an infinite-fetch bug: a shop with zero catalog items, or a
+  customer picking a day the shop is closed, previously left the wizard
+  re-fetching the same empty result forever behind a permanent "…" — now
+  each shows a clear, specific message ("This shop hasn't added any items
+  yet," "We're closed that day") and stops.
+- Fixed silent data loss: a companion (bridesmaid/groomsman) with items
+  selected but no name typed in was dropped entirely on submit, with no
+  warning — their picks just vanished. Submitting now blocks with a clear
+  message instead.
+- Added the booking horizon as a `max` date on the date picker, so a
+  customer can no longer pick a date further out than the shop actually
+  accepts bookings for (previously silently showed as merely "no times
+  available").
+- Fixed several form fields (all four Details-step fields, the companion
+  name field, all three waitlist fields) that had a visible label with no
+  actual `for`/`id` link, or no label at all — invisible to screen readers
+  even though sighted users saw a label. Added a `Shareable link` label to
+  the shortlist page's link field for the same reason.
+- Added focus management: advancing or going back a step now moves
+  keyboard/screen-reader focus to the new step's heading, so the change is
+  announced — but only on an actual step change, never on an in-step
+  re-render (picking an item, opening the waitlist form), which would have
+  made typing and clicking feel like focus kept getting yanked away.
+
+**Shortlist**
+
+- Fixed a wrong message: an empty catalog on the shortlist page was
+  showing "You haven't saved any favorites yet" — copy actually meant for
+  a different, never-built state — rather than a message about the
+  catalog itself being empty.
+- Fixed a missing `.catch()`: a failed `/items` request left the page
+  permanently blank with no error shown. Same fix applied to the shared
+  (read-only) view, which also now says something when every item on a
+  shared list has since been removed from the catalog, instead of
+  rendering an unexplained empty grid.
+- Added a brief "Loading…" state to both views instead of a blank gap
+  while the first request is in flight.
+
+**WooCommerce catalog sync**
+
+- Fixed a real gap: the Size field was disabled in BookFlow → Catalog for
+  every WooCommerce-synced item, with no other way to set it — since
+  WooCommerce itself has no size field for a Simple product, this meant a
+  shop syncing their catalog could never record a size for anything, ever.
+  Size now stays editable on synced items (Price still doesn't, since that
+  one genuinely comes from WooCommerce); set once, it survives every
+  future sync untouched.
+
+**Welcome screen**
+
+- The personalized "Welcome [Name]" screen previously showed as soon as an
+  appointment was the next one up, however far away — on a quiet day, that
+  could mean greeting a bride by name a full day ahead of her actual
+  fitting. It now only personalizes starting an hour before an appointment
+  (configurable via the `bookflow_welcome_screen_lead_minutes` filter),
+  falling back to the idle shop-branding screen otherwise — closer to the
+  "greets them as they arrive" concept this feature was built around.
+- Added a staggered fade-in on first paint and a brief crossfade between
+  appointments, instead of an instant swap — and made sure a poll with no
+  actual change never re-triggers the animation, so the screen doesn't
+  visibly flicker every 30 seconds.
+
 ## 1.5.1 — Brand icon
 
 - Added the actual brand icon (a calendar shape with a flowing checkmark,

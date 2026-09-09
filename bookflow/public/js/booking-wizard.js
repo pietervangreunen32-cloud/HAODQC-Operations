@@ -21,15 +21,23 @@
 	var state = {
 		step: 1,
 		items: [],
+		itemsLoaded: false,
 		selectedItemIds: [],
 		companions: [], // [{ name: '', itemIds: [] }]
 		date: '',
 		time: '',
 		slots: [],
+		slotsLoaded: false,
 		waitlistOpen: false,
 		waitlistJoined: false,
 		depositUrl: '',
 	};
+
+	var uidCounter = 0;
+	function uid( prefix ) {
+		uidCounter += 1;
+		return prefix + '-' + uidCounter;
+	}
 
 	function apiGet( path ) {
 		return fetch( cfg.restUrl + path, {
@@ -82,6 +90,8 @@
 		return node;
 	}
 
+	var focusHeadingOnNextRender = true; // Also true for the very first paint.
+
 	function render() {
 		root.innerHTML = '';
 		root.appendChild( renderStepper() );
@@ -95,6 +105,33 @@
 		} else if ( 4 === state.step ) {
 			root.appendChild( renderConfirmedStep() );
 		}
+
+		// Only move focus when the step itself changed — re-renders from
+		// picking an item, opening the waitlist form, etc. stay on the
+		// same step and must never steal focus back mid-interaction.
+		if ( focusHeadingOnNextRender ) {
+			focusHeadingOnNextRender = false;
+			var heading = document.getElementById( 'bookflow-step-heading' );
+			if ( heading ) {
+				heading.focus();
+			}
+		}
+	}
+
+	/**
+	 * The only way state.step should change — keeps the "move focus to
+	 * the new step's heading" behavior (useful for screen-reader and
+	 * keyboard users, since the whole panel is replaced on every step
+	 * change) from having to be remembered at every call site.
+	 */
+	function goToStep( stepNumber ) {
+		state.step = stepNumber;
+		focusHeadingOnNextRender = true;
+		render();
+	}
+
+	function stepHeading( text ) {
+		return el( 'h3', { text: text, tabindex: '-1', id: 'bookflow-step-heading' } );
 	}
 
 	function renderStepper() {
@@ -143,14 +180,23 @@
 
 	function renderCatalogStep() {
 		var wrap = el( 'div', { class: 'bookflow-step-panel' } );
-		wrap.appendChild( el( 'h3', { text: cfg.i18n.chooseItems } ) );
+		wrap.appendChild( stepHeading( cfg.i18n.chooseItems ) );
 
-		if ( ! state.items.length ) {
-			wrap.appendChild( el( 'p', { text: '…' } ) );
+		if ( ! state.itemsLoaded ) {
+			wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: 'Loading…' } ) );
 			apiGet( '/items' ).then( function ( items ) {
 				state.items = items;
+				state.itemsLoaded = true;
+				render();
+			} ).catch( function () {
+				state.itemsLoaded = true; // Stop retrying forever; show the same "nothing to book" state a genuinely empty catalog would.
 				render();
 			} );
+			return wrap;
+		}
+
+		if ( ! state.items.length ) {
+			wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: cfg.i18n.noItems } ) );
 			return wrap;
 		}
 
@@ -178,6 +224,7 @@
 					type: 'text',
 					class: 'bookflow-companion-name',
 					placeholder: cfg.i18n.companionName,
+					'aria-label': cfg.i18n.companionName,
 					value: companion.name,
 				} );
 				nameInput.addEventListener( 'input', function ( e ) {
@@ -220,8 +267,7 @@
 		var next = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-primary bookflow-btn-block', text: 'Continue' } );
 		next.disabled = state.selectedItemIds.length === 0;
 		next.addEventListener( 'click', function () {
-			state.step = 2;
-			render();
+			goToStep( 2 );
 		} );
 		wrap.appendChild( next );
 
@@ -230,27 +276,46 @@
 
 	function renderDateTimeStep() {
 		var wrap = el( 'div', { class: 'bookflow-step-panel' } );
-		wrap.appendChild( el( 'h3', { text: cfg.i18n.chooseDateTime } ) );
+		wrap.appendChild( stepHeading( cfg.i18n.chooseDateTime ) );
 
-		var dateInput = el( 'input', { type: 'date', value: state.date, min: todayIso() } );
+		var dateInputId = uid( 'bookflow-date' );
+		var dateAttrs = { type: 'date', id: dateInputId, value: state.date, min: todayIso() };
+		if ( cfg.bookingHorizon ) {
+			var maxDate = new Date();
+			maxDate.setDate( maxDate.getDate() + parseInt( cfg.bookingHorizon, 10 ) );
+			dateAttrs.max = maxDate.toISOString().slice( 0, 10 );
+		}
+		var dateInput = el( 'input', dateAttrs );
 		dateInput.addEventListener( 'change', function ( e ) {
 			state.date = e.target.value;
 			state.time = '';
 			state.slots = [];
+			state.slotsLoaded = false;
 			state.waitlistOpen = false;
 			state.waitlistJoined = false;
 			render();
 		} );
-		wrap.appendChild( el( 'label', { text: 'Date' } ) );
+		wrap.appendChild( el( 'label', { text: 'Date', for: dateInputId } ) );
 		wrap.appendChild( dateInput );
 
 		if ( state.date ) {
-			if ( ! state.slots.length ) {
-				wrap.appendChild( el( 'p', { text: '…' } ) );
+			if ( ! state.slotsLoaded ) {
+				wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: 'Loading…' } ) );
 				apiGet( '/availability?date=' + encodeURIComponent( state.date ) ).then( function ( slots ) {
 					state.slots = slots;
+					state.slotsLoaded = true;
+					render();
+				} ).catch( function () {
+					state.slots = [];
+					state.slotsLoaded = true;
 					render();
 				} );
+			} else if ( ! state.slots.length ) {
+				// An empty list (as opposed to a list of all-unavailable
+				// slots) means the shop simply isn't open that day —
+				// different from "fully booked," and not something a
+				// waitlist offer makes sense for.
+				wrap.appendChild( el( 'p', { class: 'bookflow-notice', text: cfg.i18n.shopClosed } ) );
 			} else {
 				var slotWrap = el( 'div', { class: 'bookflow-slots' } );
 				var anyAvailable = false;
@@ -283,16 +348,14 @@
 
 		var back = el( 'button', { type: 'button', class: 'bookflow-btn', text: '← Back' } );
 		back.addEventListener( 'click', function () {
-			state.step = 1;
-			render();
+			goToStep( 1 );
 		} );
 		wrap.appendChild( back );
 
 		var next = el( 'button', { type: 'button', class: 'bookflow-btn bookflow-btn-primary', text: 'Continue' } );
 		next.disabled = ! state.time;
 		next.addEventListener( 'click', function () {
-			state.step = 3;
-			render();
+			goToStep( 3 );
 		} );
 		wrap.appendChild( next );
 
@@ -318,9 +381,9 @@
 		}
 
 		var form = el( 'form', { class: 'bookflow-waitlist-form' } );
-		var nameInput = el( 'input', { type: 'text', placeholder: 'Full name', required: 'required' } );
-		var emailInput = el( 'input', { type: 'email', placeholder: 'Email', required: 'required' } );
-		var phoneInput = el( 'input', { type: 'tel', placeholder: 'Phone' } );
+		var nameInput = el( 'input', { type: 'text', placeholder: 'Full name', 'aria-label': 'Full name', required: 'required' } );
+		var emailInput = el( 'input', { type: 'email', placeholder: 'Email', 'aria-label': 'Email', required: 'required' } );
+		var phoneInput = el( 'input', { type: 'tel', placeholder: 'Phone', 'aria-label': 'Phone' } );
 		var errorBox = el( 'p', { class: 'bookflow-error', style: 'display:none;' } );
 
 		form.appendChild( el( 'h4', { text: cfg.i18n.waitlistTitle } ) );
@@ -360,33 +423,39 @@
 
 	function renderDetailsStep() {
 		var wrap = el( 'div', { class: 'bookflow-step-panel' } );
-		wrap.appendChild( el( 'h3', { text: cfg.i18n.yourDetails } ) );
+		wrap.appendChild( stepHeading( cfg.i18n.yourDetails ) );
 
 		var form = el( 'form', {} );
 
-		var nameInput = el( 'input', { type: 'text', name: 'customer_name', required: 'required', placeholder: 'Full name' } );
-		var emailInput = el( 'input', { type: 'email', name: 'customer_email', required: 'required', placeholder: 'Email' } );
-		var phoneInput = el( 'input', { type: 'tel', name: 'customer_phone', required: 'required', placeholder: 'Phone' } );
-		var eventDateInput = el( 'input', { type: 'date', name: 'event_date', placeholder: 'Wedding/event date (optional)' } );
+		var nameId = uid( 'bookflow-name' );
+		var emailId = uid( 'bookflow-email' );
+		var phoneId = uid( 'bookflow-phone' );
+		var eventDateId = uid( 'bookflow-event-date' );
+
+		var nameInput = el( 'input', { type: 'text', id: nameId, name: 'customer_name', required: 'required', placeholder: 'Full name' } );
+		var emailInput = el( 'input', { type: 'email', id: emailId, name: 'customer_email', required: 'required', placeholder: 'Email' } );
+		var phoneInput = el( 'input', { type: 'tel', id: phoneId, name: 'customer_phone', required: 'required', placeholder: 'Phone' } );
+		var eventDateInput = el( 'input', { type: 'date', id: eventDateId, name: 'event_date', placeholder: 'Wedding/event date (optional)' } );
 		var honeypot = el( 'input', { type: 'text', name: 'website', tabindex: '-1', autocomplete: 'off', style: 'position:absolute;left:-9999px;' } );
 
 		[
-			[ 'Full name', nameInput ],
-			[ 'Email', emailInput ],
-			[ 'Phone', phoneInput ],
-			[ 'Wedding/event date (optional)', eventDateInput ],
-		].forEach( function ( pair ) {
-			form.appendChild( el( 'label', { text: pair[ 0 ] } ) );
-			form.appendChild( pair[ 1 ] );
+			[ 'Full name', nameId, nameInput ],
+			[ 'Email', emailId, emailInput ],
+			[ 'Phone', phoneId, phoneInput ],
+			[ 'Wedding/event date (optional)', eventDateId, eventDateInput ],
+		].forEach( function ( group ) {
+			form.appendChild( el( 'label', { text: group[ 0 ], for: group[ 1 ] } ) );
+			form.appendChild( group[ 2 ] );
 		} );
 		form.appendChild( honeypot );
 
 		if ( state.companions.length ) {
-			var summary = el( 'p', { class: 'bookflow-notice' } );
-			summary.textContent = 'Joining you: ' + state.companions.map( function ( c ) {
-				return c.name || '(unnamed)';
-			} ).join( ', ' );
-			form.appendChild( summary );
+			var namedCompanions = state.companions.filter( function ( c ) { return c.name; } );
+			if ( namedCompanions.length ) {
+				var summary = el( 'p', { class: 'bookflow-notice' } );
+				summary.textContent = 'Joining you: ' + namedCompanions.map( function ( c ) { return c.name; } ).join( ', ' );
+				form.appendChild( summary );
+			}
 		}
 
 		var errorBox = el( 'p', { class: 'bookflow-error', style: 'display:none;' } );
@@ -395,9 +464,29 @@
 		var submit = el( 'button', { type: 'submit', class: 'bookflow-btn bookflow-btn-primary', text: 'Confirm booking' } );
 		form.appendChild( submit );
 
+		function showError( message ) {
+			errorBox.textContent = message;
+			errorBox.style.display = 'block';
+			submit.disabled = false;
+			submit.textContent = 'Confirm booking';
+		}
+
 		form.addEventListener( 'submit', function ( e ) {
 			e.preventDefault();
 			errorBox.style.display = 'none';
+
+			// A companion with items picked but no name would otherwise be
+			// silently dropped by the server (it only accepts named
+			// companions) — catch that here rather than losing their
+			// selections without any explanation.
+			var unnamedWithItems = state.companions.some( function ( c ) {
+				return ! c.name && c.itemIds.length > 0;
+			} );
+			if ( unnamedWithItems ) {
+				showError( cfg.i18n.companionNeedsName );
+				return;
+			}
+
 			submit.disabled = true;
 			submit.textContent = 'Booking…';
 
@@ -420,14 +509,10 @@
 			} )
 				.then( function ( data ) {
 					state.depositUrl = data.deposit_url || '';
-					state.step = 4;
-					render();
+					goToStep( 4 );
 				} )
 				.catch( function ( err ) {
-					errorBox.textContent = err.message || cfg.i18n.genericError;
-					errorBox.style.display = 'block';
-					submit.disabled = false;
-					submit.textContent = 'Confirm booking';
+					showError( err.message || cfg.i18n.genericError );
 				} );
 		} );
 
@@ -435,8 +520,7 @@
 
 		var back = el( 'button', { type: 'button', class: 'bookflow-btn', text: '← Back' } );
 		back.addEventListener( 'click', function () {
-			state.step = 2;
-			render();
+			goToStep( 2 );
 		} );
 		wrap.insertBefore( back, form );
 
@@ -445,7 +529,7 @@
 
 	function renderConfirmedStep() {
 		var wrap = el( 'div', { class: 'bookflow-step-panel bookflow-confirmed' } );
-		wrap.appendChild( el( 'h3', { text: cfg.i18n.confirmed } ) );
+		wrap.appendChild( stepHeading( cfg.i18n.confirmed ) );
 		wrap.appendChild( el( 'p', { text: 'A confirmation with a calendar invite has been sent to your email.' } ) );
 
 		if ( state.depositUrl ) {

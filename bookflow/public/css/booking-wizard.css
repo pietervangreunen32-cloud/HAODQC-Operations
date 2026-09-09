@@ -50,6 +50,16 @@
 	margin-top: 0;
 }
 
+/* Plain :focus, not :focus-visible — this heading is only ever focused
+   programmatically on a step change (see goToStep() in the JS), never by
+   mouse click, so the "was this keyboard input" heuristic :focus-visible
+   applies isn't relevant and can't be relied on to show the ring here. */
+.bookflow-step-panel h3:focus {
+	outline: 2px solid var(--bookflow-primary);
+	outline-offset: 4px;
+	border-radius: 2px;
+}
+
 .bookflow-catalog-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

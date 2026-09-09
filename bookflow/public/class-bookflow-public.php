@@ -32,10 +32,13 @@ class BookFlow_Public {
 			return;
 		}
 
+		$settings = BookFlow_Availability::get_settings();
+
 		$config = array(
-			'restUrl'  => esc_url_raw( rest_url( 'bookflow/v1' ) ),
-			'nonce'    => wp_create_nonce( 'wp_rest' ),
-			'features' => array(
+			'restUrl'         => esc_url_raw( rest_url( 'bookflow/v1' ) ),
+			'nonce'           => wp_create_nonce( 'wp_rest' ),
+			'bookingHorizon'  => (int) $settings['booking_horizon_days'],
+			'features'        => array(
 				'groupBookings' => BookFlow_License::tier_includes( 'group_bookings' ),
 				'waitlist'      => BookFlow_License::tier_includes( 'waitlist' ),
 			),
@@ -60,9 +63,12 @@ class BookFlow_Public {
 							'removeCompanion'  => __( 'Remove', 'bookflow' ),
 							'companionName'    => __( "Companion's name", 'bookflow' ),
 							'noSlots'          => __( 'No times available this day.', 'bookflow' ),
+							'shopClosed'       => __( "We're closed that day — please pick another date.", 'bookflow' ),
 							'joinWaitlist'     => __( 'Join the waitlist for this date instead', 'bookflow' ),
 							'waitlistTitle'    => __( 'Join the waitlist', 'bookflow' ),
 							'waitlistJoined'   => __( "You're on the list! We'll email you the moment a spot opens up.", 'bookflow' ),
+							'noItems'          => __( "This shop hasn't added any items to book yet — please contact them directly.", 'bookflow' ),
+							'companionNeedsName' => __( 'Please give every companion a name, or remove them, before confirming.', 'bookflow' ),
 							'genericError'     => __( 'Something went wrong. Please try again.', 'bookflow' ),
 						),
 					)
@@ -87,7 +93,8 @@ class BookFlow_Public {
 							'unheart'       => __( 'Remove from shortlist', 'bookflow' ),
 							'shareButton'   => __( 'Get a shareable link', 'bookflow' ),
 							'shareCopied'   => __( 'Link copied!', 'bookflow' ),
-							'empty'         => __( "You haven't saved any favorites yet — tap the heart on anything you like.", 'bookflow' ),
+							'catalogEmpty'  => __( "This shop hasn't added any items to save yet — check back soon.", 'bookflow' ),
+							'sharedEmpty'   => __( 'These items are no longer available.', 'bookflow' ),
 							'genericError'  => __( 'Something went wrong. Please try again.', 'bookflow' ),
 						),
 					)

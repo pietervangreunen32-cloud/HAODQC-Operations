@@ -68,6 +68,10 @@ class BookFlow_Welcome_Screen {
 
 		$appointment = BookFlow_DB_Appointments::get_current_or_next( null, $location_id );
 
+		if ( $appointment && self::starts_too_far_away( $appointment ) ) {
+			$appointment = null;
+		}
+
 		if ( ! $appointment ) {
 			return array(
 				'has_appointment' => false,
@@ -118,6 +122,22 @@ class BookFlow_Welcome_Screen {
 			'countdown_days'  => $countdown_days,
 			'shop_name'       => $shop_name,
 		);
+	}
+
+	/**
+	 * get_current_or_next() finds the earliest appointment that hasn't
+	 * ended yet, with no upper bound — on a quiet day that could be
+	 * tomorrow morning. Greeting a bride by name on the lobby TV hours
+	 * before she's due reads as a stale guess, not a warm welcome, so the
+	 * personalized screen only shows once an appointment is either under
+	 * way or starting soon; anything further out falls back to the idle
+	 * shop-branding screen instead.
+	 */
+	private static function starts_too_far_away( $appointment ) {
+		$lead_minutes = (int) apply_filters( 'bookflow_welcome_screen_lead_minutes', 60 );
+		$starts_in    = strtotime( $appointment->start_datetime ) - current_time( 'timestamp' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions
+
+		return $starts_in > ( $lead_minutes * MINUTE_IN_SECONDS );
 	}
 
 	private static function first_name( $full_name ) {

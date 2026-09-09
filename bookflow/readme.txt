@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,16 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.6.0 =
+* UI/UX audit and real bug fixes, verified against a live install: fixed
+  admin menu ordering (Catalog was landing in the wrong spot), fixed an
+  infinite-fetch bug on empty catalogs/closed days in the booking wizard,
+  fixed silent data loss for unnamed companions, fixed missing form
+  labels and error handling across the wizard and shortlist page, fixed
+  Size being permanently uneditable on WooCommerce-synced catalog items,
+  and made the welcome screen only personalize within an hour of an
+  appointment instead of a full day ahead.
 
 = 1.5.1 =
 * Added the brand icon (calendar + checkmark) as a proper WP admin menu

@@ -14,6 +14,8 @@ class BookFlow_Admin {
 
 	public function init_hooks() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_filter( 'parent_file', array( $this, 'fix_catalog_menu_highlight' ) );
+		add_filter( 'submenu_file', array( $this, 'fix_catalog_submenu_highlight' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
 		add_action( 'admin_post_bookflow_save_settings', array( $this, 'handle_save_settings' ) );
 		add_action( 'admin_post_bookflow_manual_booking', array( $this, 'handle_manual_booking' ) );
@@ -36,13 +38,47 @@ class BookFlow_Admin {
 			26
 		);
 
+		// Order here is deliberate and matches a shop's actual workflow:
+		// overview, then the two day-to-day operational screens, then the
+		// catalog they're booked against, then the secondary operational
+		// list (waitlist), then tools, then configuration/account screens
+		// last — the last two (Settings, License) are the ones a shop
+		// owner sets up once and rarely revisits, so WordPress convention
+		// (and this menu) puts them at the bottom.
 		add_submenu_page( 'bookflow', __( 'Dashboard', 'bookflow' ), __( 'Dashboard', 'bookflow' ), 'manage_options', 'bookflow', array( $this, 'render_dashboard_page' ) );
 		add_submenu_page( 'bookflow', __( 'Appointments', 'bookflow' ), __( 'Appointments', 'bookflow' ), 'manage_options', 'bookflow-appointments', array( $this, 'render_appointments_page' ) );
 		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
+		add_submenu_page( 'bookflow', __( 'Catalog', 'bookflow' ), __( 'Catalog', 'bookflow' ), 'manage_options', 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE );
 		add_submenu_page( 'bookflow', __( 'Waitlist', 'bookflow' ), __( 'Waitlist', 'bookflow' ), 'manage_options', 'bookflow-waitlist', array( $this, 'render_waitlist_page' ) );
 		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
-		add_submenu_page( 'bookflow', __( 'License', 'bookflow' ), __( 'License', 'bookflow' ), 'manage_options', 'bookflow-license', array( $this, 'render_license_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
+		add_submenu_page( 'bookflow', __( 'License', 'bookflow' ), __( 'License', 'bookflow' ), 'manage_options', 'bookflow-license', array( $this, 'render_license_page' ) );
+	}
+
+	/**
+	 * The catalog's post-new.php?post_type=bookflow_item screen ("Add New
+	 * Catalog Item") doesn't match any of BookFlow's own submenu URLs, so
+	 * without this WordPress leaves the whole admin menu unhighlighted
+	 * while you're on it — the standard fix for a post type whose
+	 * register_post_type() call intentionally sets show_in_menu to false
+	 * (done here so BookFlow_Admin::register_menu() controls exactly
+	 * where "Catalog" sits in the menu, rather than leaving it to
+	 * WordPress's own post-type menu insertion order).
+	 */
+	public function fix_catalog_menu_highlight( $parent_file ) {
+		global $current_screen;
+		if ( $current_screen && BookFlow_Catalog::POST_TYPE === $current_screen->post_type ) {
+			return 'bookflow';
+		}
+		return $parent_file;
+	}
+
+	public function fix_catalog_submenu_highlight( $submenu_file ) {
+		global $current_screen;
+		if ( $current_screen && BookFlow_Catalog::POST_TYPE === $current_screen->post_type ) {
+			return 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE;
+		}
+		return $submenu_file;
 	}
 
 	/**

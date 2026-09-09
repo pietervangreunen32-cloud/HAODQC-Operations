@@ -27,6 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php if ( ! $preview_data['has_appointment'] ) : ?>
 		<p><?php echo esc_html( sprintf( /* translators: %s: shop name. */ __( 'The idle screen: "Welcome to %s".', 'bookflow' ), $preview_data['shop_name'] ) ); ?></p>
+		<p class="description"><?php esc_html_e( 'This is normal even with bookings later today — the screen only greets a customer by name starting an hour before their fitting, so it never guesses a name hours ahead of time.', 'bookflow' ); ?></p>
 	<?php else : ?>
 		<table class="widefat" style="max-width:600px;">
 			<tbody>

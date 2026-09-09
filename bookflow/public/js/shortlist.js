@@ -103,9 +103,18 @@
 	function renderSharedView() {
 		root.innerHTML = '';
 		root.appendChild( el( 'h2', { text: cfg.i18n.shared } ) );
+		root.appendChild( el( 'p', { class: 'bookflow-sl-status', text: 'Loading…' } ) );
 
 		apiGet( '/shortlists/' + encodeURIComponent( sharedKey ) )
 			.then( function ( data ) {
+				root.innerHTML = '';
+				root.appendChild( el( 'h2', { text: cfg.i18n.shared } ) );
+
+				if ( ! data.items.length ) {
+					root.appendChild( el( 'p', { class: 'bookflow-sl-status', text: cfg.i18n.sharedEmpty } ) );
+					return;
+				}
+
 				var grid = el( 'div', { class: 'bookflow-sl-grid' } );
 				data.items.forEach( function ( item ) {
 					grid.appendChild( renderItemCard( item, { heartable: false } ) );
@@ -113,6 +122,8 @@
 				root.appendChild( grid );
 			} )
 			.catch( function ( err ) {
+				root.innerHTML = '';
+				root.appendChild( el( 'h2', { text: cfg.i18n.shared } ) );
 				root.appendChild( el( 'p', { class: 'bookflow-sl-error', text: err.message } ) );
 			} );
 	}
@@ -122,14 +133,18 @@
 
 		root.innerHTML = '';
 		root.appendChild( el( 'h2', { text: cfg.i18n.title } ) );
+		root.appendChild( el( 'p', { class: 'bookflow-sl-status', text: 'Loading…' } ) );
 
 		var status = el( 'p', { class: 'bookflow-sl-status', style: 'display:none;' } );
 
 		apiGet( '/items' ).then( function ( items ) {
+			root.innerHTML = '';
+			root.appendChild( el( 'h2', { text: cfg.i18n.title } ) );
+
 			var grid = el( 'div', { class: 'bookflow-sl-grid' } );
 
 			if ( ! items.length ) {
-				root.appendChild( el( 'p', { text: cfg.i18n.empty } ) );
+				root.appendChild( el( 'p', { class: 'bookflow-sl-status', text: cfg.i18n.catalogEmpty } ) );
 				return;
 			}
 
@@ -159,7 +174,7 @@
 			shareBtn.addEventListener( 'click', function () {
 				apiPost( '/shortlists', { item_ids: favorites } )
 					.then( function ( data ) {
-						var link = el( 'input', { type: 'text', readonly: 'readonly', value: data.share_url, class: 'bookflow-sl-link' } );
+						var link = el( 'input', { type: 'text', readonly: 'readonly', value: data.share_url, class: 'bookflow-sl-link', 'aria-label': 'Shareable link' } );
 						var copyBtn = el( 'button', { type: 'button', class: 'bookflow-btn', text: 'Copy' } );
 						copyBtn.addEventListener( 'click', function () {
 							link.select();
@@ -183,6 +198,10 @@
 			shareBar.appendChild( shareBtn );
 			shareBar.appendChild( status );
 			root.appendChild( shareBar );
+		} ).catch( function ( err ) {
+			root.innerHTML = '';
+			root.appendChild( el( 'h2', { text: cfg.i18n.title } ) );
+			root.appendChild( el( 'p', { class: 'bookflow-sl-error', text: err.message || cfg.i18n.genericError } ) );
 		} );
 	}
 
