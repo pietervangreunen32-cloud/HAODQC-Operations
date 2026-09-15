@@ -31,7 +31,7 @@ class MenuScreen_Plans {
 				'limit'    => 10,
 				'features' => array(
 					__( 'Up to 10 menu items', 'menuscreen' ),
-					__( '4 built-in themes, plus custom brand colors & fonts', 'menuscreen' ),
+					__( '6 built-in themes (including Food Truck & Restaurant), plus custom brand colors & fonts', 'menuscreen' ),
 					__( 'Live TV display', 'menuscreen' ),
 					__( 'QR code & display link', 'menuscreen' ),
 				),

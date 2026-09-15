@@ -25,8 +25,28 @@ menuscreen/
                                AJAX handlers, REST endpoint, display routing
   admin/                      wp-admin pages, CSS/JS, vendored QR code lib
   public/                     The public, no-login, full-screen display
-                               page: template, CSS (4 themes), polling JS
+                               page: template, CSS (6 themes), polling JS
 ```
+
+## What's new in 1.3.0 — Food Truck and Restaurant themes
+
+* Added two new built-in display themes, each a full look rather than
+  just a new color swap:
+  * **Food Truck** — warm cream/gold/toasted-brown, matching the classic
+    food-truck menu-board look from the reference example provided
+    (rounded cream cards, an orange price tag, a dark ticker bar).
+  * **Restaurant** — a quieter, upscale look: a serif headline font
+    (Playfair Display), hairline gold dividers instead of bold
+    underlines, italic descriptions, and subtle motion — a gentle fade
+    when the display's content changes, and a slow zoom (Ken Burns
+    effect) on the Feature mode's photo. The other five themes are
+    unchanged and stay motion-free.
+* Both are picked the same way as any other theme, from the same grid
+  on Theme & Look — no separate "business type" step, and switching
+  back and forth is free at any time.
+* Fixed a bug turned up while building this: items with no dietary tags
+  set were rendering an empty badge pill on the display (the REST API
+  was returning `['']` instead of `[]` for items with no diet meta).
 
 ## What's new in 1.2.1 — admin nav fix and a UI/UX audit pass
 

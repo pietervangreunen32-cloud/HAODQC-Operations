@@ -217,6 +217,63 @@ html, body {
 .menuscreen-theme-custom .menuscreen-sold-out-badge { background: var(--menuscreen-primary, #ea580c); color: #fff; }
 .menuscreen-theme-custom .menuscreen-special { background: var(--menuscreen-primary, #ea580c); color: #fff; }
 
+/* Food Truck — warm cream/gold/brown menu-board look. */
+.menuscreen-theme-foodtruck {
+	background:
+		radial-gradient(circle at 18% 12%, rgba(255,180,52,.28), transparent 32rem),
+		radial-gradient(circle at 86% 6%, rgba(255,106,33,.18), transparent 30rem),
+		linear-gradient(135deg,#fff8ea,#fff2db 62%,#ffe8bd);
+	color: #3c1609;
+}
+.menuscreen-theme-foodtruck .menuscreen-business-name { color: #2a1608; }
+.menuscreen-theme-foodtruck .menuscreen-category-title { color: #a8390f; border-color: rgba(255,106,33,.5); }
+.menuscreen-theme-foodtruck .menuscreen-menu-item { background: rgba(255,255,255,.55); border: 1px solid rgba(60,22,9,.12); border-radius: 18px; box-shadow: 0 10px 24px rgba(60,22,9,.08); }
+.menuscreen-theme-foodtruck .menuscreen-item-desc { color: rgba(60,22,9,.65); }
+.menuscreen-theme-foodtruck .menuscreen-item-price { color: #ff6a21; }
+.menuscreen-theme-foodtruck .menuscreen-sold-out-badge { background: #c6281a; color: #fff; }
+.menuscreen-theme-foodtruck .menuscreen-special { background: linear-gradient(135deg,#ffb434,#ff6a21); color: #2a1608; box-shadow: 0 10px 24px rgba(255,106,33,.3); }
+.menuscreen-theme-foodtruck .menuscreen-badge { background: rgba(255,180,52,.4); color: #2a1608; }
+.menuscreen-theme-foodtruck .menuscreen-ticker { background: #2a1608; color: #ffb434; }
+.menuscreen-theme-foodtruck .menuscreen-combo-item { background: rgba(255,255,255,.6); border: 1px solid rgba(60,22,9,.12); }
+
+/* Restaurant — a quieter, upscale look: serif headings, hairline dividers,
+   and (per the plan) a gentle fade on new content plus a slow zoom on the
+   feature photo, instead of the punchier energy of the other themes. */
+.menuscreen-theme-restaurant {
+	background: linear-gradient(160deg,#14100c 0%,#1c1712 55%,#241c14 100%);
+	color: #f3e9da;
+}
+.menuscreen-theme-restaurant .menuscreen-business-name,
+.menuscreen-theme-restaurant .menuscreen-category-title,
+.menuscreen-theme-restaurant .menuscreen-feature-name {
+	font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+.menuscreen-theme-restaurant .menuscreen-business-name { color: #f3e9da; letter-spacing: 0.01em; }
+.menuscreen-theme-restaurant .menuscreen-category-title { color: #c9a24b; border-bottom-width: 1px; border-color: rgba(201,162,75,.4); text-transform: none; letter-spacing: 0.02em; }
+.menuscreen-theme-restaurant .menuscreen-menu-item { background: rgba(255,255,255,.03); border: 1px solid rgba(201,162,75,.22); border-radius: 6px; }
+.menuscreen-theme-restaurant .menuscreen-item-desc { color: rgba(243,233,218,.6); font-style: italic; }
+.menuscreen-theme-restaurant .menuscreen-item-price { color: #c9a24b; font-weight: 600; }
+.menuscreen-theme-restaurant .menuscreen-sold-out-badge { background: rgba(243,233,218,.15); color: #f3e9da; }
+.menuscreen-theme-restaurant .menuscreen-special { background: rgba(201,162,75,.14); color: #f3e9da; border: 1px solid rgba(201,162,75,.4); }
+.menuscreen-theme-restaurant .menuscreen-badge { background: rgba(201,162,75,.2); color: #c9a24b; }
+.menuscreen-theme-restaurant .menuscreen-ticker { background: rgba(255,255,255,.06); color: #c9a24b; }
+.menuscreen-theme-restaurant .menuscreen-combo-item { background: rgba(255,255,255,.03); border: 1px solid rgba(201,162,75,.22); }
+
+.menuscreen-theme-restaurant .menuscreen-stage {
+	animation: menuscreen-restaurant-fade-in 900ms ease;
+}
+@keyframes menuscreen-restaurant-fade-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+.menuscreen-theme-restaurant .menuscreen-feature-photo img {
+	animation: menuscreen-restaurant-kenburns 16s ease-in-out infinite alternate;
+}
+@keyframes menuscreen-restaurant-kenburns {
+	from { transform: scale(1); }
+	to { transform: scale(1.07); }
+}
+
 /* ---------- Mode controls ---------- */
 
 .menuscreen-controls {

@@ -288,6 +288,8 @@
 			document.body.style.setProperty( '--menuscreen-text', data.custom.textColor );
 			document.body.style.setProperty( '--menuscreen-font', data.custom.fontFamily );
 			ensureGoogleFont( data.custom.googleFontQuery );
+		} else if ( 'restaurant' === data.theme ) {
+			ensureGoogleFont( 'Playfair+Display:wght@600;700;900' );
 		}
 
 		var html = '';

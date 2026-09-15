@@ -23,6 +23,8 @@ $rest_url = esc_url_raw( rest_url( MenuScreen_Rest_Api::NAMESPACE_ . '/menu' ) )
 	<link rel="stylesheet" href="<?php echo esc_url( MENUSCREEN_URL . 'public/css/display.css' ); ?>?v=<?php echo esc_attr( MENUSCREEN_VERSION ); ?>" />
 	<?php if ( 'custom' === $payload['theme'] ) : ?>
 		<link rel="stylesheet" href="<?php echo esc_url( 'https://fonts.googleapis.com/css2?family=' . $payload['custom']['googleFontQuery'] . '&display=swap' ); ?>" />
+	<?php elseif ( 'restaurant' === $payload['theme'] ) : ?>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&display=swap" />
 	<?php endif; ?>
 </head>
 <body

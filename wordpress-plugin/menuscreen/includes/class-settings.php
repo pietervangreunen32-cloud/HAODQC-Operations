@@ -15,7 +15,7 @@ class MenuScreen_Settings {
 
 	const OPTION_KEY = 'menuscreen_settings';
 
-	const THEMES = array( 'neon', 'chalkboard', 'minimalist', 'colorful', 'custom' );
+	const THEMES = array( 'neon', 'chalkboard', 'minimalist', 'colorful', 'foodtruck', 'restaurant', 'custom' );
 
 	const ORIENTATIONS = array( 'landscape', 'portrait' );
 

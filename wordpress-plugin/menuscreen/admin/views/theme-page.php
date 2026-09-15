@@ -31,6 +31,16 @@ $theme_meta  = array(
 		'blurb' => __( 'Bright, playful gradient background. Fun and energetic.', 'menuscreen' ),
 		'swatch' => 'linear-gradient(135deg,#ff7a18,#af002d,#319197)',
 	),
+	'foodtruck'  => array(
+		'label' => __( 'Food Truck', 'menuscreen' ),
+		'blurb' => __( 'Warm cream, gold, and toasted-brown — the classic food truck menu board look, complete with a chalk-orange price tag.', 'menuscreen' ),
+		'swatch' => 'radial-gradient(circle at 30% 20%, #ffdf7d, transparent 55%), linear-gradient(135deg,#fff2db,#ffb434,#3c1609)',
+	),
+	'restaurant' => array(
+		'label' => __( 'Restaurant', 'menuscreen' ),
+		'blurb' => __( 'A refined, upscale look with a serif headline font, a gentle fade between slides, and a slow zoom on featured photos.', 'menuscreen' ),
+		'swatch' => 'linear-gradient(160deg,#14100c,#241c14,#c9a24b)',
+	),
 	'custom'     => array(
 		'label' => __( 'Custom', 'menuscreen' ),
 		'blurb' => __( 'Your own brand colors and font — set below.', 'menuscreen' ),

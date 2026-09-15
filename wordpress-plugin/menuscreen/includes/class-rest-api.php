@@ -95,7 +95,7 @@ class MenuScreen_Rest_Api {
 					'sauce'       => get_post_meta( $item->ID, '_menuscreen_sauce', true ),
 					'heat'        => (int) get_post_meta( $item->ID, '_menuscreen_heat', true ),
 					'pieces'      => max( 1, (int) get_post_meta( $item->ID, '_menuscreen_pieces', true ) ?: 1 ),
-					'diet'        => (array) get_post_meta( $item->ID, '_menuscreen_diet', true ),
+					'diet'        => array_values( array_filter( (array) get_post_meta( $item->ID, '_menuscreen_diet', true ) ) ),
 					'hero'        => (bool) get_post_meta( $item->ID, '_menuscreen_hero', true ),
 				);
 			}
