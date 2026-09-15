@@ -122,6 +122,17 @@
 
 	function initLogoUploader() {
 		var frame;
+		var minDimension = ( window.MenuScreenAdmin && MenuScreenAdmin.minLogoDimension ) || 512;
+
+		function showLogoError( message ) {
+			var $error = $( '#menuscreen-logo-size-error' );
+			if ( message ) {
+				$error.text( message ).show();
+			} else {
+				$error.hide();
+			}
+		}
+
 		$( '#menuscreen-logo-select' ).on( 'click', function ( event ) {
 			event.preventDefault();
 			if ( frame ) {
@@ -131,6 +142,18 @@
 			frame = wp.media( { title: 'Choose a logo', multiple: false, library: { type: 'image' } } );
 			frame.on( 'select', function () {
 				var attachment = frame.state().get( 'selection' ).first().toJSON();
+				var width = attachment.width || 0;
+				var height = attachment.height || 0;
+
+				if ( width && height && ( width < minDimension || height < minDimension ) ) {
+					var message = ( window.MenuScreenAdmin && MenuScreenAdmin.i18n && MenuScreenAdmin.i18n.logoTooSmall )
+						? MenuScreenAdmin.i18n.logoTooSmall.replace( '%1$d', width ).replace( '%2$d', height ).replace( /%3\$d/g, minDimension )
+						: 'That image is too small — please choose a larger one.';
+					showLogoError( message );
+					return;
+				}
+
+				showLogoError( '' );
 				$( '#menuscreen-logo-id' ).val( attachment.id );
 				$( '#menuscreen-logo-preview' ).attr( 'src', attachment.url ).show();
 				$( '#menuscreen-logo-remove' ).show();
@@ -139,6 +162,7 @@
 		} );
 
 		$( '#menuscreen-logo-remove' ).on( 'click', function () {
+			showLogoError( '' );
 			$( '#menuscreen-logo-id' ).val( '0' );
 			$( '#menuscreen-logo-preview' ).hide();
 			$( this ).hide();

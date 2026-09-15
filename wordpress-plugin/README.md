@@ -28,6 +28,32 @@ menuscreen/
                                page: template, CSS (6 themes), polling JS
 ```
 
+## What's new in 1.4.0 — a vibe-first setup wizard and colorable themes
+
+* The first-run wizard now starts by asking what kind of menu this is —
+  **Food Truck**, **Restaurant — Classic**, **Restaurant — Modern**, or
+  a **Classic Look** (the original Neon/Chalkboard/Minimalist/Colorful/
+  Custom set) — before business name & logo, then colors, then adding
+  menu items. Each step saves independently, so going back and forth
+  never loses earlier answers.
+* Food Truck and Restaurant are no longer one fixed palette each — pick
+  one of a few ready-made palettes suited to that look, or set your own
+  5 colors (Primary, Secondary, Background, Text, Accent) with a color
+  picker. The same picker is also on Theme & Look at any time, not just
+  during setup.
+* Added a Restaurant **Modern** style — clean sans-serif, a light
+  background, and crisp flat cards — as an alternative to the original
+  **Classic** style (serif headings, dark background, gold accents).
+  Switch between them from the wizard or Theme & Look; both keep the
+  same subtle motion (a gentle fade on new content, a slow zoom on the
+  Feature mode photo).
+* Logo uploads now require at least 512×512px, checked both the moment
+  you pick a file and again on save — too-small images are rejected
+  with a clear message instead of silently looking blurry on a TV.
+* Plans & Billing now has optional USD prices for Rush/Fleet, with a
+  ZAR/USD toggle button for showing prices to customers outside South
+  Africa — set your own USD numbers, nothing is auto-converted.
+
 ## What's new in 1.3.0 — Food Truck and Restaurant themes
 
 * Added two new built-in display themes, each a full look rather than

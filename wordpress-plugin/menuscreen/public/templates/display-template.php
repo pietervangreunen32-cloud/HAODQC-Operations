@@ -23,14 +23,39 @@ $rest_url = esc_url_raw( rest_url( MenuScreen_Rest_Api::NAMESPACE_ . '/menu' ) )
 	<link rel="stylesheet" href="<?php echo esc_url( MENUSCREEN_URL . 'public/css/display.css' ); ?>?v=<?php echo esc_attr( MENUSCREEN_VERSION ); ?>" />
 	<?php if ( 'custom' === $payload['theme'] ) : ?>
 		<link rel="stylesheet" href="<?php echo esc_url( 'https://fonts.googleapis.com/css2?family=' . $payload['custom']['googleFontQuery'] . '&display=swap' ); ?>" />
-	<?php elseif ( 'restaurant' === $payload['theme'] ) : ?>
+	<?php elseif ( 'restaurant' === $payload['theme'] && 'modern' !== $payload['restaurantStyle'] ) : ?>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&display=swap" />
 	<?php endif; ?>
 </head>
+<?php
+$body_class = 'menuscreen-display menuscreen-theme-' . $payload['theme'] . ' menuscreen-orientation-' . $payload['orientation'];
+if ( 'restaurant' === $payload['theme'] ) {
+	$body_class .= ' menuscreen-restaurant-' . $payload['restaurantStyle'];
+}
+
+$color_customizable = in_array( $payload['theme'], array( 'custom', 'foodtruck', 'restaurant' ), true );
+$style_parts         = array();
+if ( $color_customizable ) {
+	foreach ( array(
+		'primary'    => $payload['colors']['primary'],
+		'secondary'  => $payload['colors']['secondary'],
+		'background' => $payload['colors']['background'],
+		'text'       => $payload['colors']['text'],
+		'accent'     => $payload['colors']['accent'],
+	) as $var_name => $var_value ) {
+		if ( $var_value ) {
+			$style_parts[] = '--menuscreen-' . $var_name . ':' . $var_value;
+		}
+	}
+}
+if ( 'custom' === $payload['theme'] ) {
+	$style_parts[] = '--menuscreen-font:' . $payload['custom']['fontFamily'];
+}
+?>
 <body
-	class="menuscreen-display menuscreen-theme-<?php echo esc_attr( $payload['theme'] ); ?> menuscreen-orientation-<?php echo esc_attr( $payload['orientation'] ); ?>"
-	<?php if ( 'custom' === $payload['theme'] ) : ?>
-	style="--menuscreen-primary:<?php echo esc_attr( $payload['custom']['primaryColor'] ); ?>;--menuscreen-background:<?php echo esc_attr( $payload['custom']['backgroundColor'] ); ?>;--menuscreen-text:<?php echo esc_attr( $payload['custom']['textColor'] ); ?>;--menuscreen-font:<?php echo esc_attr( $payload['custom']['fontFamily'] ); ?>;"
+	class="<?php echo esc_attr( $body_class ); ?>"
+	<?php if ( $style_parts ) : ?>
+	style="<?php echo esc_attr( implode( ';', $style_parts ) ); ?>"
 	<?php endif; ?>
 >
 	<div id="menuscreen-root"

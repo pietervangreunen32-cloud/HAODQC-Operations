@@ -217,47 +217,73 @@ html, body {
 .menuscreen-theme-custom .menuscreen-sold-out-badge { background: var(--menuscreen-primary, #ea580c); color: #fff; }
 .menuscreen-theme-custom .menuscreen-special { background: var(--menuscreen-primary, #ea580c); color: #fff; }
 
-/* Food Truck — warm cream/gold/brown menu-board look. */
+/* Food Truck — warm menu-board look. Colors come from --menuscreen-*
+   custom properties (set per-site from a preset or the color picker);
+   the values here are only the fallback for a site that hasn't set any,
+   which is exactly the original fixed Food Truck palette. */
 .menuscreen-theme-foodtruck {
-	background:
-		radial-gradient(circle at 18% 12%, rgba(255,180,52,.28), transparent 32rem),
-		radial-gradient(circle at 86% 6%, rgba(255,106,33,.18), transparent 30rem),
-		linear-gradient(135deg,#fff8ea,#fff2db 62%,#ffe8bd);
-	color: #3c1609;
+	background: linear-gradient(135deg, var(--menuscreen-background, #fff2db) 0%, var(--menuscreen-background, #fff2db) 55%, var(--menuscreen-secondary, #ffe8bd) 100%);
+	color: var(--menuscreen-text, #3c1609);
 }
-.menuscreen-theme-foodtruck .menuscreen-business-name { color: #2a1608; }
-.menuscreen-theme-foodtruck .menuscreen-category-title { color: #a8390f; border-color: rgba(255,106,33,.5); }
-.menuscreen-theme-foodtruck .menuscreen-menu-item { background: rgba(255,255,255,.55); border: 1px solid rgba(60,22,9,.12); border-radius: 18px; box-shadow: 0 10px 24px rgba(60,22,9,.08); }
-.menuscreen-theme-foodtruck .menuscreen-item-desc { color: rgba(60,22,9,.65); }
-.menuscreen-theme-foodtruck .menuscreen-item-price { color: #ff6a21; }
-.menuscreen-theme-foodtruck .menuscreen-sold-out-badge { background: #c6281a; color: #fff; }
-.menuscreen-theme-foodtruck .menuscreen-special { background: linear-gradient(135deg,#ffb434,#ff6a21); color: #2a1608; box-shadow: 0 10px 24px rgba(255,106,33,.3); }
-.menuscreen-theme-foodtruck .menuscreen-badge { background: rgba(255,180,52,.4); color: #2a1608; }
-.menuscreen-theme-foodtruck .menuscreen-ticker { background: #2a1608; color: #ffb434; }
-.menuscreen-theme-foodtruck .menuscreen-combo-item { background: rgba(255,255,255,.6); border: 1px solid rgba(60,22,9,.12); }
+.menuscreen-theme-foodtruck .menuscreen-business-name { color: var(--menuscreen-text, #2a1608); }
+.menuscreen-theme-foodtruck .menuscreen-category-title { color: var(--menuscreen-primary, #a8390f); border-color: color-mix(in srgb, var(--menuscreen-primary, #ff6a21) 50%, transparent); }
+.menuscreen-theme-foodtruck .menuscreen-menu-item { background: color-mix(in srgb, var(--menuscreen-background, #fff) 55%, white); border: 1px solid color-mix(in srgb, var(--menuscreen-text, #3c1609) 12%, transparent); border-radius: 18px; box-shadow: 0 10px 24px color-mix(in srgb, var(--menuscreen-text, #3c1609) 8%, transparent); }
+.menuscreen-theme-foodtruck .menuscreen-item-desc { color: color-mix(in srgb, var(--menuscreen-text, #3c1609) 65%, transparent); }
+.menuscreen-theme-foodtruck .menuscreen-item-price { color: var(--menuscreen-primary, #ff6a21); }
+.menuscreen-theme-foodtruck .menuscreen-sold-out-badge { background: var(--menuscreen-accent, #c6281a); color: #fff; }
+.menuscreen-theme-foodtruck .menuscreen-special { background: linear-gradient(135deg, var(--menuscreen-secondary, #ffb434), var(--menuscreen-primary, #ff6a21)); color: var(--menuscreen-text, #2a1608); box-shadow: 0 10px 24px color-mix(in srgb, var(--menuscreen-primary, #ff6a21) 30%, transparent); }
+.menuscreen-theme-foodtruck .menuscreen-badge { background: color-mix(in srgb, var(--menuscreen-secondary, #ffb434) 40%, transparent); color: var(--menuscreen-text, #2a1608); }
+.menuscreen-theme-foodtruck .menuscreen-ticker { background: var(--menuscreen-text, #2a1608); color: var(--menuscreen-secondary, #ffb434); }
+.menuscreen-theme-foodtruck .menuscreen-combo-item { background: color-mix(in srgb, var(--menuscreen-background, #fff) 60%, white); border: 1px solid color-mix(in srgb, var(--menuscreen-text, #3c1609) 12%, transparent); }
 
-/* Restaurant — a quieter, upscale look: serif headings, hairline dividers,
-   and (per the plan) a gentle fade on new content plus a slow zoom on the
-   feature photo, instead of the punchier energy of the other themes. */
+/* Restaurant — a quieter, upscale look, in two styles sharing the same
+   structure: Classic (serif headings, dark ground, hairline gold
+   dividers) and Modern (clean sans, light ground, crisp minimal cards)
+   — see .menuscreen-restaurant-modern below. Both get the same subtle
+   motion: a gentle fade on new content and a slow zoom on the feature
+   photo, instead of the punchier energy of the other themes. Colors
+   come from --menuscreen-* custom properties; the values here are the
+   fallback for a site that hasn't set any (the original Classic look). */
 .menuscreen-theme-restaurant {
-	background: linear-gradient(160deg,#14100c 0%,#1c1712 55%,#241c14 100%);
-	color: #f3e9da;
+	background: linear-gradient(160deg, var(--menuscreen-background, #14100c) 0%, var(--menuscreen-background, #14100c) 55%, var(--menuscreen-secondary, #241c14) 100%);
+	color: var(--menuscreen-text, #f3e9da);
 }
 .menuscreen-theme-restaurant .menuscreen-business-name,
 .menuscreen-theme-restaurant .menuscreen-category-title,
 .menuscreen-theme-restaurant .menuscreen-feature-name {
 	font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }
-.menuscreen-theme-restaurant .menuscreen-business-name { color: #f3e9da; letter-spacing: 0.01em; }
-.menuscreen-theme-restaurant .menuscreen-category-title { color: #c9a24b; border-bottom-width: 1px; border-color: rgba(201,162,75,.4); text-transform: none; letter-spacing: 0.02em; }
-.menuscreen-theme-restaurant .menuscreen-menu-item { background: rgba(255,255,255,.03); border: 1px solid rgba(201,162,75,.22); border-radius: 6px; }
-.menuscreen-theme-restaurant .menuscreen-item-desc { color: rgba(243,233,218,.6); font-style: italic; }
-.menuscreen-theme-restaurant .menuscreen-item-price { color: #c9a24b; font-weight: 600; }
-.menuscreen-theme-restaurant .menuscreen-sold-out-badge { background: rgba(243,233,218,.15); color: #f3e9da; }
-.menuscreen-theme-restaurant .menuscreen-special { background: rgba(201,162,75,.14); color: #f3e9da; border: 1px solid rgba(201,162,75,.4); }
-.menuscreen-theme-restaurant .menuscreen-badge { background: rgba(201,162,75,.2); color: #c9a24b; }
-.menuscreen-theme-restaurant .menuscreen-ticker { background: rgba(255,255,255,.06); color: #c9a24b; }
-.menuscreen-theme-restaurant .menuscreen-combo-item { background: rgba(255,255,255,.03); border: 1px solid rgba(201,162,75,.22); }
+.menuscreen-theme-restaurant .menuscreen-business-name { color: var(--menuscreen-text, #f3e9da); letter-spacing: 0.01em; }
+.menuscreen-theme-restaurant .menuscreen-category-title { color: var(--menuscreen-primary, #c9a24b); border-bottom-width: 1px; border-color: color-mix(in srgb, var(--menuscreen-primary, #c9a24b) 40%, transparent); text-transform: none; letter-spacing: 0.02em; }
+.menuscreen-theme-restaurant .menuscreen-menu-item { background: color-mix(in srgb, var(--menuscreen-text, #fff) 3%, transparent); border: 1px solid color-mix(in srgb, var(--menuscreen-primary, #c9a24b) 22%, transparent); border-radius: 6px; }
+.menuscreen-theme-restaurant .menuscreen-item-desc { color: color-mix(in srgb, var(--menuscreen-text, #f3e9da) 60%, transparent); font-style: italic; }
+.menuscreen-theme-restaurant .menuscreen-item-price { color: var(--menuscreen-primary, #c9a24b); font-weight: 600; }
+.menuscreen-theme-restaurant .menuscreen-sold-out-badge { background: color-mix(in srgb, var(--menuscreen-text, #f3e9da) 15%, transparent); color: var(--menuscreen-text, #f3e9da); }
+.menuscreen-theme-restaurant .menuscreen-special { background: color-mix(in srgb, var(--menuscreen-primary, #c9a24b) 14%, transparent); color: var(--menuscreen-text, #f3e9da); border: 1px solid color-mix(in srgb, var(--menuscreen-primary, #c9a24b) 40%, transparent); }
+.menuscreen-theme-restaurant .menuscreen-badge { background: color-mix(in srgb, var(--menuscreen-primary, #c9a24b) 20%, transparent); color: var(--menuscreen-primary, #c9a24b); }
+.menuscreen-theme-restaurant .menuscreen-ticker { background: color-mix(in srgb, var(--menuscreen-text, #fff) 6%, transparent); color: var(--menuscreen-primary, #c9a24b); }
+.menuscreen-theme-restaurant .menuscreen-combo-item { background: color-mix(in srgb, var(--menuscreen-text, #fff) 3%, transparent); border: 1px solid color-mix(in srgb, var(--menuscreen-primary, #c9a24b) 22%, transparent); }
+
+/* Restaurant — Modern: same structure, a cleaner and lighter treatment
+   layered on top (system sans instead of serif, crisp flat cards,
+   solid instead of translucent fills). Falls back to a black/white/grey
+   palette when no colors are customized. */
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern {
+	background: var(--menuscreen-background, #fafafa);
+}
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-business-name,
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-category-title,
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-feature-name {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+	font-weight: 800;
+}
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-category-title { text-transform: uppercase; letter-spacing: 0.04em; border-bottom-width: 2px; }
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-menu-item { background: color-mix(in srgb, var(--menuscreen-text, #111) 4%, white); border-radius: 4px; box-shadow: 0 1px 3px color-mix(in srgb, var(--menuscreen-text, #111) 6%, transparent); }
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-item-desc { font-style: normal; }
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-sold-out-badge { background: var(--menuscreen-text, #111); color: var(--menuscreen-background, #fff); }
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-special { background: var(--menuscreen-primary, #111); color: var(--menuscreen-background, #fff); border: none; }
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-ticker { background: var(--menuscreen-primary, #111); color: var(--menuscreen-background, #fff); }
+.menuscreen-theme-restaurant.menuscreen-restaurant-modern .menuscreen-combo-item { background: color-mix(in srgb, var(--menuscreen-text, #111) 4%, white); border-color: color-mix(in srgb, var(--menuscreen-text, #111) 10%, transparent); }
 
 .menuscreen-theme-restaurant .menuscreen-stage {
 	animation: menuscreen-restaurant-fade-in 900ms ease;

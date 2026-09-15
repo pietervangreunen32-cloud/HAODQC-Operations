@@ -222,10 +222,13 @@ class MenuScreen_Admin {
 			'menuscreen-admin',
 			'MenuScreenAdmin',
 			array(
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( MenuScreen_Ajax::NONCE_ACTION ),
-				'i18n'    => array(
+				'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+				'nonce'            => wp_create_nonce( MenuScreen_Ajax::NONCE_ACTION ),
+				'minLogoDimension' => MenuScreen_Settings::MIN_LOGO_DIMENSION,
+				'i18n'             => array(
 					'confirmDeleteCategory' => __( 'This only removes the category — items in it are kept but become uncategorized. Continue?', 'menuscreen' ),
+					/* translators: %1$d and %2$d: the uploaded image's actual width and height in pixels */
+					'logoTooSmall'          => __( 'That image is %1$d×%2$d pixels — please choose one at least %3$d×%3$d.', 'menuscreen' ),
 				),
 			)
 		);
@@ -340,30 +343,58 @@ class MenuScreen_Admin {
 
 	// ---------- Form handlers (admin-post.php) ----------
 
+	/**
+	 * Saves any subset of {theme, restaurant_style, orientation,
+	 * business_name, logo_id} — only fields actually present in the POST
+	 * are touched, everything else keeps its current value. This lets the
+	 * wizard's separate one-thing-at-a-time steps (pick a look, then
+	 * business name + logo) share this one handler with the all-at-once
+	 * form on Theme & Look, without a later step clobbering an earlier one.
+	 */
 	public static function handle_save_theme() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
 		}
 		check_admin_referer( 'menuscreen_save_theme' );
 
-		$theme         = isset( $_POST['theme'] ) ? sanitize_key( wp_unslash( $_POST['theme'] ) ) : 'neon';
-		$orientation   = isset( $_POST['orientation'] ) ? sanitize_key( wp_unslash( $_POST['orientation'] ) ) : 'landscape';
-		$business_name = isset( $_POST['business_name'] ) ? sanitize_text_field( wp_unslash( $_POST['business_name'] ) ) : '';
+		$current = MenuScreen_Settings::all();
+		$values  = array();
 
-		if ( ! in_array( $theme, MenuScreen_Settings::THEMES, true ) ) {
-			$theme = 'neon';
+		if ( isset( $_POST['theme'] ) ) {
+			$theme            = sanitize_key( wp_unslash( $_POST['theme'] ) );
+			$values['theme']  = in_array( $theme, MenuScreen_Settings::THEMES, true ) ? $theme : $current['theme'];
 		}
-		if ( ! in_array( $orientation, MenuScreen_Settings::ORIENTATIONS, true ) ) {
-			$orientation = 'landscape';
+		if ( isset( $_POST['restaurant_style'] ) ) {
+			$style                      = sanitize_key( wp_unslash( $_POST['restaurant_style'] ) );
+			$values['restaurant_style'] = in_array( $style, MenuScreen_Settings::RESTAURANT_STYLES, true ) ? $style : $current['restaurant_style'];
 		}
-
-		$values = array(
-			'theme'         => $theme,
-			'orientation'   => $orientation,
-			'business_name' => '' !== $business_name ? $business_name : ( get_bloginfo( 'name' ) ? get_bloginfo( 'name' ) : __( 'My Business', 'menuscreen' ) ),
-		);
+		if ( isset( $_POST['orientation'] ) ) {
+			$orientation            = sanitize_key( wp_unslash( $_POST['orientation'] ) );
+			$values['orientation']  = in_array( $orientation, MenuScreen_Settings::ORIENTATIONS, true ) ? $orientation : $current['orientation'];
+		}
+		if ( isset( $_POST['business_name'] ) ) {
+			$business_name            = sanitize_text_field( wp_unslash( $_POST['business_name'] ) );
+			$values['business_name']  = '' !== $business_name ? $business_name : ( get_bloginfo( 'name' ) ? get_bloginfo( 'name' ) : __( 'My Business', 'menuscreen' ) );
+		}
 		if ( isset( $_POST['logo_id'] ) ) {
-			$values['logo_id'] = absint( $_POST['logo_id'] );
+			$logo_id = absint( $_POST['logo_id'] );
+			if ( 0 !== $logo_id && ! MenuScreen_Settings::is_logo_valid( $logo_id ) ) {
+				wp_safe_redirect(
+					add_query_arg(
+						'menuscreen_error',
+						rawurlencode(
+							sprintf(
+								/* translators: %d: minimum logo width/height in pixels */
+								__( 'That logo is smaller than %1$d×%1$d pixels, so it was not saved — please upload a larger image.', 'menuscreen' ),
+								MenuScreen_Settings::MIN_LOGO_DIMENSION
+							)
+						),
+						wp_get_referer()
+					)
+				);
+				exit;
+			}
+			$values['logo_id'] = $logo_id;
 		}
 
 		MenuScreen_Settings::update( $values );
@@ -401,15 +432,30 @@ class MenuScreen_Admin {
 		exit;
 	}
 
+	/**
+	 * Saves the shared 5-color palette (+ font) used by any of the three
+	 * color-customizable themes — Custom, Food Truck, and Restaurant.
+	 * Which theme it applies to comes from the form's own hidden `theme`
+	 * field, so the exact same handler backs the Custom theme card, the
+	 * wizard's color step, and Theme & Look's color picker for Food Truck
+	 * / Restaurant alike.
+	 */
 	public static function handle_save_custom_branding() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'menuscreen' ) );
 		}
 		check_admin_referer( 'menuscreen_save_custom_branding' );
 
+		$theme = isset( $_POST['theme'] ) ? sanitize_key( wp_unslash( $_POST['theme'] ) ) : 'custom';
+		if ( ! in_array( $theme, MenuScreen_Settings::COLOR_CUSTOMIZABLE_THEMES, true ) ) {
+			$theme = 'custom';
+		}
+
 		$primary    = isset( $_POST['primary_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['primary_color'] ) ) : '';
+		$secondary  = isset( $_POST['secondary_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['secondary_color'] ) ) : '';
 		$background = isset( $_POST['background_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['background_color'] ) ) : '';
 		$text       = isset( $_POST['text_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['text_color'] ) ) : '';
+		$accent     = isset( $_POST['accent_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['accent_color'] ) ) : '';
 		$font       = isset( $_POST['font'] ) ? sanitize_key( wp_unslash( $_POST['font'] ) ) : '';
 
 		if ( ! $primary || ! $background || ! $text ) {
@@ -422,10 +468,12 @@ class MenuScreen_Admin {
 
 		MenuScreen_Settings::update(
 			array(
-				'theme'                    => 'custom',
+				'theme'                    => $theme,
 				'custom_primary_color'     => $primary,
+				'custom_secondary_color'  => $secondary ? $secondary : '',
 				'custom_background_color' => $background,
 				'custom_text_color'       => $text,
+				'custom_accent_color'     => $accent ? $accent : '',
 				'custom_font'             => $font,
 			)
 		);
@@ -485,6 +533,8 @@ class MenuScreen_Admin {
 			array(
 				'upgrade_url_rush'  => isset( $_POST['upgrade_url_rush'] ) ? esc_url_raw( wp_unslash( $_POST['upgrade_url_rush'] ) ) : '',
 				'upgrade_url_fleet' => isset( $_POST['upgrade_url_fleet'] ) ? esc_url_raw( wp_unslash( $_POST['upgrade_url_fleet'] ) ) : '',
+				'price_usd_rush'    => isset( $_POST['price_usd_rush'] ) ? max( 0, (float) $_POST['price_usd_rush'] ) : 0,
+				'price_usd_fleet'   => isset( $_POST['price_usd_fleet'] ) ? max( 0, (float) $_POST['price_usd_fleet'] ) : 0,
 			)
 		);
 

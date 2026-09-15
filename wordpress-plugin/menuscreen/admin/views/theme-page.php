@@ -48,7 +48,6 @@ $theme_meta  = array(
 	),
 );
 $logo_url     = $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'thumbnail' ) : '';
-$font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'caveat' );
 ?>
 <div class="wrap menuscreen-wrap">
 	<h1><?php esc_html_e( 'Theme & Look', 'menuscreen' ); ?></h1>
@@ -104,41 +103,14 @@ $font_options = array( 'poppins', 'bebas', 'playfair', 'inter', 'oswald', 'cavea
 		<?php submit_button( __( 'Save', 'menuscreen' ) ); ?>
 	</form>
 
-	<div class="menuscreen-card">
-		<h2><?php esc_html_e( 'Custom theme', 'menuscreen' ); ?></h2>
-		<p class="description"><?php esc_html_e( 'Match your own brand colors and pick a display font instead of one of the built-in themes.', 'menuscreen' ); ?></p>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="menuscreen_save_custom_branding" />
-			<?php wp_nonce_field( 'menuscreen_save_custom_branding' ); ?>
-
-			<p>
-				<label for="menuscreen-primary-color"><strong><?php esc_html_e( 'Accent color', 'menuscreen' ); ?></strong></label><br>
-				<input type="color" id="menuscreen-primary-color" name="primary_color" value="<?php echo esc_attr( $settings['custom_primary_color'] ); ?>" />
-			</p>
-			<p>
-				<label for="menuscreen-background-color"><strong><?php esc_html_e( 'Background color', 'menuscreen' ); ?></strong></label><br>
-				<input type="color" id="menuscreen-background-color" name="background_color" value="<?php echo esc_attr( $settings['custom_background_color'] ); ?>" />
-			</p>
-			<p>
-				<label for="menuscreen-text-color"><strong><?php esc_html_e( 'Text color', 'menuscreen' ); ?></strong></label><br>
-				<input type="color" id="menuscreen-text-color" name="text_color" value="<?php echo esc_attr( $settings['custom_text_color'] ); ?>" />
-			</p>
-			<p>
-				<label for="menuscreen-font"><strong><?php esc_html_e( 'Font', 'menuscreen' ); ?></strong></label><br>
-				<select id="menuscreen-font" name="font">
-					<?php foreach ( $font_options as $font_key ) : ?>
-						<?php $font_meta = MenuScreen_Settings::font_meta( $font_key ); ?>
-						<option value="<?php echo esc_attr( $font_key ); ?>" <?php selected( $settings['custom_font'], $font_key ); ?>>
-							<?php echo esc_html( $font_meta['label'] ); ?>
-						</option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-
-			<?php submit_button( __( 'Use this custom theme', 'menuscreen' ) ); ?>
-		</form>
-	</div>
+	<?php if ( in_array( $settings['theme'], MenuScreen_Settings::COLOR_CUSTOMIZABLE_THEMES, true ) ) : ?>
+		<?php include MENUSCREEN_DIR . 'admin/views/partials/colors-card.php'; ?>
+	<?php else : ?>
+		<div class="menuscreen-card">
+			<h2><?php esc_html_e( 'Colors', 'menuscreen' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'This look uses a fixed palette. Pick Food Truck, Restaurant, or Custom above to set your own colors.', 'menuscreen' ); ?></p>
+		</div>
+	<?php endif; ?>
 
 	<div class="menuscreen-card">
 		<h2><?php esc_html_e( 'Functionality', 'menuscreen' ); ?></h2>

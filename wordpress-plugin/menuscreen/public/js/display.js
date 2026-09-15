@@ -277,19 +277,36 @@
 		return renderBoard( data );
 	}
 
+	var COLOR_VAR_KEYS = [ 'primary', 'secondary', 'background', 'text', 'accent' ];
+	var COLOR_CUSTOMIZABLE_THEMES = [ 'custom', 'foodtruck', 'restaurant' ];
+
 	function render( data ) {
 		lastData = data;
 		document.title = data.name + ' — Menu';
-		document.body.className = 'menuscreen-display menuscreen-theme-' + data.theme + ' menuscreen-orientation-' + data.orientation;
+		var className = 'menuscreen-display menuscreen-theme-' + data.theme + ' menuscreen-orientation-' + data.orientation;
+		if ( 'restaurant' === data.theme ) {
+			className += ' menuscreen-restaurant-' + ( data.restaurantStyle || 'classic' );
+		}
+		document.body.className = className;
+
+		var showColors = COLOR_CUSTOMIZABLE_THEMES.indexOf( data.theme ) !== -1;
+		COLOR_VAR_KEYS.forEach( function ( key ) {
+			var value = showColors && data.colors ? data.colors[ key ] : '';
+			if ( value ) {
+				document.body.style.setProperty( '--menuscreen-' + key, value );
+			} else {
+				document.body.style.removeProperty( '--menuscreen-' + key );
+			}
+		} );
 
 		if ( 'custom' === data.theme && data.custom ) {
-			document.body.style.setProperty( '--menuscreen-primary', data.custom.primaryColor );
-			document.body.style.setProperty( '--menuscreen-background', data.custom.backgroundColor );
-			document.body.style.setProperty( '--menuscreen-text', data.custom.textColor );
 			document.body.style.setProperty( '--menuscreen-font', data.custom.fontFamily );
 			ensureGoogleFont( data.custom.googleFontQuery );
-		} else if ( 'restaurant' === data.theme ) {
-			ensureGoogleFont( 'Playfair+Display:wght@600;700;900' );
+		} else {
+			document.body.style.removeProperty( '--menuscreen-font' );
+			if ( 'restaurant' === data.theme && 'modern' !== data.restaurantStyle ) {
+				ensureGoogleFont( 'Playfair+Display:wght@600;700;900' );
+			}
 		}
 
 		var html = '';

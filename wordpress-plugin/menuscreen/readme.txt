@@ -4,7 +4,7 @@ Tags: menu, digital signage, food truck, restaurant, display
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,7 @@ browser.
 * Instantly mark an item "Sold Out" — it updates on the display within seconds.
 * Drag-and-drop reordering of categories and of items within a category.
 * A "Today's Special" banner you can toggle on/off.
-* Six built-in display themes (Neon, Chalkboard, Minimalist, Colorful, Food Truck, Restaurant) — no design skill required. Food Truck matches a classic warm menu-board look; Restaurant is a quieter, upscale look with a serif headline font and subtle motion (a gentle fade between slides, a slow zoom on featured photos).
+* Six built-in display themes (Neon, Chalkboard, Minimalist, Colorful, Food Truck, Restaurant) — no design skill required. Food Truck and Restaurant (in Classic or Modern style) come with ready-made color palettes, or set your own 5 colors; Restaurant also has subtle motion (a gentle fade between slides, a slow zoom on featured photos).
 * Landscape or portrait screen orientation.
 * A shareable display link with an auto-generated QR code, generated entirely in your browser (no external service call).
 * A first-activation setup wizard and a plain-English "how to put this on your TV" guide.
@@ -33,7 +33,7 @@ browser.
 * An owner Dashboard with at-a-glance stats (items, sold out, categories, display loads) and current plan usage.
 * Three plans — Sampler (free, 10 items), Rush, and Fleet — with the Sampler item limit actually enforced (an item over the limit saves as a draft with a clear notice, not silently blocked).
 * Bulk CSV import for menu items (Rush plan and up), with per-row error reporting.
-* A Custom theme (Fleet plan) with your own brand colors and a choice of Google Fonts, alongside the six built-in themes.
+* A Custom theme with your own brand colors and a choice of Google Fonts, alongside the six built-in themes.
 * A "hide sold-out items entirely" display option.
 * A Plans & Billing page — manual plan switching, configurable upgrade links, and automatic plan upgrades from WooCommerce order completion if WooCommerce is active on the same site.
 * Combos & Upsells (Rush plan) with their own list, active/hide toggle, and a "Combos" TV display mode.
@@ -81,6 +81,13 @@ categories it created; photos already in your Media Library are left
 alone.
 
 == Changelog ==
+
+= 1.4.0 =
+* Rebuilt the first-run setup wizard: pick a vibe (Food Truck, Restaurant — Classic, Restaurant — Modern, or a Classic Look) first, then business name & logo, then colors, before adding menu items.
+* Food Truck and Restaurant are no longer fixed-color themes — pick from ready-made palettes or set your own 5 colors (Primary/Secondary/Background/Text/Accent), from the wizard or Theme & Look at any time.
+* Added a Restaurant "Modern" style (clean sans-serif, light background, crisp minimal cards) alongside the original "Classic" style (serif, dark background, gold accents) — switch between them anytime.
+* Logo uploads now require at least 512×512px — smaller images are rejected with a clear message, both in the wizard and on Theme & Look.
+* Added optional USD prices for Rush/Fleet on Plans & Billing, with a ZAR/USD toggle for customers outside South Africa.
 
 = 1.3.0 =
 * Added two new built-in display themes: Food Truck (warm cream/gold/brown menu-board look) and Restaurant (an upscale look with a serif headline font, a gentle fade between slides, and a slow zoom on featured photos).

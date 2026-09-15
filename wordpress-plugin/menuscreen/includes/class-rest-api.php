@@ -126,20 +126,35 @@ class MenuScreen_Rest_Api {
 			}
 		}
 
+		// The 5-color palette behind any of the color-customizable themes
+		// (Custom, Food Truck, Restaurant) — a blank value here means "use
+		// that theme's own built-in fallback color", handled entirely in
+		// CSS via var(--menuscreen-x, <fallback>), so we only ever pass
+		// through what's actually configured.
+		$colors = array(
+			'primary'    => $settings['custom_primary_color'],
+			'secondary'  => $settings['custom_secondary_color'],
+			'background' => $settings['custom_background_color'],
+			'text'       => $settings['custom_text_color'],
+			'accent'     => $settings['custom_accent_color'],
+		);
+
 		return array(
-			'name'          => $settings['business_name'],
-			'theme'         => $settings['theme'],
-			'orientation'   => $settings['orientation'],
-			'logoUrl'       => $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'thumbnail' ) : null,
-			'specialActive' => (bool) $settings['special_active'],
-			'specialText'   => $settings['special_text'],
-			'currency'      => $settings['currency'],
-			'updatedAt'     => current_time( 'timestamp' ), // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-			'categories'    => $data_categories,
-			'combos'        => $data_combos,
-			'tickerText'    => $settings['ticker_text'],
+			'name'             => $settings['business_name'],
+			'theme'            => $settings['theme'],
+			'restaurantStyle'  => $settings['restaurant_style'],
+			'orientation'      => $settings['orientation'],
+			'logoUrl'          => $settings['logo_id'] ? wp_get_attachment_image_url( $settings['logo_id'], 'thumbnail' ) : null,
+			'specialActive'    => (bool) $settings['special_active'],
+			'specialText'      => $settings['special_text'],
+			'currency'         => $settings['currency'],
+			'updatedAt'        => current_time( 'timestamp' ), // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+			'categories'       => $data_categories,
+			'combos'           => $data_combos,
+			'tickerText'       => $settings['ticker_text'],
 			'autoHideControls' => (bool) $settings['auto_hide_controls'],
-			'custom'        => array(
+			'colors'           => $colors,
+			'custom'           => array(
 				'primaryColor'    => $settings['custom_primary_color'],
 				'backgroundColor' => $settings['custom_background_color'],
 				'textColor'       => $settings['custom_text_color'],
