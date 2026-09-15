@@ -25,6 +25,7 @@ class BookFlow_Admin {
 		add_action( 'admin_post_bookflow_delete_waitlist_entry', array( $this, 'handle_delete_waitlist_entry' ) );
 		add_action( 'admin_post_bookflow_activate_license', array( $this, 'handle_activate_license' ) );
 		add_action( 'admin_post_bookflow_deactivate_license', array( $this, 'handle_deactivate_license' ) );
+		add_action( 'admin_post_bookflow_save_welcome_background', array( $this, 'handle_save_welcome_background' ) );
 	}
 
 	public function register_menu() {
@@ -101,6 +102,11 @@ class BookFlow_Admin {
 			return;
 		}
 		wp_enqueue_style( 'bookflow-admin', BOOKFLOW_PLUGIN_URL . 'admin/css/admin.css', array(), BOOKFLOW_VERSION );
+
+		if ( strpos( $hook, 'bookflow-welcome-screen' ) !== false ) {
+			wp_enqueue_media(); // Only here — the media library JS isn't cheap, so it's not loaded on every BookFlow screen.
+			wp_enqueue_script( 'bookflow-admin-welcome-screen', BOOKFLOW_PLUGIN_URL . 'admin/js/welcome-screen-background.js', array( 'media-editor' ), BOOKFLOW_VERSION, true );
+		}
 	}
 
 	// ---------------------------------------------------------------
@@ -112,7 +118,67 @@ class BookFlow_Admin {
 		$upcoming            = BookFlow_DB_Appointments::get_range( current_time( 'mysql' ), gmdate( 'Y-m-d H:i:s', strtotime( '+7 days' ) ), 'confirmed' );
 		$reviewloop_active   = BookFlow_ReviewLoop_Bridge::is_reviewloop_active();
 		$reviewloop_licensed = BookFlow_License::tier_includes( 'reviewloop' );
+		$checklist           = $this->get_setup_checklist();
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/dashboard.php';
+	}
+
+	/**
+	 * Drives the Dashboard's "Getting started" checklist. Every step is
+	 * checked against real, current site state (not a one-time flag the
+	 * shop could get stuck on) so the list always reflects what's actually
+	 * left to do — including un-checking itself if, say, they later remove
+	 * every catalog item.
+	 */
+	private function get_setup_checklist() {
+		global $wpdb;
+
+		$settings = BookFlow_Availability::get_settings();
+
+		$has_open_day = false;
+		foreach ( (array) $settings['weekly_hours'] as $day ) {
+			if ( ! empty( $day['enabled'] ) ) {
+				$has_open_day = true;
+				break;
+			}
+		}
+
+		$catalog_counts = wp_count_posts( BookFlow_Catalog::POST_TYPE );
+		$has_catalog     = $catalog_counts && ! empty( $catalog_counts->publish );
+
+		// A direct LIKE on post_content is the same technique WordPress's
+		// own has_shortcode()/has_block() checks rely on — good enough here
+		// since we only need "has anyone put this on a published page yet,"
+		// not to parse shortcode attributes.
+		$has_shortcode = (bool) $wpdb->get_var(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_content LIKE '%[bookflow_booking%' LIMIT 1"
+		);
+
+		return array(
+			array(
+				'done'  => $has_catalog,
+				'label' => __( 'Add your dresses & suits to the catalog', 'bookflow' ),
+				'url'   => admin_url( 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE ),
+				'cta'   => __( 'Go to Catalog', 'bookflow' ),
+			),
+			array(
+				'done'  => $has_open_day,
+				'label' => __( 'Set your opening hours & fitting slot length', 'bookflow' ),
+				'url'   => admin_url( 'admin.php?page=bookflow-settings' ),
+				'cta'   => __( 'Go to Settings', 'bookflow' ),
+			),
+			array(
+				'done'  => $has_shortcode,
+				'label' => __( 'Add the booking form to a page on your website', 'bookflow' ),
+				'url'   => admin_url( 'edit.php?post_type=page' ),
+				'cta'   => __( 'View your pages', 'bookflow' ),
+			),
+			array(
+				'done'  => ! empty( $settings['welcome_bg_image_id'] ),
+				'label' => __( 'Personalize your in-store TV welcome screen', 'bookflow' ),
+				'url'   => admin_url( 'admin.php?page=bookflow-welcome-screen' ),
+				'cta'   => __( 'Go to Welcome Screen', 'bookflow' ),
+			),
+		);
 	}
 
 	public function render_appointments_page() {
@@ -153,7 +219,11 @@ class BookFlow_Admin {
 		$welcome_screen_url = get_option( 'permalink_structure' )
 			? home_url( '/bookflow-welcome-screen/' )
 			: home_url( '/?' . BookFlow_Welcome_Screen::QUERY_VAR . '=1' );
-		$preview_data = BookFlow_Welcome_Screen::get_display_data();
+		$preview_data      = BookFlow_Welcome_Screen::get_display_data();
+		$settings          = BookFlow_Availability::get_settings();
+		$bg_image_id       = (int) $settings['welcome_bg_image_id'];
+		$bg_image_url      = $bg_image_id ? wp_get_attachment_image_url( $bg_image_id, 'medium' ) : '';
+		$bg_blur           = ! empty( $settings['welcome_bg_blur'] );
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/welcome-screen.php';
 	}
 
@@ -317,6 +387,19 @@ class BookFlow_Admin {
 		BookFlow_License::deactivate_license();
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-license' ) );
+		exit;
+	}
+
+	public function handle_save_welcome_background() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_save_welcome_background' );
+
+		$settings                          = BookFlow_Availability::get_settings();
+		$settings['welcome_bg_image_id']   = isset( $_POST['welcome_bg_image_id'] ) ? absint( $_POST['welcome_bg_image_id'] ) : 0;
+		$settings['welcome_bg_blur']       = ! empty( $_POST['welcome_bg_blur'] );
+		update_option( 'bookflow_settings', $settings );
+
+		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-welcome-screen&bg_updated=1' ) );
 		exit;
 	}
 

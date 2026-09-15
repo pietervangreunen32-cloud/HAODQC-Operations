@@ -16,18 +16,60 @@ html, body {
 }
 
 #bookflow-welcome-screen {
+	position: relative;
+	overflow: hidden;
 	width: 100vw;
 	height: 100vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: radial-gradient(circle at 50% 20%, #3D4EDB 0%, #1F2430 70%);
 	opacity: 1;
 	transition: opacity 260ms ease;
 }
 
 #bookflow-welcome-screen.bookflow-leaving {
 	opacity: 0;
+}
+
+/* Layer 1: the shop's own uploaded venue photo, when they've set one —
+   a separate element from the text content so blurring it never touches
+   the welcome message sitting on top. */
+#bookflow-welcome-screen::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background-image: var(--bookflow-bg-image, none);
+	background-size: cover;
+	background-position: center;
+}
+
+#bookflow-welcome-screen.is-blurred::before {
+	filter: blur(10px);
+	transform: scale(1.06); /* Hides the sharp, unblurred edge a plain blur() leaves at the viewport border. */
+}
+
+/* Layer 2: always present. Without a photo it's the screen's whole
+   background (the original indigo gradient); with one, it's a darkening
+   scrim so white text stays legible over any photo a shop uploads. */
+#bookflow-welcome-screen::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: radial-gradient(circle at 50% 20%, #3D4EDB 0%, #1F2430 70%);
+}
+
+#bookflow-welcome-screen.has-bg-image::after {
+	background:
+		linear-gradient(to bottom, rgba(20, 22, 31, 0.35) 0%, rgba(20, 22, 31, 0.25) 45%, rgba(20, 22, 31, 0.75) 100%),
+		radial-gradient(circle at 50% 20%, rgba(61, 78, 219, 0.3) 0%, transparent 65%);
+}
+
+/* Layer 3: the actual welcome content, always on top of both. */
+#bookflow-welcome-screen > * {
+	position: relative;
+	z-index: 2;
 }
 
 @keyframes bookflow-rise {

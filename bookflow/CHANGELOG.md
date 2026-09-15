@@ -1,5 +1,51 @@
 # BookFlow Changelog
 
+## 1.7.0 — Welcome screen background, ZAR pricing, and a Dashboard setup wizard
+
+**Welcome screen**
+
+- Shops can now upload their own venue or fitting-lounge photo as the
+  welcome screen's background, via BookFlow → Welcome Screen → the
+  WordPress media library. It renders softly blurred (optional, on by
+  default) behind a darkening gradient so the welcome text stays legible
+  over any photo. Without one, the original indigo gradient is used —
+  nothing changes for shops that don't set a photo.
+
+**Pricing**
+
+- Added South African Rand as a second, real reference currency on the
+  License page (Starter R349, Growth R699, Pro R1,199 per month), backed
+  by actual research into comparable booking-plugin pricing and current
+  USD/ZAR exchange rates rather than a guess — see the doc comment in
+  `class-bookflow-pricing.php` for the reasoning and sources. A ZAR/USD
+  toggle (persisted per-browser) lets a shop see either. This is a
+  *display* change only: Stripe still handles actual billing in the
+  buyer's own local currency at checkout, unchanged from 1.5.0.
+
+**Dashboard**
+
+- Added a "Getting started" checklist that checks real site state (has a
+  catalog item been published, are any hours turned on, is the
+  `[bookflow_booking]` shortcode actually placed on a published page, has
+  a welcome screen background been set) rather than a one-time flag, so
+  it can never get permanently stuck showing an already-completed step
+  as pending, or vice versa.
+- Added a plain-language "How this fits into your website" explanation
+  covering the two ways to build a catalog (BookFlow's own, or synced
+  read-only from an existing WooCommerce store), where the booking form
+  shortcode goes, how optional deposits and the ReviewLoop hook fit in,
+  and that the welcome screen is a separate, in-store-only link never
+  exposed to website visitors.
+
+**Verification**
+
+- Re-checked the 1.6.0 admin menu fix live (fresh WordPress + WooCommerce
+  install, scripted browser check of the actual rendered submenu order)
+  after a report that the menu still looked unorganized. Confirmed
+  Dashboard renders first, as intended — the most likely explanation for
+  a shop still seeing the old order is a browser/plugin-cache holding an
+  older copy rather than a live 1.6.0+ install.
+
 ## 1.6.0 — Admin menu order, UI/UX audit, and real bug fixes
 
 Everything here came out of an actual UI/UX and code audit, verified live

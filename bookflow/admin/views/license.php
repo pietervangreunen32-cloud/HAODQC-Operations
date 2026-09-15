@@ -3,9 +3,11 @@
  * BookFlow admin: current plan status, license key activation, and the
  * pricing table for upgrading.
  *
- * Note on "multi-currency billing": this screen shows USD reference
- * prices only. The actual checkout/subscription billing (where a shop
- * outside the US would see and pay in their own local currency, via
+ * Note on "multi-currency billing": this screen shows a reference price
+ * in ZAR (fixed, see class-bookflow-pricing.php for why it's not a live
+ * conversion) or USD, switchable client-side — purely a display choice
+ * for browsing plans. The actual checkout/subscription billing (where a
+ * shop outside South Africa sees and pays in its own local currency, via
  * Stripe) happens on BookFlow's own website, not inside this plugin —
  * see the note at the top of class-bookflow-license.php for why.
  */
@@ -103,15 +105,20 @@ $status_labels = array(
 
 	<h2><?php esc_html_e( 'Plans', 'bookflow' ); ?></h2>
 	<p class="description">
-		<?php esc_html_e( 'Prices shown in USD. At checkout, Stripe automatically shows and charges in your local currency.', 'bookflow' ); ?>
+		<?php esc_html_e( 'Reference prices only — at checkout, Stripe shows and charges in the buyer\'s own local currency.', 'bookflow' ); ?>
 	</p>
 
-	<div class="bookflow-plans-grid">
+	<div class="bookflow-currency-toggle" role="group" aria-label="<?php esc_attr_e( 'Currency', 'bookflow' ); ?>">
+		<button type="button" class="bookflow-currency-btn is-active" data-currency="zar">R <?php esc_html_e( 'ZAR', 'bookflow' ); ?></button>
+		<button type="button" class="bookflow-currency-btn" data-currency="usd">$ <?php esc_html_e( 'USD', 'bookflow' ); ?></button>
+	</div>
+
+	<div class="bookflow-plans-grid" id="bookflow-plans-grid" data-currency="zar">
 		<?php foreach ( $purchasable as $tier_key => $tier ) : ?>
 			<div class="bookflow-plan-card<?php echo ( $tier_key === $current_tier ) ? ' is-current' : ''; ?>">
 				<h3><?php echo esc_html( $tier['label'] ); ?></h3>
 				<p class="bookflow-plan-price">
-					$<?php echo esc_html( $tier['price_usd'] ); ?><span>/<?php esc_html_e( 'mo', 'bookflow' ); ?></span>
+					<span class="bookflow-price-zar">R<?php echo esc_html( number_format_i18n( $tier['price_zar'] ) ); ?></span><span class="bookflow-price-usd">$<?php echo esc_html( $tier['price_usd'] ); ?></span><span class="bookflow-plan-period">/<?php esc_html_e( 'mo', 'bookflow' ); ?></span>
 				</p>
 				<p>
 					<?php
@@ -142,3 +149,31 @@ $status_labels = array(
 		<?php endforeach; ?>
 	</div>
 </div>
+<script>
+( function () {
+	var grid = document.getElementById( 'bookflow-plans-grid' );
+	var buttons = document.querySelectorAll( '.bookflow-currency-btn' );
+	if ( ! grid || ! buttons.length ) {
+		return;
+	}
+	var STORAGE_KEY = 'bookflow_license_currency';
+	function setCurrency( currency ) {
+		grid.setAttribute( 'data-currency', currency );
+		buttons.forEach( function ( btn ) {
+			btn.classList.toggle( 'is-active', btn.getAttribute( 'data-currency' ) === currency );
+		} );
+		try { window.localStorage.setItem( STORAGE_KEY, currency ); } catch ( e ) {}
+	}
+	buttons.forEach( function ( btn ) {
+		btn.addEventListener( 'click', function () {
+			setCurrency( btn.getAttribute( 'data-currency' ) );
+		} );
+	} );
+	try {
+		var saved = window.localStorage.getItem( STORAGE_KEY );
+		if ( 'usd' === saved ) {
+			setCurrency( 'usd' );
+		}
+	} catch ( e ) {}
+} )();
+</script>

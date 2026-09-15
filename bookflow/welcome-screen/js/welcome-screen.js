@@ -87,8 +87,26 @@
 		return wrap;
 	}
 
+	/**
+	 * Applies the shop's own uploaded venue photo (if any) as the screen's
+	 * background — separate from buildScreen() since it changes rarely
+	 * and shouldn't be part of the content that gets wiped/rebuilt on
+	 * every render.
+	 */
+	function applyBackground( data ) {
+		if ( data.bg_image_url ) {
+			root.classList.add( 'has-bg-image' );
+			root.classList.toggle( 'is-blurred', !! data.bg_blur );
+			root.style.setProperty( '--bookflow-bg-image', 'url("' + data.bg_image_url.replace( /"/g, '%22' ) + '")' );
+		} else {
+			root.classList.remove( 'has-bg-image', 'is-blurred' );
+			root.style.removeProperty( '--bookflow-bg-image' );
+		}
+	}
+
 	function render( data ) {
-		root.innerHTML = '';
+		applyBackground( data );
+		root.innerHTML = ''; // Only clears children — root's own classes/style from applyBackground() are untouched.
 		root.appendChild( buildScreen( data ) );
 	}
 

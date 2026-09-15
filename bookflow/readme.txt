@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,27 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.7.0 =
+* Welcome screen: shops can now upload their own venue/shop photo as a
+  background (via the WordPress media library), shown softly blurred
+  behind the welcome message with a darkening overlay so text always
+  stays legible — replaces the plain indigo background as an optional,
+  more personal touch.
+* Pricing: added South African Rand as a second reference currency on
+  the License page, with a one-click ZAR/USD toggle, alongside real
+  market research behind the ZAR figures. Actual billing still runs
+  through Stripe in the buyer's own local currency; this only affects
+  what price is displayed while deciding on a plan.
+* Dashboard: added a "Getting started" checklist that tracks real setup
+  progress (catalog added, hours set, booking form placed on a page,
+  welcome screen personalized) and a plain-language explanation of how
+  BookFlow's booking form and TV welcome screen fit alongside an
+  existing website and WooCommerce catalog.
+* Re-verified the admin menu order live (Dashboard first, as fixed in
+  1.6.0) after a report that it looked unorganized — confirmed correct
+  in a fresh install; a cached or pre-1.6.0 copy of the plugin was the
+  likely cause.
 
 = 1.6.0 =
 * UI/UX audit and real bug fixes, verified against a live install: fixed

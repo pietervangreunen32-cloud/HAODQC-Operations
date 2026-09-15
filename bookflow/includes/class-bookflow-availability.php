@@ -25,6 +25,8 @@ class BookFlow_Availability {
 				'weekly_hours'            => array(),
 				'booking_lead_time_hours' => 2,
 				'booking_horizon_days'    => 90,
+				'welcome_bg_image_id'     => 0,
+				'welcome_bg_blur'         => true,
 			)
 		);
 	}

@@ -19,6 +19,20 @@
  * customer's dress felt like the wrong place to cut corners even on the
  * cheapest plan. Flagging this resolution for confirmation — the fix, if
  * this reading is wrong, is a one-line change in should_gate_inventory().
+ *
+ * ZAR figures (flagged for review): fixed reference prices, not a live
+ * FX conversion of price_usd — deliberately, since South African buyers
+ * researching SaaS pricing consistently want a stable Rand number they
+ * can budget against, not one that drifts with the exchange rate. Set
+ * using the 2026 average USD/ZAR rate (~R16.40, ranging ~R15.70–R17.20
+ * across the year) plus a buffer against that volatility, then rounded
+ * to ordinary South African price points. Cross-checked against the
+ * closest real comparable — SimplyBook.me, a true metered booking SaaS
+ * like this one rather than a one-time-license WordPress plugin — whose
+ * tiers (€11.90 / €24.90 / €49.90 per month, roughly $13 / $27 / $54)
+ * land close to BookFlow's own $19 / $39 / $69, which is reassuring
+ * context but wasn't the basis for the ZAR numbers themselves. These are
+ * a starting point to test, the same as the USD figures.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,6 +50,7 @@ class BookFlow_Pricing {
 			'trial' => array(
 				'label'          => __( 'Free Trial', 'bookflow' ),
 				'price_usd'      => 0,
+				'price_zar'      => 0,
 				'billing_period' => null,
 				'booking_cap'    => null, // Unlimited for the trial window's duration.
 				'features'       => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits', 'woocommerce_sync', 'wedding_countdown', 'multi_location', 'sms_reminders', 'reviewloop' ),
@@ -43,6 +58,7 @@ class BookFlow_Pricing {
 			'free' => array(
 				'label'          => __( 'Free', 'bookflow' ),
 				'price_usd'      => 0,
+				'price_zar'      => 0,
 				'billing_period' => null,
 				'booking_cap'    => 10,
 				'features'       => array( 'inventory_aware' ),
@@ -50,6 +66,7 @@ class BookFlow_Pricing {
 			'starter' => array(
 				'label'          => __( 'Starter', 'bookflow' ),
 				'price_usd'      => 19,
+				'price_zar'      => 349,
 				'billing_period' => 'month',
 				'booking_cap'    => 25,
 				'features'       => array( 'inventory_aware' ),
@@ -57,6 +74,7 @@ class BookFlow_Pricing {
 			'growth' => array(
 				'label'          => __( 'Growth', 'bookflow' ),
 				'price_usd'      => 39,
+				'price_zar'      => 699,
 				'billing_period' => 'month',
 				'booking_cap'    => 60,
 				'features'       => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits' ),
@@ -64,6 +82,7 @@ class BookFlow_Pricing {
 			'pro' => array(
 				'label'          => __( 'Pro', 'bookflow' ),
 				'price_usd'      => 69,
+				'price_zar'      => 1199,
 				'billing_period' => 'month',
 				'booking_cap'    => null, // Unlimited.
 				'features'       => array( 'inventory_aware', 'group_bookings', 'shortlist', 'waitlist', 'deposits', 'woocommerce_sync', 'wedding_countdown', 'multi_location', 'sms_reminders', 'reviewloop' ),

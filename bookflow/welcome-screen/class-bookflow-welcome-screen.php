@@ -65,6 +65,7 @@ class BookFlow_Welcome_Screen {
 	 */
 	public static function get_display_data( $location_id = null ) {
 		$shop_name = get_bloginfo( 'name' );
+		$bg        = self::get_background();
 
 		$appointment = BookFlow_DB_Appointments::get_current_or_next( null, $location_id );
 
@@ -80,6 +81,8 @@ class BookFlow_Welcome_Screen {
 				'items'           => array(),
 				'countdown_days'  => null,
 				'shop_name'       => $shop_name,
+				'bg_image_url'    => $bg['url'],
+				'bg_blur'         => $bg['blur'],
 			);
 		}
 
@@ -121,6 +124,28 @@ class BookFlow_Welcome_Screen {
 			'items'           => $items,
 			'countdown_days'  => $countdown_days,
 			'shop_name'       => $shop_name,
+			'bg_image_url'    => $bg['url'],
+			'bg_blur'         => $bg['blur'],
+		);
+	}
+
+	/**
+	 * The shop's own uploaded venue photo for the welcome screen, if
+	 * they've set one — shown behind the welcome text on both the idle
+	 * and active states, so the screen looks like their shop rather than
+	 * a generic indigo gradient all day. Falls back to no image (the CSS
+	 * gradient) until a shop uploads one.
+	 *
+	 * @return array{url:string,blur:bool}
+	 */
+	private static function get_background() {
+		$settings   = BookFlow_Availability::get_settings();
+		$image_id   = (int) $settings['welcome_bg_image_id'];
+		$image_url  = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
+
+		return array(
+			'url'  => $image_url ? $image_url : '',
+			'blur' => ! empty( $settings['welcome_bg_blur'] ),
 		);
 	}
 
