@@ -239,14 +239,15 @@ class BookFlow_Admin {
 	public function render_license_page() {
 		$this->guard_capability();
 
-		$license_data  = BookFlow_License::get_license_data();
-		$current_tier  = BookFlow_License::get_current_tier();
-		$tier_config   = BookFlow_Pricing::get_tier( $current_tier );
-		$purchasable   = BookFlow_Pricing::get_purchasable_tiers();
-		$is_trial      = BookFlow_License::is_trial_active();
-		$trial_days    = BookFlow_License::trial_days_remaining();
-		$bookings_used = BookFlow_DB_Appointments::count_for_month( (int) current_time( 'Y' ), (int) current_time( 'n' ) );
-		$license_error = get_transient( 'bookflow_license_error_' . get_current_user_id() );
+		$license_data        = BookFlow_License::get_license_data();
+		$current_tier        = BookFlow_License::get_current_tier();
+		$tier_config         = BookFlow_Pricing::get_tier( $current_tier );
+		$purchasable         = BookFlow_Pricing::get_purchasable_tiers();
+		$is_testing_unlocked = defined( 'BOOKFLOW_UNLOCKED' ) && BOOKFLOW_UNLOCKED;
+		$is_trial            = ! $is_testing_unlocked && BookFlow_License::is_trial_active();
+		$trial_days          = BookFlow_License::trial_days_remaining();
+		$bookings_used       = BookFlow_DB_Appointments::count_for_month( (int) current_time( 'Y' ), (int) current_time( 'n' ) );
+		$license_error       = get_transient( 'bookflow_license_error_' . get_current_user_id() );
 		delete_transient( 'bookflow_license_error_' . get_current_user_id() );
 
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/license.php';

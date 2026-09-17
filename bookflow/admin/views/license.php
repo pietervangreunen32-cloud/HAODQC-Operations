@@ -32,6 +32,12 @@ $status_labels = array(
 		<div class="notice notice-error"><p><?php echo esc_html( $license_error ); ?></p></div>
 	<?php endif; ?>
 
+	<?php if ( $is_testing_unlocked ) : ?>
+		<div class="notice notice-warning"><p>
+			<?php esc_html_e( 'Testing mode: every plan feature is unlocked here because BOOKFLOW_UNLOCKED is set in wp-config.php — no real license or bookings-per-month cap applies on this site. Remove that constant before this codebase is ever used on a real shop\'s site.', 'bookflow' ); ?>
+		</p></div>
+	<?php endif; ?>
+
 	<div class="bookflow-plan-summary">
 		<h2>
 			<?php

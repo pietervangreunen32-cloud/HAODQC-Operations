@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,13 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.7.3 =
+* Added an internal testing-only override (a `BOOKFLOW_UNLOCKED`
+  wp-config.php constant, switched on by a separate "BookFlow –
+  Testing Unlock" companion plugin) that forces every plan onto Pro
+  with no license key, for testing on a private/staging site. Never
+  ships active by default and never affects a normal install.
 
 = 1.7.2 =
 * Replaced the background blur on/off toggle with a 0-100% slider

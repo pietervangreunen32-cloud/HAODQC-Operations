@@ -94,6 +94,20 @@ class BookFlow_License {
 	 * @return string One of: 'trial', 'free', 'starter', 'growth', 'pro'.
 	 */
 	public static function get_current_tier() {
+		// Internal testing/QA override — every other method in this class
+		// (tier_includes(), check_can_book(), etc.) derives from this one,
+		// so forcing it here is enough to exercise every Pro-only feature
+		// without going through a real license key. Deliberately gated
+		// behind a wp-config.php constant rather than any UI or database
+		// setting, so it can never be flipped on for a real shop by
+		// accident, a stray filter, or a support tech poking at settings —
+		// only someone with file access to the site's wp-config.php (i.e.
+		// whoever installed it there on purpose) can turn it on. Never
+		// ship a site with this constant set.
+		if ( defined( 'BOOKFLOW_UNLOCKED' ) && BOOKFLOW_UNLOCKED ) {
+			return 'pro';
+		}
+
 		$data = self::get_license_data();
 
 		if ( empty( $data['key'] ) ) {

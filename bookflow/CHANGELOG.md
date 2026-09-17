@@ -1,5 +1,30 @@
 # BookFlow Changelog
 
+## 1.7.3 — Testing-unlock override for internal QA
+
+- Added `BookFlow_License::get_current_tier()` support for a
+  `BOOKFLOW_UNLOCKED` constant that, when defined truthy (normally via
+  wp-config.php), forces every plan check to resolve to Pro — no
+  license key, no booking cap — so the whole feature set can be
+  exercised on a private/staging install without going through
+  licensing. Every other gating method (`tier_includes()`,
+  `check_can_book()`, `get_current_tier_config()`) derives from this
+  one call, so nothing else needed to change.
+- Added a tiny, separately-packaged companion plugin,
+  `bookflow-testing-unlock/`, whose only job is defining that
+  constant — so unlocking/re-locking BookFlow for testing is just
+  activating/deactivating a clearly-labeled plugin ("BookFlow —
+  Testing Unlock (DO NOT USE ON A LIVE SITE)"), not editing
+  wp-config.php by hand. It declares `Requires Plugins: bookflow`, so
+  WordPress itself blocks deactivating BookFlow while this is active
+  and shows the dependency in the Plugins list.
+- The License page shows an explicit "Testing mode" warning notice
+  and suppresses the trial-days badge (which would otherwise show
+  stale/misleading data) whenever the override is active.
+- This lives in its own top-level folder outside `bookflow/`, so the
+  ordinary product ZIP never contains it — it only ships in the
+  separate testing bundle.
+
 ## 1.7.2 — Adjustable blur %, wedding fonts, confirmed live sync
 
 **Welcome screen**
