@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap bookflow-wrap">
 	<h1><?php esc_html_e( 'Welcome Screen', 'bookflow' ); ?></h1>
 	<p class="description">
-		<?php esc_html_e( 'Open this link full-screen on a browser plugged into a TV in your shop. It updates itself automatically as appointments come and go — nobody needs to touch it.', 'bookflow' ); ?>
+		<?php esc_html_e( 'Open this link full-screen on a browser plugged into a TV in your shop. It reads live from your bookings and checks for updates every 15 seconds, moving on to the next appointment on its own — nobody needs to touch it.', 'bookflow' ); ?>
 	</p>
 
 	<p>
@@ -23,13 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php esc_html_e( 'Tip: most TVs and browsers have a full-screen (F11 on Windows/Linux, the green button on Mac) or "kiosk mode" option — use it so no browser toolbar is visible to customers.', 'bookflow' ); ?>
 	</p>
 
-	<h2><?php esc_html_e( 'Background photo', 'bookflow' ); ?></h2>
+	<h2><?php esc_html_e( 'Background & style', 'bookflow' ); ?></h2>
 	<p class="description">
-		<?php esc_html_e( 'Set a photo of your own shop or fitting lounge to show behind the welcome message — a plain indigo background is used until you add one.', 'bookflow' ); ?>
+		<?php esc_html_e( 'Set a photo of your own shop or fitting lounge to show behind the welcome message — a plain indigo background is used until you add one — and pick a typeface for the welcome name.', 'bookflow' ); ?>
 	</p>
 
 	<?php if ( isset( $_GET['bg_updated'] ) ) : ?>
-		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Background updated.', 'bookflow' ); ?></p></div>
+		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Background & style updated.', 'bookflow' ); ?></p></div>
 	<?php endif; ?>
 
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bookflow-form">
@@ -54,13 +54,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</p>
 
 		<p>
-			<label>
-				<input type="checkbox" name="welcome_bg_blur" value="1" <?php checked( $bg_blur ); ?> />
-				<?php esc_html_e( 'Soften the photo (blur), so the welcome text stays easy to read', 'bookflow' ); ?>
-			</label>
+			<label for="bookflow-bg-blur-amount"><strong><?php esc_html_e( 'Blur amount', 'bookflow' ); ?></strong></label><br>
+			<input
+				type="range"
+				id="bookflow-bg-blur-amount"
+				name="welcome_bg_blur_amount"
+				min="0"
+				max="100"
+				step="5"
+				value="<?php echo esc_attr( $bg_blur_amount ); ?>"
+				style="width:320px;vertical-align:middle;"
+				oninput="document.getElementById('bookflow-bg-blur-value').textContent = this.value + '%';"
+			/>
+			<span id="bookflow-bg-blur-value" style="font-weight:600;"><?php echo esc_html( $bg_blur_amount ); ?>%</span>
+			<p class="description"><?php esc_html_e( 'A light softening keeps the photo from competing with the welcome text — 0% shows the photo sharp, higher values soften it more.', 'bookflow' ); ?></p>
 		</p>
 
-		<?php submit_button( __( 'Save background', 'bookflow' ) ); ?>
+		<p>
+			<label for="welcome_font"><strong><?php esc_html_e( 'Font', 'bookflow' ); ?></strong></label><br>
+			<select id="welcome_font" name="welcome_font">
+				<?php foreach ( $font_choices as $key => $choice ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $selected_font_key, $key ); ?>><?php echo esc_html( $choice['label'] ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<p class="description"><?php esc_html_e( 'Used for the welcome name only — item names and details stay in the easy-to-read default font.', 'bookflow' ); ?></p>
+		</p>
+
+		<?php submit_button( __( 'Save background & style', 'bookflow' ) ); ?>
 	</form>
 
 	<h2><?php esc_html_e( 'Right now, it would show:', 'bookflow' ); ?></h2>

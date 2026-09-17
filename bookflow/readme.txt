@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,21 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.7.2 =
+* Replaced the background blur on/off toggle with a 0-100% slider
+  (defaults to a light 5%), so you can dial in exactly how soft the
+  photo looks instead of a fixed amount.
+* Added a Font setting on the Welcome Screen page with 10 wedding-
+  appropriate typefaces (elegant serif and script Google Fonts) for
+  the welcome name — item names and details stay in the easy-to-read
+  default font.
+* Fixed a bug where any non-default font selection silently failed to
+  apply, caused by HTML-escaping breaking the inline CSS that carries
+  it to the browser.
+* Confirmed (with a live, no-reload test) that the welcome screen
+  already syncs automatically with real bookings via its background
+  refresh, and tightened that refresh from 30 to 15 seconds.
 
 = 1.7.1 =
 * Toned down the welcome screen's background blur — it looked much

@@ -230,7 +230,9 @@ class BookFlow_Admin {
 		$settings          = BookFlow_Availability::get_settings();
 		$bg_image_id       = (int) $settings['welcome_bg_image_id'];
 		$bg_image_url      = $bg_image_id ? wp_get_attachment_image_url( $bg_image_id, 'medium' ) : '';
-		$bg_blur           = ! empty( $settings['welcome_bg_blur'] );
+		$bg_blur_amount    = max( 0, min( 100, (int) $settings['welcome_bg_blur_amount'] ) );
+		$font_choices      = BookFlow_Welcome_Screen::get_font_choices();
+		$selected_font_key = isset( $font_choices[ $settings['welcome_font'] ] ) ? $settings['welcome_font'] : 'default';
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/welcome-screen.php';
 	}
 
@@ -403,7 +405,12 @@ class BookFlow_Admin {
 
 		$settings                          = BookFlow_Availability::get_settings();
 		$settings['welcome_bg_image_id']   = isset( $_POST['welcome_bg_image_id'] ) ? absint( $_POST['welcome_bg_image_id'] ) : 0;
-		$settings['welcome_bg_blur']       = ! empty( $_POST['welcome_bg_blur'] );
+		$settings['welcome_bg_blur_amount'] = isset( $_POST['welcome_bg_blur_amount'] ) ? max( 0, min( 100, absint( $_POST['welcome_bg_blur_amount'] ) ) ) : 5;
+
+		$font_choices = BookFlow_Welcome_Screen::get_font_choices();
+		$posted_font  = isset( $_POST['welcome_font'] ) ? sanitize_key( wp_unslash( $_POST['welcome_font'] ) ) : 'default';
+		$settings['welcome_font'] = isset( $font_choices[ $posted_font ] ) ? $posted_font : 'default';
+
 		update_option( 'bookflow_settings', $settings );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bookflow-welcome-screen&bg_updated=1' ) );

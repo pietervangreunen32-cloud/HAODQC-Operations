@@ -82,7 +82,7 @@ class BookFlow_Welcome_Screen {
 				'countdown_days'  => null,
 				'shop_name'       => $shop_name,
 				'bg_image_url'    => $bg['url'],
-				'bg_blur'         => $bg['blur'],
+				'bg_blur_amount'  => $bg['blur_amount'],
 			);
 		}
 
@@ -125,7 +125,7 @@ class BookFlow_Welcome_Screen {
 			'countdown_days'  => $countdown_days,
 			'shop_name'       => $shop_name,
 			'bg_image_url'    => $bg['url'],
-			'bg_blur'         => $bg['blur'],
+			'bg_blur_amount'  => $bg['blur_amount'],
 		);
 	}
 
@@ -136,7 +136,7 @@ class BookFlow_Welcome_Screen {
 	 * a generic indigo gradient all day. Falls back to no image (the CSS
 	 * gradient) until a shop uploads one.
 	 *
-	 * @return array{url:string,blur:bool}
+	 * @return array{url:string,blur_amount:int}
 	 */
 	private static function get_background() {
 		$settings   = BookFlow_Availability::get_settings();
@@ -144,8 +144,8 @@ class BookFlow_Welcome_Screen {
 		$image_url  = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
 
 		return array(
-			'url'  => $image_url ? $image_url : '',
-			'blur' => ! empty( $settings['welcome_bg_blur'] ),
+			'url'         => $image_url ? $image_url : '',
+			'blur_amount' => max( 0, min( 100, (int) $settings['welcome_bg_blur_amount'] ) ),
 		);
 	}
 
@@ -168,5 +168,87 @@ class BookFlow_Welcome_Screen {
 	private static function first_name( $full_name ) {
 		$parts = explode( ' ', trim( $full_name ) );
 		return $parts[0];
+	}
+
+	/**
+	 * The welcome screen's name/heading typeface options — kept short and
+	 * curated (rather than a free-text Google Font name) so every choice on
+	 * offer actually looks right blown up to TV size and paired with the
+	 * rest of the screen, no shop has to know what a "web-safe fallback"
+	 * is, and there's no way to typo in a broken font name. Applied only to
+	 * the big name/heading text; item names and the countdown badge stay in
+	 * the base sans-serif for legibility at a distance.
+	 *
+	 * @return array<string,array{label:string,family:string,google:?string}>
+	 */
+	public static function get_font_choices() {
+		return array(
+			'default'    => array(
+				'label'  => __( 'Default (matches the rest of the screen)', 'bookflow' ),
+				'family' => "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+				'google' => null,
+			),
+			'playfair'   => array(
+				'label'  => __( 'Playfair Display', 'bookflow' ),
+				'family' => "'Playfair Display', Georgia, serif",
+				'google' => 'Playfair+Display:wght@600;700',
+			),
+			'cormorant'  => array(
+				'label'  => __( 'Cormorant Garamond', 'bookflow' ),
+				'family' => "'Cormorant Garamond', Georgia, serif",
+				'google' => 'Cormorant+Garamond:wght@600;700',
+			),
+			'ebgaramond' => array(
+				'label'  => __( 'EB Garamond', 'bookflow' ),
+				'family' => "'EB Garamond', Georgia, serif",
+				'google' => 'EB+Garamond:wght@600;700',
+			),
+			'cinzel'     => array(
+				'label'  => __( 'Cinzel', 'bookflow' ),
+				'family' => "'Cinzel', Georgia, serif",
+				'google' => 'Cinzel:wght@600;700',
+			),
+			'marcellus'  => array(
+				'label'  => __( 'Marcellus', 'bookflow' ),
+				'family' => "'Marcellus', Georgia, serif",
+				'google' => 'Marcellus',
+			),
+			'prata'      => array(
+				'label'  => __( 'Prata', 'bookflow' ),
+				'family' => "'Prata', Georgia, serif",
+				'google' => 'Prata',
+			),
+			'italiana'   => array(
+				'label'  => __( 'Italiana', 'bookflow' ),
+				'family' => "'Italiana', Georgia, serif",
+				'google' => 'Italiana',
+			),
+			'greatvibes' => array(
+				'label'  => __( 'Great Vibes (script)', 'bookflow' ),
+				'family' => "'Great Vibes', cursive",
+				'google' => 'Great+Vibes',
+			),
+			'parisienne' => array(
+				'label'  => __( 'Parisienne (script)', 'bookflow' ),
+				'family' => "'Parisienne', cursive",
+				'google' => 'Parisienne',
+			),
+		);
+	}
+
+	/**
+	 * @return array{key:string,family:string,google_url:?string}
+	 */
+	public static function get_selected_font() {
+		$settings = BookFlow_Availability::get_settings();
+		$choices  = self::get_font_choices();
+		$key      = isset( $choices[ $settings['welcome_font'] ] ) ? $settings['welcome_font'] : 'default';
+		$choice   = $choices[ $key ];
+
+		return array(
+			'key'        => $key,
+			'family'     => $choice['family'],
+			'google_url' => $choice['google'] ? 'https://fonts.googleapis.com/css2?family=' . $choice['google'] . '&display=swap' : null,
+		);
 	}
 }

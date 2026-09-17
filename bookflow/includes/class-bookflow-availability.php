@@ -26,7 +26,8 @@ class BookFlow_Availability {
 				'booking_lead_time_hours' => 2,
 				'booking_horizon_days'    => 90,
 				'welcome_bg_image_id'     => 0,
-				'welcome_bg_blur'         => true,
+				'welcome_bg_blur_amount'  => 5, // 0-100; a soft-focus default, not a heavy blur.
+				'welcome_font'            => 'default',
 			)
 		);
 	}

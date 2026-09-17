@@ -45,13 +45,14 @@ html, body {
 }
 
 #bookflow-welcome-screen.is-blurred::before {
-	/* A fixed px blur looks much stronger on a smaller browser window than
-	   on a full TV screen (the same blur radius covers proportionally more
-	   of a smaller image), which is what made this look heavy-handed in a
-	   normal-sized window — a vw-based value keeps the effect visually
-	   consistent at any size, clamped so it's never barely-there on a tiny
-	   window or overpowering on a huge one. */
-	filter: blur(clamp(2px, 0.3vw, 6px));
+	/* Driven by the shop's own 0-100 "Blur amount" setting rather than a
+	   fixed number, after a fixed px value read as much stronger in a
+	   normal browser window than full-screen on a TV (the same blur
+	   radius covers proportionally more of a smaller image). The vw unit
+	   keeps whatever percentage they pick looking visually consistent at
+	   any window size; --bookflow-bg-blur-pct is set in JS from that
+	   setting and defaults to 5 (a soft-focus level) if ever unset. */
+	filter: blur(calc(var(--bookflow-bg-blur-pct, 5) * 0.025vw));
 	transform: scale(1.02); /* Hides the sharp, unblurred edge a plain blur() leaves at the viewport border. */
 }
 
@@ -98,6 +99,7 @@ html, body {
 	font-weight: 600;
 	text-align: center;
 	opacity: 0.9;
+	font-family: var(--bookflow-heading-font, inherit);
 }
 
 .bookflow-welcome {
@@ -118,6 +120,7 @@ html, body {
 	font-weight: 700;
 	margin: 0 0 1vw;
 	line-height: 1.1;
+	font-family: var(--bookflow-heading-font, inherit);
 }
 
 .bookflow-countdown {

@@ -1,5 +1,33 @@
 # BookFlow Changelog
 
+## 1.7.2 — Adjustable blur %, wedding fonts, confirmed live sync
+
+**Welcome screen**
+
+- The background blur is now a 0-100% slider (BookFlow → Welcome Screen
+  → Background & style), defaulting to a light 5%, instead of a fixed
+  on/off toggle — after 5% specifically was requested as the right
+  amount, this makes that (and any other level) a setting rather than
+  a guess baked into the CSS.
+- Added a Font setting offering 10 wedding-appropriate typefaces
+  (Playfair Display, Cormorant Garamond, EB Garamond, Cinzel,
+  Marcellus, Prata, Italiana, Great Vibes, Parisienne, plus the
+  existing default) for the welcome name specifically — item names and
+  the countdown badge stay in the base sans-serif for legibility.
+- Fixed a real bug found while building the font picker: the chosen
+  font's CSS was written through `esc_html()` inside an inline
+  `<style>` block, which HTML-entity-encodes the quotes around font
+  names (`'Playfair Display'` → `&#039;Playfair Display&#039;`) —
+  harmless in normal HTML text, but browsers don't decode HTML
+  entities inside `<style>` tags, so every non-default font silently
+  failed to apply and fell back to the default. Fixed by outputting
+  the (developer-controlled, whitelist-only) font family string
+  directly, with just a `</style>`-breakout guard.
+- Live-tested (no page reload, a real booking inserted mid-test) that
+  the welcome screen already syncs automatically with bookings via its
+  background poll — confirmed working, no bug found — and tightened
+  that poll from 30 to 15 seconds so a fresh booking reflects sooner.
+
 ## 1.7.1 — Softer background blur, Adding Products guide in-plugin
 
 - Toned down the welcome screen's background blur. It used a fixed

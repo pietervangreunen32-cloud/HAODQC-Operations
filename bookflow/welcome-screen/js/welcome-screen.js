@@ -1,12 +1,14 @@
 /**
  * Renders the welcome screen from the data embedded in the page (first
- * paint) and then polls the REST endpoint every 30 seconds so the display
- * moves on to the next appointment on its own — this is meant to run
- * unattended on a TV, with nobody there to hit refresh.
+ * paint) and then polls the REST endpoint every 15 seconds so the display
+ * moves on to the next appointment on its own, reading real appointment
+ * data every time — this is meant to run unattended on a TV, with nobody
+ * there to hit refresh, and to pick up a booking made moments ago quickly
+ * enough that it feels automatic rather than stale.
  *
  * Every poll re-fetches, but a render only happens when the payload
  * actually changed — otherwise the entrance animation would restart
- * every 30 seconds, which reads as flickering rather than "elegant" on
+ * every 15 seconds, which reads as flickering rather than "elegant" on
  * a screen meant to sit still in a fitting room.
  */
 ( function () {
@@ -19,7 +21,7 @@
 
 	var restUrl = root.getAttribute( 'data-rest-url' );
 	var nonce   = root.getAttribute( 'data-nonce' );
-	var POLL_MS = 30000;
+	var POLL_MS = 15000;
 	var lastPayload = null;
 
 	function el( tag, attrs, children ) {
@@ -95,12 +97,15 @@
 	 */
 	function applyBackground( data ) {
 		if ( data.bg_image_url ) {
+			var blurAmount = data.bg_blur_amount || 0;
 			root.classList.add( 'has-bg-image' );
-			root.classList.toggle( 'is-blurred', !! data.bg_blur );
+			root.classList.toggle( 'is-blurred', blurAmount > 0 );
+			root.style.setProperty( '--bookflow-bg-blur-pct', blurAmount );
 			root.style.setProperty( '--bookflow-bg-image', 'url("' + data.bg_image_url.replace( /"/g, '%22' ) + '")' );
 		} else {
 			root.classList.remove( 'has-bg-image', 'is-blurred' );
 			root.style.removeProperty( '--bookflow-bg-image' );
+			root.style.removeProperty( '--bookflow-bg-blur-pct' );
 		}
 	}
 
