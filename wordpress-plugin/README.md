@@ -14,6 +14,31 @@ the standalone multi-business version.
 3. You'll land on the setup wizard automatically — add a few items, pick
    a theme, and grab your display link/QR code.
 
+## Testing build vs. the real licensed build
+
+Every plan gate in the plugin (item limits, Combos, Recipe Book, the
+Costing/Prep/Profit tools, etc.) routes through one method,
+`MenuScreen_Plans::current()`. `menuscreen.php` defines a constant,
+`MENUSCREEN_FORCE_UNLOCKED`, that method checks first — when it's `true`,
+`current()` always reports `'fleet'` regardless of what plan is actually
+stored, which unlocks every feature at once.
+
+- **The licensed build** (what customers get, and what ships in
+  `menuscreen.zip`) has this constant set to `false` — plans behave
+  normally.
+- **A private "fully unlocked" build for your own testing** is the exact
+  same source with that one line flipped to `true`, packaged as a
+  separate zip (e.g. `menuscreen-unlocked-testing.zip`). Both Plans &
+  Billing and the Dashboard show a warning banner when this is on, so
+  it's never mistaken for a real Fleet subscription.
+
+Keep the committed source's default at `false` — never commit `true`.
+To build the unlocked zip yourself: copy the `menuscreen/` folder, change
+`define( 'MENUSCREEN_FORCE_UNLOCKED', false );` to `true` in the copy's
+`menuscreen.php`, then zip that copy. Since both builds share the same
+plugin folder name, don't try to activate them side by side on the same
+WordPress site — use a separate site (or swap the zip) for testing.
+
 ## What's here
 
 ```

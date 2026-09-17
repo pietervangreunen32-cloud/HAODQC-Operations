@@ -53,6 +53,12 @@ $stats = array(
 	</h1>
 	<p class="description"><?php esc_html_e( 'A quick look at how things are set up.', 'menuscreen' ); ?></p>
 
+	<?php if ( defined( 'MENUSCREEN_FORCE_UNLOCKED' ) && MENUSCREEN_FORCE_UNLOCKED ) : ?>
+		<div class="notice notice-warning inline">
+			<p><?php esc_html_e( 'This is an unlocked testing build — every Fleet-plan feature is enabled. Not for distribution to customers.', 'menuscreen' ); ?></p>
+		</div>
+	<?php endif; ?>
+
 	<div class="menuscreen-stats-grid">
 		<?php foreach ( $stats as $stat ) : ?>
 			<div class="menuscreen-stat">

@@ -28,6 +28,16 @@ define( 'MENUSCREEN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MENUSCREEN_URL', plugin_dir_url( __FILE__ ) );
 define( 'MENUSCREEN_BASENAME', plugin_basename( __FILE__ ) );
 
+// Testing-build switch: when true, MenuScreen_Plans::current() always
+// reports 'fleet' — every plan gate in the plugin routes through that one
+// method, so this single flag unlocks everything at once. Never ship this
+// as true in the version customers install; it exists so a private
+// "fully unlocked" build can be produced from the exact same source as the
+// real licensed build, instead of maintaining two divergent copies.
+if ( ! defined( 'MENUSCREEN_FORCE_UNLOCKED' ) ) {
+	define( 'MENUSCREEN_FORCE_UNLOCKED', false );
+}
+
 require_once MENUSCREEN_DIR . 'includes/class-menuscreen.php';
 require_once MENUSCREEN_DIR . 'includes/class-activation.php';
 

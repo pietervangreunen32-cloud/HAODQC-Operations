@@ -68,6 +68,9 @@ class MenuScreen_Plans {
 	}
 
 	public static function current() {
+		if ( defined( 'MENUSCREEN_FORCE_UNLOCKED' ) && MENUSCREEN_FORCE_UNLOCKED ) {
+			return 'fleet';
+		}
 		$plan = MenuScreen_Settings::get( 'plan' );
 		return in_array( $plan, self::PLANS, true ) ? $plan : 'sampler';
 	}

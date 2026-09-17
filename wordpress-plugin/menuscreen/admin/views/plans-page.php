@@ -24,6 +24,12 @@ $woo_active   = class_exists( 'WooCommerce' );
 		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Saved.', 'menuscreen' ); ?></p></div>
 	<?php endif; ?>
 
+	<?php if ( defined( 'MENUSCREEN_FORCE_UNLOCKED' ) && MENUSCREEN_FORCE_UNLOCKED ) : ?>
+		<div class="notice notice-warning inline">
+			<p><?php esc_html_e( 'This is an unlocked testing build — every Fleet-plan feature is enabled regardless of the plan setting below. Not for distribution to customers.', 'menuscreen' ); ?></p>
+		</div>
+	<?php endif; ?>
+
 	<?php
 	$usd_prices = array( 'rush' => (float) $settings['price_usd_rush'], 'fleet' => (float) $settings['price_usd_fleet'] );
 	$has_usd    = $usd_prices['rush'] > 0 || $usd_prices['fleet'] > 0;
