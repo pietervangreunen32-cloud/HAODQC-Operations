@@ -41,15 +41,17 @@ class BookFlow_Admin {
 
 		// Order here is deliberate and matches a shop's actual workflow:
 		// overview, then the two day-to-day operational screens, then the
-		// catalog they're booked against, then the secondary operational
-		// list (waitlist), then tools, then configuration/account screens
-		// last — the last two (Settings, License) are the ones a shop
-		// owner sets up once and rarely revisits, so WordPress convention
-		// (and this menu) puts them at the bottom.
+		// catalog they're booked against (with its own how-to guide right
+		// next to it), then the secondary operational list (waitlist), then
+		// tools, then configuration/account screens last — the last two
+		// (Settings, License) are the ones a shop owner sets up once and
+		// rarely revisits, so WordPress convention (and this menu) puts
+		// them at the bottom.
 		add_submenu_page( 'bookflow', __( 'Dashboard', 'bookflow' ), __( 'Dashboard', 'bookflow' ), 'manage_options', 'bookflow', array( $this, 'render_dashboard_page' ) );
 		add_submenu_page( 'bookflow', __( 'Appointments', 'bookflow' ), __( 'Appointments', 'bookflow' ), 'manage_options', 'bookflow-appointments', array( $this, 'render_appointments_page' ) );
 		add_submenu_page( 'bookflow', __( 'Add Booking', 'bookflow' ), __( 'Add Booking', 'bookflow' ), 'manage_options', 'bookflow-add-booking', array( $this, 'render_add_booking_page' ) );
 		add_submenu_page( 'bookflow', __( 'Catalog', 'bookflow' ), __( 'Catalog', 'bookflow' ), 'manage_options', 'edit.php?post_type=' . BookFlow_Catalog::POST_TYPE );
+		add_submenu_page( 'bookflow', __( 'Adding Products', 'bookflow' ), __( 'Adding Products', 'bookflow' ), 'manage_options', 'bookflow-product-guide', array( $this, 'render_product_guide_page' ) );
 		add_submenu_page( 'bookflow', __( 'Waitlist', 'bookflow' ), __( 'Waitlist', 'bookflow' ), 'manage_options', 'bookflow-waitlist', array( $this, 'render_waitlist_page' ) );
 		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
@@ -179,6 +181,11 @@ class BookFlow_Admin {
 				'cta'   => __( 'Go to Welcome Screen', 'bookflow' ),
 			),
 		);
+	}
+
+	public function render_product_guide_page() {
+		$this->guard_capability();
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/product-guide.php';
 	}
 
 	public function render_appointments_page() {

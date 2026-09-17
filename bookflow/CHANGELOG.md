@@ -1,5 +1,20 @@
 # BookFlow Changelog
 
+## 1.7.1 — Softer background blur, Adding Products guide in-plugin
+
+- Toned down the welcome screen's background blur. It used a fixed
+  10px radius, which looked much heavier on a normal browser window
+  than it did full-screen on a TV (the same blur radius covers
+  proportionally more of a smaller image) — reported as "way too
+  much." Now scales with the viewport (`clamp(2px, 0.3vw, 6px)`) so it
+  reads as a gentle, consistent soft-focus at any size instead of a
+  heavy blur.
+- Added the "Adding Products" guide as its own page inside BookFlow
+  admin (next to Catalog), covering both ways to build a catalog
+  (BookFlow's own, or WooCommerce sync) field-by-field, plus photo
+  guidance and common mistakes — previously only available as a
+  separate doc outside the plugin.
+
 ## 1.7.0 — Welcome screen background, ZAR pricing, and a Dashboard setup wizard
 
 **Welcome screen**

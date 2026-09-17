@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,14 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.7.1 =
+* Toned down the welcome screen's background blur — it looked much
+  stronger in a normal browser window than on a full-screen TV, now
+  scales with viewport size instead of using a fixed, heavier radius.
+* Added the "Adding Products" guide as its own page in BookFlow admin
+  (next to Catalog), so field-by-field setup help for both the manual
+  catalog and WooCommerce sync is available without leaving WordPress.
 
 = 1.7.0 =
 * Welcome screen: shops can now upload their own venue/shop photo as a

@@ -310,6 +310,10 @@
 	padding-left: 1.25rem;
 }
 
+ul.bookflow-flow-list {
+	list-style: disc; /* WP admin's own stylesheet resets bare <ul>, so this needs to be explicit. */
+}
+
 .bookflow-flow-list li {
 	margin-bottom: 0.9rem;
 	font-size: 0.9rem;
