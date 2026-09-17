@@ -18,6 +18,17 @@
  * genuinely can lapse — an optional annual renewal that only controls
  * whether ReviewLoop_Updater is offered a newer plugin version; it never
  * feeds into get_plan() or is_at_least().
+ *
+ * TESTING OVERRIDE: define REVIEWLOOP_FORCE_PLAN in wp-config.php (e.g.
+ * define( 'REVIEWLOOP_FORCE_PLAN', 'pro' );) to force get_plan() to that
+ * tier on this site, completely bypassing the license server — no key,
+ * no network call, no real license record needed. Deliberately a
+ * wp-config.php constant rather than a plugin setting or a separate
+ * "unlocked" build: only someone with file access to the site can set it,
+ * so the one zip we ship to real customers is safe to also install on our
+ * own test sites. Leave it undefined (the default) for every real
+ * customer install and for any site meant to actually test the license
+ * flow itself.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,6 +44,10 @@ class ReviewLoop_License {
 	const TIER_ORDER = array( 'free', 'starter', 'pro' );
 
 	public static function get_plan() {
+		if ( defined( 'REVIEWLOOP_FORCE_PLAN' ) && in_array( REVIEWLOOP_FORCE_PLAN, self::TIER_ORDER, true ) ) {
+			return REVIEWLOOP_FORCE_PLAN;
+		}
+
 		$settings = get_option( 'reviewloop_settings', array() );
 
 		if ( empty( $settings['license_status'] ) || 'active' !== $settings['license_status'] ) {

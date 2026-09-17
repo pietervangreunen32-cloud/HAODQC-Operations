@@ -4,7 +4,7 @@ Tags: google reviews, review requests, customer feedback, reputation management,
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -131,6 +131,10 @@ Add the `[reviewloop_reviews]` shortcode to any page, post, or widget area. By d
 5. The `[reviewloop_reviews]` shortcode displaying reviews on the front end of a site.
 
 == Changelog ==
+
+= 1.9.1 =
+* Internal: a QA convenience for GrowthCraft's own testing sites, with no
+  effect on a normal customer install.
 
 = 1.9.0 =
 * Added: automatic hand-off from BookFlow (booking/catalog plugin for

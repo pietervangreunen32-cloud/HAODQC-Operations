@@ -87,6 +87,12 @@ class ReviewLoop_License_Settings {
 				<?php esc_html_e( '— a one-time purchase, yours to keep permanently.', 'reviewloop' ); ?>
 			</p>
 
+			<?php if ( defined( 'REVIEWLOOP_FORCE_PLAN' ) ) : ?>
+				<div class="notice notice-warning inline" style="margin:0 0 16px;">
+					<p><strong><?php esc_html_e( 'Testing override active:', 'reviewloop' ); ?></strong> <?php echo esc_html( sprintf( /* translators: %s: forced plan name */ __( 'REVIEWLOOP_FORCE_PLAN is set in wp-config.php, forcing this site to the "%s" plan regardless of any real license. Remove that constant before treating this site as a real customer install.', 'reviewloop' ), $plan ) ); ?></p>
+				</div>
+			<?php endif; ?>
+
 			<?php if ( 'free' !== $plan ) : ?>
 				<?php $updates_expire = ReviewLoop_License::updates_expire_label(); ?>
 				<p class="description">
@@ -141,7 +147,9 @@ class ReviewLoop_License_Settings {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( 'free' !== $plan ) : ?>
+			<?php if ( defined( 'REVIEWLOOP_FORCE_PLAN' ) ) : ?>
+				<p class="description"><?php esc_html_e( 'License activation is bypassed while REVIEWLOOP_FORCE_PLAN is set — remove it from wp-config.php to test the real activate/deactivate flow.', 'reviewloop' ); ?></p>
+			<?php elseif ( 'free' !== $plan ) : ?>
 				<form method="post">
 					<?php wp_nonce_field( 'reviewloop_license_action' ); ?>
 					<input type="hidden" name="reviewloop_action" value="deactivate_license">
