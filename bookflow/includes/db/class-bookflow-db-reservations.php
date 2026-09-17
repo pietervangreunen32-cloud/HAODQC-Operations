@@ -60,9 +60,12 @@ class BookFlow_DB_Reservations {
 	/**
 	 * Given a list of item IDs and a time window, returns just the subset
 	 * that are already reserved for an overlapping appointment — used to
-	 * grey out unavailable items in the catalog step of the booking wizard.
+	 * grey out unavailable items in the catalog step of the booking wizard,
+	 * and to validate an edit to an existing appointment (via
+	 * $exclude_appointment_id) without it conflicting with its own,
+	 * not-yet-changed reservations.
 	 */
-	public static function get_unavailable_item_ids( array $item_ids, $start_datetime, $end_datetime ) {
+	public static function get_unavailable_item_ids( array $item_ids, $start_datetime, $end_datetime, $exclude_appointment_id = 0 ) {
 		if ( empty( $item_ids ) ) {
 			return array();
 		}
@@ -81,6 +84,11 @@ class BookFlow_DB_Reservations {
 		$params   = $item_ids;
 		$params[] = $end_datetime;
 		$params[] = $start_datetime;
+
+		if ( $exclude_appointment_id ) {
+			$sql     .= ' AND r.appointment_id != %d';
+			$params[] = $exclude_appointment_id;
+		}
 
 		return $wpdb->get_col( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL
 	}

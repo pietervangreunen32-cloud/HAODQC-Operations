@@ -131,6 +131,122 @@ class BookFlow_Booking_Service {
 		return $appointment_id;
 	}
 
+	/**
+	 * Edits an existing appointment in place — the shop-side "make it
+	 * editable" screen calls this rather than create_booking(), since an
+	 * edit must never count against the plan's monthly booking cap and
+	 * must not conflict with its own current time slot / item reservations
+	 * when nothing about them actually changed.
+	 *
+	 * Validates the new date/time/items *before* touching any existing
+	 * row: if validation fails, the appointment is left completely
+	 * untouched rather than losing its current reservations while the
+	 * update itself is rejected.
+	 *
+	 * @param int   $appointment_id
+	 * @param array $request Same shape as create_booking(), minus $source.
+	 * @return int|WP_Error Appointment ID, or WP_Error explaining why it failed.
+	 */
+	public static function update_booking( $appointment_id, array $request ) {
+		$appointment_id = (int) $appointment_id;
+		$appointment    = BookFlow_DB_Appointments::get( $appointment_id );
+
+		if ( ! $appointment ) {
+			return new WP_Error( 'bookflow_not_found', __( 'Appointment not found.', 'bookflow' ) );
+		}
+
+		$customer_name  = isset( $request['customer_name'] ) ? sanitize_text_field( $request['customer_name'] ) : '';
+		$customer_email = isset( $request['customer_email'] ) ? sanitize_email( $request['customer_email'] ) : '';
+		$customer_phone = isset( $request['customer_phone'] ) ? sanitize_text_field( $request['customer_phone'] ) : '';
+		$event_date     = ! empty( $request['event_date'] ) ? sanitize_text_field( $request['event_date'] ) : null;
+		$date           = isset( $request['date'] ) ? sanitize_text_field( $request['date'] ) : '';
+		$time           = isset( $request['time'] ) ? sanitize_text_field( $request['time'] ) : '';
+		$notes          = isset( $request['notes'] ) ? sanitize_textarea_field( $request['notes'] ) : '';
+
+		if ( ! $customer_name || ! is_email( $customer_email ) || ! $date || ! $time ) {
+			return new WP_Error( 'bookflow_missing_fields', __( 'Please provide a name, valid email, and a date/time.', 'bookflow' ) );
+		}
+
+		$settings     = BookFlow_Availability::get_settings();
+		$slot_minutes = max( 5, (int) $settings['slot_length_minutes'] );
+
+		$start_timestamp = strtotime( "{$date} {$time}" );
+		if ( ! $start_timestamp ) {
+			return new WP_Error( 'bookflow_invalid_datetime', __( 'That date/time could not be understood.', 'bookflow' ) );
+		}
+
+		$start_datetime = gmdate( 'Y-m-d H:i:s', $start_timestamp );
+		$end_datetime   = gmdate( 'Y-m-d H:i:s', $start_timestamp + ( $slot_minutes * MINUTE_IN_SECONDS ) );
+
+		$lead_item_ids = isset( $request['item_ids'] ) ? array_map( 'intval', (array) $request['item_ids'] ) : array();
+		$companions_in = isset( $request['companions'] ) && is_array( $request['companions'] ) ? $request['companions'] : array();
+
+		if ( ! BookFlow_License::tier_includes( 'group_bookings' ) ) {
+			$companions_in = array();
+		}
+
+		$all_item_ids = $lead_item_ids;
+		foreach ( $companions_in as $companion ) {
+			if ( ! empty( $companion['item_ids'] ) ) {
+				$all_item_ids = array_merge( $all_item_ids, array_map( 'intval', (array) $companion['item_ids'] ) );
+			}
+		}
+
+		// Validated against the appointment's *current* reservations still
+		// in place — excluding this appointment's own ID is what stops
+		// "keep the same time and items" from looking like a conflict with
+		// itself. Nothing is written until this passes.
+		$validation = BookFlow_Availability::validate_booking_request( $start_datetime, $end_datetime, $all_item_ids, $appointment_id );
+		if ( is_wp_error( $validation ) ) {
+			return $validation;
+		}
+
+		BookFlow_DB_Appointments::update(
+			$appointment_id,
+			array(
+				'customer_name'  => $customer_name,
+				'customer_email' => $customer_email,
+				'customer_phone' => $customer_phone,
+				'event_date'     => $event_date,
+				'start_datetime' => $start_datetime,
+				'end_datetime'   => $end_datetime,
+				'notes'          => $notes,
+			)
+		);
+
+		// Simplest correct way to reconcile companions/items on an edit is
+		// to replace them wholesale rather than diff old vs. new — safe now
+		// that validation above has already passed.
+		BookFlow_DB_Reservations::delete_for_appointment( $appointment_id );
+		BookFlow_DB_Companions::delete_for_appointment( $appointment_id );
+
+		foreach ( $lead_item_ids as $item_id ) {
+			BookFlow_DB_Reservations::insert( $appointment_id, $item_id, $start_datetime, $end_datetime );
+		}
+
+		foreach ( $companions_in as $companion ) {
+			$name = isset( $companion['name'] ) ? sanitize_text_field( $companion['name'] ) : '';
+			if ( ! $name ) {
+				continue;
+			}
+			$companion_id = BookFlow_DB_Companions::insert( $appointment_id, $name );
+			foreach ( (array) ( $companion['item_ids'] ?? array() ) as $item_id ) {
+				BookFlow_DB_Reservations::insert( $appointment_id, (int) $item_id, $start_datetime, $end_datetime, $companion_id );
+			}
+		}
+
+		/**
+		 * Fires after an existing appointment is edited, appointment ID as
+		 * the only argument — separate from bookflow_booking_created so
+		 * anything listening for genuinely new bookings (e.g. the
+		 * ReviewLoop bridge's completed-appointment hand-off) never
+		 * double-fires on an edit.
+		 */
+		do_action( 'bookflow_booking_updated', $appointment_id );
+
+		return $appointment_id;
+	}
+
 	public static function cancel_booking( $appointment_id ) {
 		$appointment = BookFlow_DB_Appointments::get( $appointment_id );
 		if ( ! $appointment ) {
