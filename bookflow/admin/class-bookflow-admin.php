@@ -17,8 +17,10 @@ class BookFlow_Admin {
 		add_filter( 'parent_file', array( $this, 'fix_catalog_menu_highlight' ) );
 		add_filter( 'submenu_file', array( $this, 'fix_catalog_submenu_highlight' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
+		add_action( 'admin_head', array( $this, 'hide_edit_appointment_menu_item' ) );
 		add_action( 'admin_post_bookflow_save_settings', array( $this, 'handle_save_settings' ) );
 		add_action( 'admin_post_bookflow_manual_booking', array( $this, 'handle_manual_booking' ) );
+		add_action( 'admin_post_bookflow_update_appointment', array( $this, 'handle_update_appointment' ) );
 		add_action( 'admin_post_bookflow_add_blackout', array( $this, 'handle_add_blackout' ) );
 		add_action( 'admin_post_bookflow_delete_blackout', array( $this, 'handle_delete_blackout' ) );
 		add_action( 'admin_post_bookflow_cancel_appointment', array( $this, 'handle_cancel_appointment' ) );
@@ -56,6 +58,31 @@ class BookFlow_Admin {
 		add_submenu_page( 'bookflow', __( 'Welcome Screen', 'bookflow' ), __( 'Welcome Screen', 'bookflow' ), 'manage_options', 'bookflow-welcome-screen', array( $this, 'render_welcome_screen_page' ) );
 		add_submenu_page( 'bookflow', __( 'Settings', 'bookflow' ), __( 'Settings', 'bookflow' ), 'manage_options', 'bookflow-settings', array( $this, 'render_settings_page' ) );
 		add_submenu_page( 'bookflow', __( 'License', 'bookflow' ), __( 'License', 'bookflow' ), 'manage_options', 'bookflow-license', array( $this, 'render_license_page' ) );
+
+		// Registered under the 'bookflow' parent (so the BookFlow top-level
+		// menu still highlights while on it) — this screen is only ever
+		// reached via the "Edit" link on a specific row in Appointments,
+		// the same way WordPress's own post-new.php/post.php aren't menu
+		// items either, so it's hidden from the visible submenu list by
+		// hide_edit_appointment_menu_item()'s CSS below rather than by
+		// calling remove_submenu_page(). That used to be the standard way
+		// to register a menu-hidden admin page, but a WordPress core
+		// hardening change means user_can_access_admin_page() now denies
+		// direct access to a page whose entry isn't still present in the
+		// $submenu global — removing it from the visible menu also silently
+		// locks everyone, including admins, out of the page itself.
+		add_submenu_page( 'bookflow', __( 'Edit Appointment', 'bookflow' ), __( 'Edit Appointment', 'bookflow' ), 'manage_options', 'bookflow-edit-appointment', array( $this, 'render_edit_appointment_page' ) );
+	}
+
+	/**
+	 * Hides the "Edit Appointment" entry from BookFlow's visible submenu
+	 * (it stays registered — see register_menu() above — just out of
+	 * sight) without touching WordPress's own capability-lookup data.
+	 * Runs on every admin screen, not just BookFlow's own, since the
+	 * sidebar submenu is present everywhere in wp-admin.
+	 */
+	public function hide_edit_appointment_menu_item() {
+		echo '<style>#adminmenu li:has(> a[href*="page=bookflow-edit-appointment"]) { display: none; }</style>';
 	}
 
 	/**
@@ -211,6 +238,39 @@ class BookFlow_Admin {
 		include BOOKFLOW_PLUGIN_DIR . 'admin/views/add-booking.php';
 	}
 
+	public function render_edit_appointment_page() {
+		$this->guard_capability();
+
+		$appointment_id = isset( $_GET['appointment_id'] ) ? absint( $_GET['appointment_id'] ) : 0;
+		$appointment     = $appointment_id ? BookFlow_DB_Appointments::get( $appointment_id ) : null;
+
+		if ( ! $appointment ) {
+			wp_die( esc_html__( 'Appointment not found.', 'bookflow' ) );
+		}
+
+		$reservations = BookFlow_DB_Reservations::get_for_appointment( $appointment_id );
+		$lead_item_ids = array();
+		$companion_items = array(); // [ companion_id => [ item names ] ], display-only.
+		foreach ( $reservations as $reservation ) {
+			if ( $reservation->companion_id ) {
+				$companion_items[ $reservation->companion_id ][] = get_the_title( $reservation->item_id );
+			} else {
+				$lead_item_ids[] = (int) $reservation->item_id;
+			}
+		}
+
+		$companions = BookFlow_DB_Companions::get_for_appointment( $appointment_id );
+		foreach ( $companions as $companion ) {
+			$companion->item_names = $companion_items[ $companion->id ] ?? array();
+		}
+
+		$items = BookFlow_Catalog::get_all_items_for_admin();
+		$error = get_transient( 'bookflow_edit_appointment_error_' . get_current_user_id() );
+		delete_transient( 'bookflow_edit_appointment_error_' . get_current_user_id() );
+
+		include BOOKFLOW_PLUGIN_DIR . 'admin/views/edit-appointment.php';
+	}
+
 	public function render_waitlist_page() {
 		$this->guard_capability();
 		$entries = BookFlow_DB_Waitlist::get_upcoming();
@@ -325,6 +385,36 @@ class BookFlow_Admin {
 		}
 
 		wp_safe_redirect( add_query_arg( array( 'page' => 'bookflow-appointments', 'created' => '1' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
+	public function handle_update_appointment() {
+		$this->guard_capability();
+		check_admin_referer( 'bookflow_update_appointment' );
+
+		$appointment_id = (int) ( $_POST['appointment_id'] ?? 0 );
+
+		$request = array(
+			'customer_name'  => sanitize_text_field( wp_unslash( $_POST['customer_name'] ?? '' ) ),
+			'customer_email' => sanitize_email( wp_unslash( $_POST['customer_email'] ?? '' ) ),
+			'customer_phone' => sanitize_text_field( wp_unslash( $_POST['customer_phone'] ?? '' ) ),
+			'event_date'     => ! empty( $_POST['event_date'] ) ? sanitize_text_field( wp_unslash( $_POST['event_date'] ) ) : null,
+			'date'           => sanitize_text_field( wp_unslash( $_POST['date'] ?? '' ) ),
+			'time'           => sanitize_text_field( wp_unslash( $_POST['time'] ?? '' ) ),
+			'item_ids'       => isset( $_POST['item_ids'] ) ? array_map( 'intval', (array) $_POST['item_ids'] ) : array(),
+			'notes'          => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+			'status'         => sanitize_key( wp_unslash( $_POST['status'] ?? '' ) ),
+		);
+
+		$result = BookFlow_Booking_Service::update_booking( $appointment_id, $request );
+
+		if ( is_wp_error( $result ) ) {
+			set_transient( 'bookflow_edit_appointment_error_' . get_current_user_id(), $result->get_error_message(), 60 );
+			wp_safe_redirect( admin_url( 'admin.php?page=bookflow-edit-appointment&appointment_id=' . $appointment_id ) );
+			exit;
+		}
+
+		wp_safe_redirect( add_query_arg( array( 'page' => 'bookflow-appointments', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 

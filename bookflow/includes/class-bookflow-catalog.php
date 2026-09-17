@@ -178,6 +178,40 @@ class BookFlow_Catalog {
 		return $items;
 	}
 
+	/**
+	 * Every published catalog item, regardless of its "Available for
+	 * booking" flag — used for admin screens that edit an existing
+	 * appointment, where an item picked before it was later marked
+	 * unavailable (or retired) still needs to show up so staff can see
+	 * what's actually booked, rather than having it silently vanish from
+	 * the list (and then from the appointment, the next time it's saved).
+	 * The public booking wizard uses get_bookable_items() instead, which
+	 * correctly hides unavailable items from new bookings.
+	 */
+	public static function get_all_items_for_admin() {
+		$posts = get_posts(
+			array(
+				'post_type'   => self::POST_TYPE,
+				'post_status' => 'publish',
+				'numberposts' => -1,
+				'orderby'     => 'title',
+				'order'       => 'ASC',
+			)
+		);
+
+		$items = array();
+		foreach ( $posts as $post ) {
+			$items[] = array(
+				'id'        => $post->ID,
+				'name'      => get_the_title( $post ),
+				'size'      => get_post_meta( $post->ID, '_bookflow_size', true ),
+				'available' => '1' === get_post_meta( $post->ID, '_bookflow_available', true ),
+			);
+		}
+
+		return $items;
+	}
+
 	public static function item_exists_and_available( $item_id ) {
 		$available = get_post_meta( $item_id, '_bookflow_available', true );
 		return ( get_post_status( $item_id ) === 'publish' && '1' === $available );

@@ -131,6 +131,111 @@ class BookFlow_Booking_Service {
 		return $appointment_id;
 	}
 
+	/**
+	 * Edits an existing appointment: customer details, wedding/event date,
+	 * fitting date/time, the lead customer's own item picks, notes, and
+	 * status. Re-runs the same conflict checks create_booking() does
+	 * (excluding the appointment's own existing slot/reservations from
+	 * counting against itself), and — if the time changes — moves every
+	 * reservation tied to it, including any companions', to the new time
+	 * so nothing is left double-booking a stale slot.
+	 *
+	 * Companions themselves (adding, removing, renaming, or changing their
+	 * own item picks) aren't editable from this screen — same as manual
+	 * booking entry, which also doesn't support companions — so their
+	 * existing reservations are preserved as-is apart from the time shift.
+	 *
+	 * @param array $request Same shape as create_booking(), plus $status.
+	 * @return int|WP_Error Appointment ID, or WP_Error explaining why it failed.
+	 */
+	public static function update_booking( $appointment_id, array $request ) {
+		$appointment = BookFlow_DB_Appointments::get( $appointment_id );
+		if ( ! $appointment ) {
+			return new WP_Error( 'bookflow_not_found', __( 'Appointment not found.', 'bookflow' ) );
+		}
+
+		$customer_name  = isset( $request['customer_name'] ) ? sanitize_text_field( $request['customer_name'] ) : '';
+		$customer_email = isset( $request['customer_email'] ) ? sanitize_email( $request['customer_email'] ) : '';
+		$customer_phone = isset( $request['customer_phone'] ) ? sanitize_text_field( $request['customer_phone'] ) : '';
+		$event_date     = ! empty( $request['event_date'] ) ? sanitize_text_field( $request['event_date'] ) : null;
+		$date           = isset( $request['date'] ) ? sanitize_text_field( $request['date'] ) : '';
+		$time           = isset( $request['time'] ) ? sanitize_text_field( $request['time'] ) : '';
+		$notes          = isset( $request['notes'] ) ? sanitize_textarea_field( $request['notes'] ) : $appointment->notes;
+
+		if ( ! $customer_name || ! is_email( $customer_email ) || ! $date || ! $time ) {
+			return new WP_Error( 'bookflow_missing_fields', __( 'Please provide a name, valid email, and a date/time.', 'bookflow' ) );
+		}
+
+		$allowed_statuses = array( 'pending', 'confirmed', 'cancelled', 'completed' );
+		$status           = isset( $request['status'] ) && in_array( $request['status'], $allowed_statuses, true )
+			? $request['status']
+			: $appointment->status;
+
+		$settings     = BookFlow_Availability::get_settings();
+		$slot_minutes = max( 5, (int) $settings['slot_length_minutes'] );
+
+		$start_timestamp = strtotime( "{$date} {$time}" );
+		if ( ! $start_timestamp ) {
+			return new WP_Error( 'bookflow_invalid_datetime', __( 'That date/time could not be understood.', 'bookflow' ) );
+		}
+
+		$start_datetime = gmdate( 'Y-m-d H:i:s', $start_timestamp );
+		$end_datetime   = gmdate( 'Y-m-d H:i:s', $start_timestamp + ( $slot_minutes * MINUTE_IN_SECONDS ) );
+
+		$lead_item_ids = isset( $request['item_ids'] ) ? array_map( 'intval', (array) $request['item_ids'] ) : array();
+
+		// A cancelled appointment frees its slot and items entirely, so
+		// there's nothing to conflict-check or reschedule for one.
+		if ( 'cancelled' !== $status ) {
+			// Conflict-checking has to cover every item still tied to this
+			// appointment once it moves to the new time — the lead's
+			// newly-submitted picks, plus any companions' existing picks,
+			// which shift to the new time right along with it — not just
+			// the lead's, or a reschedule could quietly double-book a
+			// companion's item against some other appointment.
+			$companion_item_ids = array();
+			foreach ( BookFlow_DB_Reservations::get_for_appointment( $appointment_id ) as $reservation ) {
+				if ( $reservation->companion_id ) {
+					$companion_item_ids[] = (int) $reservation->item_id;
+				}
+			}
+			$all_item_ids = array_merge( $lead_item_ids, $companion_item_ids );
+
+			$validation = BookFlow_Availability::validate_booking_request( $start_datetime, $end_datetime, $all_item_ids, $appointment_id );
+			if ( is_wp_error( $validation ) ) {
+				return $validation;
+			}
+
+			BookFlow_DB_Reservations::reschedule_for_appointment( $appointment_id, $start_datetime, $end_datetime );
+			BookFlow_DB_Reservations::delete_lead_reservations( $appointment_id );
+			foreach ( $lead_item_ids as $item_id ) {
+				BookFlow_DB_Reservations::insert( $appointment_id, $item_id, $start_datetime, $end_datetime );
+			}
+		}
+
+		BookFlow_DB_Appointments::update(
+			$appointment_id,
+			array(
+				'customer_name'  => $customer_name,
+				'customer_email' => $customer_email,
+				'customer_phone' => $customer_phone,
+				'event_date'     => $event_date,
+				'start_datetime' => $start_datetime,
+				'end_datetime'   => $end_datetime,
+				'status'         => $status,
+				'notes'          => $notes,
+			)
+		);
+
+		/**
+		 * Fires right after an existing appointment is edited, appointment
+		 * ID as the only argument — mirrors bookflow_booking_created.
+		 */
+		do_action( 'bookflow_booking_updated', $appointment_id );
+
+		return $appointment_id;
+	}
+
 	public static function cancel_booking( $appointment_id ) {
 		$appointment = BookFlow_DB_Appointments::get( $appointment_id );
 		if ( ! $appointment ) {

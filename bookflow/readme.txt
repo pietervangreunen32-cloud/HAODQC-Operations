@@ -4,7 +4,7 @@ Tags: booking, appointments, bridal, wedding, rental, calendar, woocommerce
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.7.3
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,6 +101,17 @@ No. The welcome screen only ever shows first names and the items selected
 No. Catalog sync from WooCommerce is strictly read-only.
 
 == Changelog ==
+
+= 1.8.0 =
+* Appointments are now editable from BookFlow → Appointments: an "Edit"
+  button on every row opens a screen for the customer's details,
+  wedding/event date, fitting date/time, status, and their own item
+  picks, going through the same double-booking and item-conflict
+  checks as a brand-new booking. Rescheduling moves every item this
+  appointment holds (including any companions') to the new time
+  together, so nothing is left blocking a slot it no longer needs.
+  Companions themselves aren't editable yet — shown read-only for
+  reference.
 
 = 1.7.3 =
 * Added an internal testing-only override (a `BOOKFLOW_UNLOCKED`

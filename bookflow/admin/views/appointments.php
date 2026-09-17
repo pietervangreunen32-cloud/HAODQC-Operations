@@ -17,6 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( isset( $_GET['cancelled'] ) ) : ?>
 		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Appointment cancelled.', 'bookflow' ); ?></p></div>
 	<?php endif; ?>
+	<?php if ( isset( $_GET['updated'] ) ) : ?>
+		<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Appointment updated.', 'bookflow' ); ?></p></div>
+	<?php endif; ?>
 
 	<form method="get" class="bookflow-filter-form">
 		<input type="hidden" name="page" value="bookflow-appointments" />
@@ -89,8 +92,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</td>
 						<td><?php echo esc_html( ucfirst( $appointment->source ) ); ?></td>
 						<td>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=bookflow-edit-appointment&appointment_id=' . $appointment->id ) ); ?>" class="button button-small"><?php esc_html_e( 'Edit', 'bookflow' ); ?></a>
 							<?php if ( ! in_array( $appointment->status, array( 'cancelled', 'completed' ), true ) ) : ?>
-								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Cancel this appointment?', 'bookflow' ) ); ?>');">
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Cancel this appointment?', 'bookflow' ) ); ?>');" style="display:inline;">
 									<?php wp_nonce_field( 'bookflow_cancel_appointment' ); ?>
 									<input type="hidden" name="action" value="bookflow_cancel_appointment" />
 									<input type="hidden" name="appointment_id" value="<?php echo esc_attr( $appointment->id ); ?>" />

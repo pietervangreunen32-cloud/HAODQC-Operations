@@ -60,9 +60,12 @@ class BookFlow_DB_Reservations {
 	/**
 	 * Given a list of item IDs and a time window, returns just the subset
 	 * that are already reserved for an overlapping appointment — used to
-	 * grey out unavailable items in the catalog step of the booking wizard.
+	 * grey out unavailable items in the catalog step of the booking wizard,
+	 * and to conflict-check an edit to an existing appointment (pass its
+	 * own ID as $exclude_appointment_id so its own current reservations
+	 * don't count as a conflict against themselves).
 	 */
-	public static function get_unavailable_item_ids( array $item_ids, $start_datetime, $end_datetime ) {
+	public static function get_unavailable_item_ids( array $item_ids, $start_datetime, $end_datetime, $exclude_appointment_id = 0 ) {
 		if ( empty( $item_ids ) ) {
 			return array();
 		}
@@ -82,6 +85,11 @@ class BookFlow_DB_Reservations {
 		$params[] = $end_datetime;
 		$params[] = $start_datetime;
 
+		if ( $exclude_appointment_id ) {
+			$sql     .= ' AND r.appointment_id != %d';
+			$params[] = $exclude_appointment_id;
+		}
+
 		return $wpdb->get_col( $wpdb->prepare( $sql, $params ) ); // phpcs:ignore WordPress.DB.PreparedSQL
 	}
 
@@ -95,5 +103,40 @@ class BookFlow_DB_Reservations {
 	public static function delete_for_appointment( $appointment_id ) {
 		global $wpdb;
 		return $wpdb->delete( self::table(), array( 'appointment_id' => (int) $appointment_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+
+	/**
+	 * Deletes only the lead customer's own reservations (companion_id IS
+	 * NULL) for an appointment, leaving any companions' item reservations
+	 * untouched — used when an edit changes the lead's item picks, since
+	 * this admin screen doesn't (yet) offer editing companions themselves.
+	 */
+	public static function delete_lead_reservations( $appointment_id ) {
+		global $wpdb;
+		return $wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			self::table(),
+			array(
+				'appointment_id' => (int) $appointment_id,
+				'companion_id'   => null,
+			)
+		);
+	}
+
+	/**
+	 * Moves every reservation tied to an appointment (the lead's and any
+	 * companions') to a new time window — used when an edit reschedules
+	 * the appointment, so every item it holds stays correctly blocked out
+	 * at the new time instead of the stale original one.
+	 */
+	public static function reschedule_for_appointment( $appointment_id, $start_datetime, $end_datetime ) {
+		global $wpdb;
+		return $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			self::table(),
+			array(
+				'start_datetime' => $start_datetime,
+				'end_datetime'   => $end_datetime,
+			),
+			array( 'appointment_id' => (int) $appointment_id )
+		);
 	}
 }

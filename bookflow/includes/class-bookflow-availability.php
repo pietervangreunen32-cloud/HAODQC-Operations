@@ -104,14 +104,20 @@ class BookFlow_Availability {
 	 *                                customer and every companion.
 	 * @return true|WP_Error
 	 */
-	public static function validate_booking_request( $start_datetime, $end_datetime, array $item_ids ) {
+	/**
+	 * @param int $exclude_appointment_id When re-validating an edit to an
+	 *        existing appointment, its own ID — so its own current
+	 *        appointment slot and item reservations don't count as a
+	 *        conflict against themselves. 0 for a brand-new booking.
+	 */
+	public static function validate_booking_request( $start_datetime, $end_datetime, array $item_ids, $exclude_appointment_id = 0 ) {
 		$settings = self::get_settings();
 
 		if ( BookFlow_DB_Blackouts::overlaps( $start_datetime, $end_datetime ) ) {
 			return new WP_Error( 'bookflow_blackout', __( 'That time is not available. Please choose another slot.', 'bookflow' ) );
 		}
 
-		$booked_count = BookFlow_DB_Appointments::count_overlapping( $start_datetime, $end_datetime );
+		$booked_count = BookFlow_DB_Appointments::count_overlapping( $start_datetime, $end_datetime, $exclude_appointment_id );
 		if ( $booked_count >= (int) $settings['concurrent_fittings'] ) {
 			return new WP_Error( 'bookflow_slot_full', __( 'That time slot just filled up. Please choose another time, or join the waitlist.', 'bookflow' ) );
 		}
@@ -125,7 +131,7 @@ class BookFlow_Availability {
 		}
 
 		if ( ! empty( $item_ids ) ) {
-			$conflicts = BookFlow_DB_Reservations::get_unavailable_item_ids( $item_ids, $start_datetime, $end_datetime );
+			$conflicts = BookFlow_DB_Reservations::get_unavailable_item_ids( $item_ids, $start_datetime, $end_datetime, $exclude_appointment_id );
 			if ( ! empty( $conflicts ) ) {
 				return new WP_Error(
 					'bookflow_item_conflict',

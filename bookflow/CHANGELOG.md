@@ -1,5 +1,43 @@
 # BookFlow Changelog
 
+## 1.8.0 — Editable appointments
+
+- Added an "Edit" button on every row in BookFlow → Appointments,
+  opening a screen for the customer's name/email/phone, wedding/event
+  date, fitting date/time, status, the lead customer's own item picks,
+  and staff notes.
+- Reuses the exact same conflict-checking a brand-new booking goes
+  through (blackout days, the concurrent-fittings cap, and per-item
+  double-booking), just excluding the appointment's own current slot
+  and reservations from counting as a conflict against themselves —
+  added `$exclude_appointment_id` support to
+  `BookFlow_Availability::validate_booking_request()` and
+  `BookFlow_DB_Reservations::get_unavailable_item_ids()` for this.
+- Rescheduling an appointment moves every reservation it holds —
+  including any companions' — to the new time together (a new
+  `BookFlow_DB_Reservations::reschedule_for_appointment()`), so a
+  companion's item can't end up double-booked against a stale time
+  after their fitting is moved.
+- Item options on the edit screen come from a new
+  `BookFlow_Catalog::get_all_items_for_admin()`, which — unlike the
+  public wizard's item list — includes items since marked unavailable,
+  so an item already on this appointment never silently disappears
+  from the form (and then from the appointment) just because it was
+  later retired.
+- Companions themselves (adding, removing, renaming, or changing their
+  own item picks) aren't editable from this screen — same scope as
+  manual booking entry, which doesn't support companions either —
+  shown read-only for context instead.
+- Registered the edit screen as a normal (but menu-hidden) BookFlow
+  submenu page. Originally hidden with the once-standard
+  `add_submenu_page()` + `remove_submenu_page()` pattern, which turned
+  out to silently 403 the page for everyone, including admins — a
+  WordPress core hardening change means `user_can_access_admin_page()`
+  now denies direct access to a page whose entry isn't still present
+  in the `$submenu` global. Fixed by keeping the entry registered and
+  hiding it from the sidebar with a small `admin_head`-injected CSS
+  rule instead.
+
 ## 1.7.3 — Testing-unlock override for internal QA
 
 - Added `BookFlow_License::get_current_tier()` support for a
